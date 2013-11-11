@@ -243,6 +243,7 @@ public class PlayerListener extends ListenerBase {
 			return;
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo())) {
 			KitAPI.getMatchManager().getCurrentMatches().remove(e.getPlayer().getName());
+			KitAPI.getMatchManager().getMatches().remove(e.getPlayer().getName());
 		}
 		if (KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo()) && !KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getFrom())) {
 			if (!KitAPI.getPlayerManager().getSpawnProtection().contains(e.getPlayer().getName())) {
