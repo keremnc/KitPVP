@@ -1,0 +1,7 @@
+name: KitPVP
+author: Kerem Celik
+version: 09:46 10-10-2013 | Kerem
+description: KitPVP plugin
+main: net.frozenorb.KitPVP.KitPVP
+depend: [mBasic]
+softdepend: [KitPVP]
