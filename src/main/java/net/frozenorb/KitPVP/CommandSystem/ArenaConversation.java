@@ -67,7 +67,10 @@ public abstract class ArenaConversation {
 					}
 				}
 				if (s.equalsIgnoreCase("info")) {
-					cc.getForWhom().sendRawMessage(ChatColor.YELLOW + "§ePrimary Loc: " + Core.get().formatDBObject(new LocationSerializer().serialize(loc1)) + "" + "     " + "§eSecondary Loc: " + Core.get().formatDBObject(new LocationSerializer().serialize(loc2)));
+					cc.getForWhom().sendRawMessage(ChatColor.YELLOW + "§ePrimary Loc: ");
+					Core.get().sendFormattedDBOBject(sender, new LocationSerializer().serialize(loc1), "§e");
+					cc.getForWhom().sendRawMessage("§eSecondary Loc: ");
+					Core.get().sendFormattedDBOBject(sender, new LocationSerializer().serialize(loc2), "§e");
 					return this;
 				}
 				cc.getForWhom().sendRawMessage("§cIncorrect usage!");
