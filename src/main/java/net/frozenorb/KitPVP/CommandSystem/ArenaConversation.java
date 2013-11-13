@@ -22,7 +22,13 @@ public abstract class ArenaConversation {
 	public ArenaConversation(final Player sender, final int id) {
 
 		loc1 = sender.getLocation();
-		sender.sendMessage(ChatColor.YELLOW + "Welcome to the ArenaCreata 3000 by LazyLemons!\n§7=======================================\n§e" + "Type §a'2'§e to set the second location.\n" + "To change the first location, type §a'1'§e.\n" + "Type §a'quit'§e at any time to quit.\n" + "Type §a'save§e to save the arena!" + "\n" + "Typing §a'info'§e will display the arena info!\n");
+		sender.sendMessage(ChatColor.YELLOW + "Welcome to the ArenaCreata 3000 by LazyLemons!");
+		sender.sendMessage("§7=======================================");
+		sender.sendMessage("§eType §a'2'§e to set the second location.");
+		sender.sendMessage("To change the first location, type §a'1'§e.");
+		sender.sendMessage("Type §a'quit'§e at any time to quit.");
+		sender.sendMessage("Type §a'save§e to save the arena!");
+		sender.sendMessage("Typing §a'info'§e will display the arena info!");
 		ConversationFactory factory = new ConversationFactory(KitAPI.getKitPVP()).withModality(true).withPrefix(new NullConversationPrefix()).withFirstPrompt(new StringPrompt() {
 
 			public String getPromptText(ConversationContext context) {
@@ -61,7 +67,7 @@ public abstract class ArenaConversation {
 					}
 				}
 				if (s.equalsIgnoreCase("info")) {
-					cc.getForWhom().sendRawMessage(ChatColor.YELLOW + "ID: Undetermined" + "\n\n" + "§ePrimary Loc: " + Core.get().formatDBObject(new LocationSerializer().serialize(loc1)) + "\n\n" + "§eSecondary Loc: " + Core.get().formatDBObject(new LocationSerializer().serialize(loc2)));
+					cc.getForWhom().sendRawMessage(ChatColor.YELLOW + "§ePrimary Loc: " + Core.get().formatDBObject(new LocationSerializer().serialize(loc1)) + "" + "     " + "§eSecondary Loc: " + Core.get().formatDBObject(new LocationSerializer().serialize(loc2)));
 					return this;
 				}
 				cc.getForWhom().sendRawMessage("§cIncorrect usage!");
