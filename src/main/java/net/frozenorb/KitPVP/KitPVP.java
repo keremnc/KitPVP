@@ -77,19 +77,27 @@ public class KitPVP extends JavaPlugin {
 		this.commandManager = new CommandManager();
 		KitAPI.getStatManager().loadLocalData();
 		KitAPI.init(this);
-		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getScoreboardManager(), 100L, 20L);
 		try {
 			KitAPI.getKitManager().loadKits();
 			new ListenerBase().registerListeners(this, "net.frozenorb.KitPVP.ListenerSystem.Listeners");
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | ClassNotFoundException e) {
+			e.printStackTrace();
 		}
+		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getScoreboardManager(), 20L, 20L);
 		/*
 		 * We do the following to fix the server after a restart
 		 */
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			System.out.println("Reloading " + p.getName());
-			PlayerListener.get().onPlayerJoin(new PlayerJoinEvent(p, null));
-		}
+		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+
+			@Override
+			public void run() {
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					System.out.println("Reloading " + p.getName());
+					PlayerListener.get().onPlayerJoin(new PlayerJoinEvent(p, null));
+				}
+			}
+		}, 20L);
+
 		Loadout.init();
 
 	}

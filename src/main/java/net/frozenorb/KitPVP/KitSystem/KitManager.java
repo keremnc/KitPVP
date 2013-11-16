@@ -1,11 +1,5 @@
 package net.frozenorb.KitPVP.KitSystem;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -13,136 +7,19 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.util.JSON;
 
 import net.frozenorb.KitPVP.KitPVP;
-import net.frozenorb.KitPVP.DataSystem.Serialization.Transformers.CustomKitSerializer;
 import net.frozenorb.KitPVP.Reflection.ClassGetter;
-import net.frozenorb.mShared.Shared;
 
 public class KitManager {
 	private KitPVP plugin;
 	private String packageName;
 	private HashMap<String, Kit> playerKits = new HashMap<String, Kit>();
 	private HashSet<String> packages = new HashSet<String>();
-	private HashMap<String, HashSet<CustomKit>> customKits = new HashMap<String, HashSet<CustomKit>>();
 
 	public KitManager(KitPVP plugin, String packageName) {
 		this.plugin = plugin;
 		this.packageName = packageName;
-	}
-
-	public boolean hasCustomKit(String name, String kit) {
-		if (getCustomKits(name) != null) {
-			for (CustomKit ckit : getCustomKits(name))
-				if (ckit.getKitName().equalsIgnoreCase(kit))
-					return true;
-		}
-		return false;
-	}
-
-	public CustomKit getCustomKitByName(String player, String name) {
-		if (getCustomKits(player) != null) {
-			for (CustomKit kit : getCustomKits(player))
-				if (kit.getKitName().equalsIgnoreCase(name))
-					return kit;
-		}
-		return null;
-	}
-
-	public void saveCustomKits(String name) {
-		HashSet<CustomKit> kits = getCustomKits(name);
-		if (kits != null) {
-			try {
-				File dataFolder = new File("data" + File.separator + "customKits");
-				dataFolder.mkdirs();
-				File f = new File(dataFolder + File.separator + name + ".json");
-				if (!f.exists())
-					f.createNewFile();
-				BufferedWriter writer = new BufferedWriter(new FileWriter(f, false));
-				BasicDBObject kitObjects = new BasicDBObject();
-				BasicDBList kitsList = new BasicDBList();
-				for (CustomKit k : kits) {
-					kitsList.add(new CustomKitSerializer().serialize(k));
-				}
-				kitObjects.append("kits", kitsList);
-				writer.write(Shared.get().getUtilities().formatDBObject(kitObjects));
-				writer.flush();
-				writer.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public void loadCustomKits(String name) {
-		File dataFolder = new File("data" + File.separator + "customKits");
-		dataFolder.mkdirs();
-		File f = new File(dataFolder + File.separator + name + ".json");
-		if (f.exists()) {
-
-			BufferedReader br = null;
-
-			try {
-				String sCurrentLine;
-				br = new BufferedReader(new FileReader(f));
-				StringBuilder json = new StringBuilder();
-				while ((sCurrentLine = br.readLine()) != null) {
-					json.append(sCurrentLine);
-				}
-				BasicDBObject data = (BasicDBObject) JSON.parse(json.toString());
-				if (data == null)
-					return;
-				BasicDBList kitList = (BasicDBList) data.get("kits");
-				for (Object o : kitList) {
-					CustomKit k = new CustomKitSerializer().deserialize((BasicDBObject) o);
-					addCustomKit(k, name);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (br != null)
-						br.close();
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-
-		}
-	}
-
-	public HashMap<String, HashSet<CustomKit>> getCustomKits() {
-		return customKits;
-	}
-
-	public void addCustomKit(CustomKit kitSaved, String name) {
-		HashSet<CustomKit> kits;
-		if (getCustomKits(name) != null)
-			kits = (getCustomKits(name));
-		else
-			kits = new HashSet<CustomKit>();
-
-		Iterator<CustomKit> iter = kits.iterator();
-		while (iter.hasNext()) {
-			CustomKit kit = iter.next();
-			if (kit.getKitName().equalsIgnoreCase(kitSaved.getKitName())) {
-				iter.remove();
-
-			}
-		}
-		kits.add(kitSaved);
-		customKits.put(name, kits);
-	}
-
-	public HashSet<CustomKit> getCustomKits(String name) {
-		if (customKits.containsKey(name))
-			return customKits.get(name);
-		return new HashSet<CustomKit>();
 	}
 
 	public HashMap<String, Kit> getKitsOnPlayers() {

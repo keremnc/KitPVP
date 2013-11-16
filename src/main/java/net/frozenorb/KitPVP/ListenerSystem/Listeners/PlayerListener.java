@@ -4,16 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
+import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.Utilities.Core;
+import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,12 +32,16 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -46,6 +53,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.mongodb.BasicDBObject;
 
+@SuppressWarnings("deprecation")
 public class PlayerListener extends ListenerBase {
 	public static boolean CHAT_MUTED = false;
 	private static HashMap<String, HashMap<String, Double>> assist = new HashMap<String, HashMap<String, Double>>();
@@ -57,19 +65,62 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler
+	public void onBlockPlace(BlockPlaceEvent e) {
+		if (!e.getPlayer().hasPermission("kit.build")) {
+			e.setCancelled(true);
+			e.getPlayer().updateInventory();
+		}
+	}
+
+	@EventHandler
+	public void onInventoryClick(InventoryClickEvent e) {
+		if (e.getCurrentItem() != null && e.getCurrentItem().getType() == Material.PISTON_EXTENSION) {
+			e.setCancelled(true);
+			((Player) e.getWhoClicked()).updateInventory();
+		}
+	}
+
+	@EventHandler
+	public void onBlockBreak(final BlockBreakEvent e) {
+		if (e.getBlock().getType() == Material.RED_MUSHROOM || e.getBlock().getType() == Material.BROWN_MUSHROOM) {
+			final Material mat = e.getBlock().getType();
+			if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getBlock().getLocation())) {
+				e.getPlayer().getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP));
+				e.getBlock().setType(Material.AIR);
+				Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
+
+					@Override
+					public void run() {
+						e.getBlock().setType(mat);
+					}
+				}, 300L);
+				return;
+			}
+		}
+		if (!e.getPlayer().hasPermission("kit.build")) {
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler
 	public void onPlayerLoginEvent(PlayerLoginEvent e) {
 		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		KitAPI.getKitManager().loadCustomKits(e.getPlayer().getName());
-		KitAPI.getStatManager().loadStats(e.getPlayer().getName());
 		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
-		KitAPI.getScoreboardManager().loadScoreboard(e.getPlayer());
 		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) == null) {
 			KitAPI.getStatManager().setLocalData(e.getPlayer().getName().toLowerCase(), new LocalPlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO)));
 		}
+		KitAPI.getStatManager().loadStats(e.getPlayer().getName());
+		KitAPI.getScoreboardManager().loadScoreboard(e.getPlayer());
+
+	}
+
+	@EventHandler
+	public void onPlayerProfileLoad(PlayerProfileLoadEvent e) {
+		KitAPI.getStatManager().loadStats(e.getName());
 	}
 
 	@EventHandler
@@ -110,6 +161,13 @@ public class PlayerListener extends ListenerBase {
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
 		e.getDrops().clear();
+		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {
+			KitPVP.get().getCommandManager().teleport(e.getEntity(), CommandManager.EARLY_HG_LOCATION);
+			for (int i = 0; i < 9; i += 1)
+				if (e.getEntity().getInventory().getItem(i) != null && e.getEntity().getInventory().getItem(i).getType() == Material.MUSHROOM_SOUP) {
+					e.getDrops().add(new ItemStack(Material.MUSHROOM_SOUP));
+				}
+		}
 		final Player p = e.getEntity();
 		KitAPI.getServerManager().handleRespawn(p);
 		Stat pStat = KitAPI.getStatManager().getStat(p.getName());
@@ -155,8 +213,24 @@ public class PlayerListener extends ListenerBase {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		Player p = e.getPlayer();
+		ItemStack item = e.getItemDrop().getItemStack();
+		if (KitAPI.getMatchManager().getMatchItems().contains(item.getType()) || item.getType() == Material.PISTON_EXTENSION) {
+			e.setCancelled(true);
+		}
+		if (item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
+			p.sendMessage(ChatColor.RED + "You can only drop this by using /drop.");
+			e.setCancelled(true);
+		} else {
+			e.setCancelled(false);
+			e.getItemDrop().remove();
+		}
+	}
+
 	@EventHandler
-	public void onent(EntityDamageEvent e) {
+	public void onEntityDamageEvent(EntityDamageEvent e) {
 		if (e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
 			if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, p.getLocation())) {
@@ -241,6 +315,7 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerTeleport(PlayerTeleportEvent e) {
 		if (e.getCause() == TeleportCause.END_PORTAL)
 			return;
+		KitAPI.getRegionChecker().getRegion(e.getTo()).getMeta().onWarp(e.getPlayer());
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo())) {
 			KitAPI.getMatchManager().getCurrentMatches().remove(e.getPlayer().getName());
 		}
@@ -282,7 +357,7 @@ public class PlayerListener extends ListenerBase {
 			if (e.getPlayer().getItemInHand() != null) {
 				if (e.getPlayer().getItemInHand().getType().equals(Material.ENCHANTED_BOOK)) {
 					if (e.getPlayer().getItemInHand().hasItemMeta()) {
-						if (e.getPlayer().getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + "Kits")) {
+						if (e.getPlayer().getItemInHand().getItemMeta().getDisplayName().equalsIgnoreCase(ChatColor.RED + "§lKits")) {
 							KitAPI.getServerManager().openKitInventory(e.getPlayer());
 						}
 					}
@@ -301,11 +376,12 @@ public class PlayerListener extends ListenerBase {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onEntDm(EntityDamageByEntityEvent e) {
-
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
 		if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
 			Location loc = e.getEntity().getLocation();
+			if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, loc))
+				e.setCancelled(true);
 			Player damager = (Player) e.getDamager();
 			Player p = (Player) e.getEntity();
 			if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, loc)) {
@@ -325,10 +401,6 @@ public class PlayerListener extends ListenerBase {
 				KitAPI.getPlayerManager().getSpawnProtection().remove(damager.getName());
 			}
 		}
-	}
-
-	@EventHandler(ignoreCancelled = true)
-	public void onDamage(EntityDamageByEntityEvent e) {
 		if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getEntity().getLocation())) {
 			if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
 				final Player victim = (Player) e.getEntity();

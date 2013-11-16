@@ -69,6 +69,17 @@ public class MatchManager {
 		});
 	}
 
+	public ArrayList<Material> getMatchItems() {
+		return new ArrayList<Material>() {
+			private static final long serialVersionUID = 1L;
+			{
+				add(UNRANKED_MATCHUP_ITEM);
+				add(RANKED_MATCHUP_ITEM);
+				add(QUICK_MATCHUP_ITEM);
+			}
+		};
+	}
+
 	public MatchList getMatches() {
 		return matches;
 	}
@@ -274,10 +285,12 @@ public class MatchManager {
 	@SuppressWarnings("deprecation")
 	public void applyArenaInventory(Player p) {
 		Core.get().clearPlayer(p);
-
-		p.getInventory().setItem(0, UNRANKED_ITEM);
-		p.getInventory().setItem(1, RANKED_ITEM);
-		p.getInventory().setItem(2, QUICK_ITEM);
+		p.setMaxHealth(20D);
+		p.setHealth(p.getMaxHealth());
+		p.setFoodLevel(20);
+		p.getInventory().setItem(0, QUICK_ITEM);
+		p.getInventory().setItem(1, UNRANKED_ITEM);
+		p.getInventory().setItem(2, RANKED_ITEM);
 		p.updateInventory();
 	}
 
@@ -359,8 +372,12 @@ public class MatchManager {
 						}
 					}
 				}
-				damager.sendMessage(ChatColor.RED + "You can only attack during a 1v1.");
-				e.setCancelled(true);
+				if (isInMatch(p.getName())) {
+					if (currentMatches.get(p.getName()).isInProgress()) {
+						damager.sendMessage(ChatColor.RED + "You can only attack during a 1v1.");
+						e.setCancelled(true);
+					}
+				}
 
 			}
 		}
@@ -373,7 +390,6 @@ public class MatchManager {
 				if (m.isInProgress()) {
 					m.finish(p, p.getName(), MatchFinishReason.PLAYER_DEATH);
 					if (KitAPI.getServerManager().getWarpToMatch().contains(p.getName())) {
-						KitAPI.getServerManager().getWarpToMatch().remove(p.getName());
 						Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 							@Override

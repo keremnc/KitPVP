@@ -114,7 +114,6 @@ public class StatManager {
 			BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
 			if (db != null)
 				stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
-
 		}
 	}
 

@@ -15,7 +15,6 @@ import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.Commands.SetShortcutWarp;
-import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Serialization.Serializers.LocationSerializer;
 
 import org.bukkit.Bukkit;
@@ -37,6 +36,7 @@ public class CommandManager {
 	private YamlConfiguration config;
 	private File configFile;
 	public static Location DUEL_LOCATION;
+	public static Location EARLY_HG_LOCATION;
 
 	public CommandManager() {
 
@@ -78,9 +78,10 @@ public class CommandManager {
 	 */
 	public CommandExecutor generateCommandExecutor(final String commandName, final Location toWarp) {
 		SetShortcutWarp.getWarps().add(commandName);
-		if (commandName.equalsIgnoreCase("1v1")) {
+		if (commandName.equalsIgnoreCase("1v1"))
 			DUEL_LOCATION = toWarp;
-		}
+		if (commandName.equalsIgnoreCase("hg"))
+			EARLY_HG_LOCATION = toWarp;
 		return new BaseCommand() {
 
 			@Override
@@ -112,9 +113,7 @@ public class CommandManager {
 	}
 
 	public void teleport(Player p, Location loc) {
-		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, loc)) {
-			KitAPI.getMatchManager().applyArenaInventory(p);
-		}
+		KitAPI.getRegionChecker().getRegion(loc).getMeta().onWarp(p);
 		p.teleport(loc);
 		p.closeInventory();
 	}

@@ -1,5 +1,6 @@
 package net.frozenorb.KitPVP.Commands;
 
+import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 
 import org.bukkit.Bukkit;
@@ -18,10 +19,12 @@ public class Kill extends BaseCommand {
 				return;
 			}
 			p.setHealth(0D);
+			KitAPI.getServerManager().handleRespawn(p);
 			sender.sendMessage("Killed " + ChatColor.GOLD + p.getName());
 		} else {
 			((Player) sender).setHealth(0D);
 			sender.sendMessage("Killed " + ChatColor.GOLD + sender.getName());
+			KitAPI.getServerManager().handleRespawn(((Player) sender));
 		}
 	}
 }

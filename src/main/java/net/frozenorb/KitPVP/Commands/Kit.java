@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
-import net.frozenorb.KitPVP.KitSystem.CustomKit;
 
 public class Kit extends BaseCommand implements TabExecutor {
 	public String[] aliases = new String[] { "selectkit" };
@@ -34,9 +33,6 @@ public class Kit extends BaseCommand implements TabExecutor {
 		for (net.frozenorb.KitPVP.KitSystem.Kit k : KitPVP.getKits()) {
 			kits.add(k.getName());
 		}
-		for (CustomKit k : KitAPI.getKitManager().getCustomKits(sender.getName())) {
-			kits.add(k.getKitName());
-		}
 		for (String p : kits) {
 			if (p.toLowerCase().startsWith(action.toLowerCase())) {
 				results.add(p);
@@ -49,17 +45,13 @@ public class Kit extends BaseCommand implements TabExecutor {
 	public void execute() {
 		if (args.length > 0) {
 			String kitName = args[0];
-			if (KitAPI.getKitManager().hasCustomKit(sender.getName(), kitName)) {
-				CustomKit kit = KitAPI.getKitManager().getCustomKitByName(sender.getName(), kitName);
-				kit.equip((Player) sender);
+			if (KitAPI.getKitManager().getByName(kitName) != null) {
+				net.frozenorb.KitPVP.KitSystem.Kit k = KitAPI.getKitManager().getByName(kitName);
+				((Player) sender).chat("/" + k.getName());
 			} else {
-				if (KitAPI.getKitManager().getByName(kitName) != null) {
-					net.frozenorb.KitPVP.KitSystem.Kit k = KitAPI.getKitManager().getByName(kitName);
-					((Player) sender).chat("/" + k.getName());
-				} else {
-					sender.sendMessage(String.format(ChatColor.RED + "Kit '%s' not found!", kitName));
-				}
+				sender.sendMessage(String.format(ChatColor.RED + "Kit '%s' not found!", kitName));
 			}
+
 		} else {
 			sender.sendMessage(ChatColor.RED + "/kit <kitName>");
 		}

@@ -25,4 +25,12 @@ public class RegionChecker {
 		}
 
 	}
+
+	public Region getRegion(Location l) {
+		for (Region r : Region.getRegions()) {
+			if (isRegion(r, l))
+				return r;
+		}
+		return null;
+	}
 }

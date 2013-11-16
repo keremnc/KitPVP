@@ -27,8 +27,6 @@ public class KitInventory extends PageInventory {
 		super(player, true);
 		maxInvSize = 36;
 		kiterate.addAll(KitPVP.getKits());
-		if (KitAPI.getKitManager().getCustomKits(player.getName()) != null)
-			kiterate.addAll(KitAPI.getKitManager().getCustomKits(player.getName()));
 		title = "§9Kit Selection";
 		ItemStack item = new ItemStack(Material.CARPET);
 		item.setDurability((short) 14);
@@ -64,8 +62,7 @@ public class KitInventory extends PageInventory {
 				} else {
 					String name = item.getItemMeta().getDisplayName();
 					name = ChatColor.stripColor(name);
-					boolean realKit = KitAPI.getKitManager().getByName(name) != null;
-					Kit k = (realKit ? KitAPI.getKitManager().getByName(name) : KitAPI.getKitManager().getCustomKitByName(((Player) event.getWhoClicked()).getName(), name));
+					Kit k = KitAPI.getKitManager().getByName(name);
 					if (k.hasKit(((Player) event.getWhoClicked()))) {
 						((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.NOTE_PLING, 20F, 20F);
 						Bukkit.dispatchCommand((CommandSender) event.getWhoClicked(), "kit " + k.getName());

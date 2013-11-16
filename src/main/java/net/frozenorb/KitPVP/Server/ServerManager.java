@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +17,10 @@ import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.Pagination.KitInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
-import net.minecraft.server.v1_6_R3.Packet205ClientCommand;
+import net.frozenorb.KitPVP.Reflection.CommandManager;
+import net.frozenorb.KitPVP.RegionSysten.Region;
+import net.frozenorb.KitPVP.Utilities.Utilities;
+import net.frozenorb.Utilities.Core;
 
 public class ServerManager {
 
@@ -76,21 +78,20 @@ public class ServerManager {
 	public void handleRespawn(final Player p) {
 		final GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
 		KitAPI.getKitManager().getKitsOnPlayers().remove(p.getName());
-		Bukkit.getScheduler().scheduleSyncDelayedTask(KitAPI.getKitPVP(), new Runnable() {
-			@Override
-			public void run() {
-				if (p.isOnline() && p != null) {
-					Packet205ClientCommand packet = new Packet205ClientCommand();
-					packet.a = 1;
-					((CraftPlayer) p).getHandle().playerConnection.a(packet);
-					p.setVelocity(new Vector(0, 0, 0));
-					p.setFireTicks(1);
-					p.setHealth(20D);
-					KitAPI.getPlayerManager().getSpawnProtection().add(p.getName());
-				}
-			}
-		}, 0L);
+		p.setHealth(20D);
+		p.setVelocity(new Vector(0, 0, 0));
+		p.setFireTicks(1);
+		if (warpToMatch.contains(p.getName())) {
+			KitAPI.getKitPVP().getCommandManager().teleport(p, CommandManager.DUEL_LOCATION);
+			return;
+		}
+		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, p.getLocation()))
+			return;
+		if (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())
+			return;
+		p.teleport(getSpawn());
 
+		KitAPI.getPlayerManager().getSpawnProtection().add(p.getName());
 		Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
 
 			@SuppressWarnings("deprecation")
@@ -98,20 +99,22 @@ public class ServerManager {
 			public void run() {
 				if (warpToMatch.contains(p.getName()))
 					return;
+				if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation()))
+					return;
 				ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
 				ItemMeta meta = book.getItemMeta();
-				meta.setDisplayName(ChatColor.RED + "Kits");
+				meta.setDisplayName(ChatColor.RED + "§lKits");
 				ArrayList<String> lore = new ArrayList<String>();
-				lore.add("Open your kit menu.");
+				lore.add("§9Open your kit menu.");
 				meta.setLore(lore);
 				book.setItemMeta(meta);
 				p.getInventory().setItem(0, book);
 				if (prof.getLastUsedKit() != null) {
 					ItemStack books = new ItemStack(Material.WATCH);
 					ItemMeta metas = books.getItemMeta();
-					metas.setDisplayName(ChatColor.GREEN + "Last Kit: §e" + prof.getLastUsedKit().getName());
+					metas.setDisplayName(ChatColor.GREEN + "Last Kit: §e§l" + prof.getLastUsedKit().getName());
 					ArrayList<String> lores = new ArrayList<String>();
-					lores.add("Select your last used kit.");
+					lores.add("§9Select your last used kit.");
 					metas.setLore(lores);
 					books.setItemMeta(metas);
 					p.getInventory().setItem(1, books);
@@ -142,6 +145,15 @@ public class ServerManager {
 			}
 		}
 		return soups;
+	}
+
+	public void applyHGInventory(Player p) {
+		Core.get().clearPlayer(p);
+		p.getInventory().setItem(0, Utilities.generateItem(Material.MUSHROOM_SOUP, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
+		KitAPI.getPlayerManager().fillSoup(p.getInventory());
+		for (int i = 19; i < 26; i += 1) {
+			p.getInventory().setItem(0, new ItemStack(Material.MUSHROOM_SOUP));
+		}
 	}
 
 	/**

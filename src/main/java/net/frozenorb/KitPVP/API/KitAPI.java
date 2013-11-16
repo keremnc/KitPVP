@@ -3,7 +3,6 @@ package net.frozenorb.KitPVP.API;
 import java.io.File;
 
 import net.frozenorb.KitPVP.KitPVP;
-import net.frozenorb.KitPVP.DataSystem.ArmorDataManager;
 import net.frozenorb.KitPVP.DataSystem.WarpDataManager;
 import net.frozenorb.KitPVP.KitSystem.KitManager;
 import net.frozenorb.KitPVP.MatchSystem.MatchManager;
@@ -33,7 +32,6 @@ public class KitAPI {
 	private static KitManager kitManager = null;
 	private static StatManager statManager = null;
 	private static WarpDataManager warpDataManager = null;
-	private static ArmorDataManager armorDataManager = null;
 	private static ArenaManager arenaManager = null;
 	private static ServerManager serverManager = null;
 	private static EloManager eloManager = null;
@@ -90,12 +88,6 @@ public class KitAPI {
 		return warpDataManager;
 	}
 
-	public static ArmorDataManager getArmorDataManager() {
-		if (armorDataManager == null)
-			armorDataManager = new ArmorDataManager(new File(kitpvp.getDataFolder() + File.separator + "armor.json"));
-		return armorDataManager;
-	}
-
 	public static ArenaManager getArenaManager() {
 		if (arenaManager == null)
 			arenaManager = new ArenaManager(new File(kitpvp.getDataFolder() + File.separator + "arenas.json"));
@@ -111,7 +103,6 @@ public class KitAPI {
 	public static void init(KitPVP kitpvp) {
 		KitAPI.kitpvp = kitpvp;
 		warpDataManager = new WarpDataManager(new File(kitpvp.getDataFolder() + File.separator + "warps.json"));
-		armorDataManager = new ArmorDataManager(new File(kitpvp.getDataFolder() + File.separator + "armor.json"));
 		arenaManager = new ArenaManager(new File(kitpvp.getDataFolder() + File.separator + "arenas.json"));
 	}
 

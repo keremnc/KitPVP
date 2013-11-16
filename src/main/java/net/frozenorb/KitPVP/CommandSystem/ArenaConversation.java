@@ -25,25 +25,25 @@ public abstract class ArenaConversation {
 		sender.sendMessage(ChatColor.YELLOW + "Welcome to the ArenaCreata 3000 by LazyLemons!");
 		sender.sendMessage("§7=======================================");
 		sender.sendMessage("§eType §a'2'§e to set the second location.");
-		sender.sendMessage("To change the first location, type §a'1'§e.");
-		sender.sendMessage("Type §a'quit'§e at any time to quit.");
-		sender.sendMessage("Type §a'save§e to save the arena!");
-		sender.sendMessage("Typing §a'info'§e will display the arena info!");
+		sender.sendMessage("§eTo change the first location, type §a'1'§e.");
+		sender.sendMessage("§eType §a'quit'§e at any time to quit.");
+		sender.sendMessage("§eType §a'save'§e to save the arena!");
+		sender.sendMessage("§eTyping §a'info'§e will display the arena info!");
 		ConversationFactory factory = new ConversationFactory(KitAPI.getKitPVP()).withModality(true).withPrefix(new NullConversationPrefix()).withFirstPrompt(new StringPrompt() {
-
-			public String getPromptText(ConversationContext context) {
-				return "";
-			}
 
 			@Override
 			public Prompt acceptInput(ConversationContext cc, String s) {
 				if (s.equalsIgnoreCase("1")) {
 					loc1 = ((Player) cc.getForWhom()).getLocation();
+					loc1.setPitch(0);
+					loc1.setYaw(90 * (Math.round(loc1.getYaw() / 90)));
 					cc.getForWhom().sendRawMessage(ChatColor.GREEN + "Loc1 Set");
 					return this;
 				}
 				if (s.equalsIgnoreCase("2")) {
 					loc2 = ((Player) cc.getForWhom()).getLocation();
+					loc2.setPitch(0);
+					loc2.setYaw(90 * (Math.round(loc2.getYaw() / 90)));
 					cc.getForWhom().sendRawMessage(ChatColor.GREEN + "Loc2 Set!");
 					return this;
 				}
@@ -67,16 +67,25 @@ public abstract class ArenaConversation {
 					}
 				}
 				if (s.equalsIgnoreCase("info")) {
-					cc.getForWhom().sendRawMessage(ChatColor.YELLOW + "§ePrimary Loc: ");
-					Core.get().sendFormattedDBOBject(sender, new LocationSerializer().serialize(loc1), "§e");
-					cc.getForWhom().sendRawMessage("§eSecondary Loc: ");
-					Core.get().sendFormattedDBOBject(sender, new LocationSerializer().serialize(loc2), "§e");
+					cc.getForWhom().sendRawMessage(ChatColor.YELLOW + "§ePrimary Location: ");
+					for (String str : Core.get().getFormattedObject(new LocationSerializer().serialize(loc1))) {
+						cc.getForWhom().sendRawMessage(str);
+					}
+					cc.getForWhom().sendRawMessage("§eSecondary Location: ");
+					for (String str : Core.get().getFormattedObject(new LocationSerializer().serialize(loc2))) {
+						cc.getForWhom().sendRawMessage(str);
+					}
 					return this;
 				}
 				cc.getForWhom().sendRawMessage("§cIncorrect usage!");
 				return this;
 			}
 
+			@Override
+			public String getPromptText(ConversationContext arg0) {
+				return "§eArenaCreata>";
+			}
+			
 		}).withEscapeSequence("quit").withLocalEcho(false).thatExcludesNonPlayersWithMessage("Go away evil console!");
 		Conversation con = factory.buildConversation((Player) sender);
 		((Player) sender).beginConversation(con);

@@ -3,9 +3,7 @@ package net.frozenorb.KitPVP.Commands;
 import java.util.ArrayList;
 
 import net.frozenorb.KitPVP.KitPVP;
-import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
-import net.frozenorb.KitPVP.KitSystem.CustomKit;
 import net.frozenorb.KitPVP.KitSystem.Kit;
 
 import org.bukkit.ChatColor;
@@ -27,9 +25,6 @@ public class Kits extends BaseCommand {
 			if (s.hasPermission(ki.getPermission())) {
 				kitz.add("§a" + ki.getName());
 			}
-		}
-		for (CustomKit k : KitAPI.getKitManager().getCustomKits(s.getName())) {
-			kitz.add("§a" + k.getKitName());
 		}
 		for (Kit ki : KitPVP.getKits()) {
 			if (!(s.hasPermission(ki.getPermission()))) {

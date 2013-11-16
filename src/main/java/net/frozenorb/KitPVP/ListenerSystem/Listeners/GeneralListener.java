@@ -10,17 +10,11 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 public class GeneralListener extends ListenerBase {
 	public static boolean CHAT_MUTED = false;
-
-	@EventHandler
-	public void onItemSpawn(ItemSpawnEvent e) {
-		e.getEntity().remove();
-	}
 
 	@EventHandler
 	public void onItemPickup(PlayerPickupItemEvent e) {
@@ -34,20 +28,19 @@ public class GeneralListener extends ListenerBase {
 	}
 
 	@EventHandler
-	public void o(ProjectileHitEvent e) {
+	public void onProjectileHitEvent(ProjectileHitEvent e) {
 		if (e.getEntityType() == EntityType.ARROW) {
 			e.getEntity().remove();
 		}
 	}
 
 	@EventHandler
-	public void onFall(EntityDamageEvent e) {
+	public void onEntityDamageEvent(EntityDamageEvent e) {
 		if ((e.getEntity() instanceof Player)) {
 			Player p = (Player) e.getEntity();
 			if (KitAPI.getPlayerManager().getProfile(p.getName()).isObject("adminMode"))
 				e.setCancelled(true);
 		}
-
 	}
 
 	@EventHandler
