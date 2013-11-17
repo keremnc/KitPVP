@@ -5,7 +5,7 @@ import java.util.Random;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.Arena;
-import net.frozenorb.KitPVP.MatchSystem.MatchTypes.Loadout;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.Utilities.Core;
 

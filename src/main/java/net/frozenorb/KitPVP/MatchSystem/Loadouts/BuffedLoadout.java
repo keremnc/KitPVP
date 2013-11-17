@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.MatchSystem.MatchTypes;
+package net.frozenorb.KitPVP.MatchSystem.Loadouts;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.Utilities.Utilities;
@@ -9,21 +9,20 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class BuffedSpeedLoadout extends Loadout {
-
-	@Override
-	public String getDescription() {
-		return "Standard with Strength II and Speed II";
-	}
-
+public class BuffedLoadout extends Loadout {
 	@Override
 	public String getName() {
-		return "Buffed w/ Speed II";
+		return "Buffed";
 	}
 
 	@Override
 	public PotionEffect[] getPotionEffects() {
-		return new PotionEffect[] { new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1), new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1) };
+		return new PotionEffect[] { new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1) };
+	}
+
+	@Override
+	public String getDescription() {
+		return "Standard with Strength II";
 	}
 
 	@Override
@@ -37,7 +36,6 @@ public class BuffedSpeedLoadout extends Loadout {
 
 	@Override
 	public int getWeight() {
-		return 2;
+		return 1;
 	}
-
 }

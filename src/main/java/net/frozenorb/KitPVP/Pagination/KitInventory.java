@@ -63,6 +63,8 @@ public class KitInventory extends PageInventory {
 					String name = item.getItemMeta().getDisplayName();
 					name = ChatColor.stripColor(name);
 					Kit k = KitAPI.getKitManager().getByName(name);
+					if (k == null)
+						return;
 					if (k.hasKit(((Player) event.getWhoClicked()))) {
 						((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.NOTE_PLING, 20F, 20F);
 						Bukkit.dispatchCommand((CommandSender) event.getWhoClicked(), "kit " + k.getName());
@@ -87,9 +89,9 @@ public class KitInventory extends PageInventory {
 				{
 					addAll(wrap(kit.getDescription()));
 					add("");
-					add("§6Uses: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
 					add("§6Kills: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getKills());
 					add("§6Deaths: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getDeaths());
+					add("§6Uses: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
 
 				}
 			};

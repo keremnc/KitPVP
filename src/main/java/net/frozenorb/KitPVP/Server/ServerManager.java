@@ -23,6 +23,7 @@ import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 import net.frozenorb.Utilities.Core;
 
+@SuppressWarnings("deprecation")
 public class ServerManager {
 
 	private KitPVP plugin;
@@ -96,7 +97,6 @@ public class ServerManager {
 		KitAPI.getPlayerManager().getSpawnProtection().add(p.getName());
 		Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
 
-			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				if (warpToMatch.contains(p.getName()))
@@ -125,6 +125,30 @@ public class ServerManager {
 				p.getInventory().setHeldItemSlot(0);
 			}
 		}, 5L);
+	}
+
+	public void addSpawnItems(Player p) {
+		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
+		ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+		ItemMeta meta = book.getItemMeta();
+		meta.setDisplayName(ChatColor.RED + "§lKits");
+		ArrayList<String> lore = new ArrayList<String>();
+		lore.add("§9Open your kit menu.");
+		meta.setLore(lore);
+		book.setItemMeta(meta);
+		p.getInventory().setItem(0, book);
+		if (prof.getLastUsedKit() != null) {
+			ItemStack books = new ItemStack(Material.WATCH);
+			ItemMeta metas = books.getItemMeta();
+			metas.setDisplayName(ChatColor.GREEN + "Last Kit: §e§l" + prof.getLastUsedKit().getName());
+			ArrayList<String> lores = new ArrayList<String>();
+			lores.add("§9Select your last used kit.");
+			metas.setLore(lores);
+			books.setItemMeta(metas);
+			p.getInventory().setItem(1, books);
+		}
+		p.updateInventory();
+		p.getInventory().setHeldItemSlot(0);
 	}
 
 	/**
@@ -170,7 +194,7 @@ public class ServerManager {
 		KitAPI.getPlayerManager().fillSoup(p.getInventory());
 		for (int i = 9; i < 36; i += 1) {
 			if (p.getInventory().getItem(i) == null)
-				p.getInventory().setItem(i, new ItemStack(Material.PISTON_EXTENSION));
+				p.getInventory().setItem(i, Utilities.generateItem(Material.PISTON_EXTENSION, "§c§lUnusable Slot"));
 		}
 	}
 

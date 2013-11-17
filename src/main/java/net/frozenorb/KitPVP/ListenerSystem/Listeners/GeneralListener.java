@@ -26,7 +26,6 @@ public class GeneralListener extends ListenerBase {
 				e.setCancelled(true);
 			}
 		} else {
-			e.getItem().remove();
 			e.setCancelled(true);
 		}
 	}

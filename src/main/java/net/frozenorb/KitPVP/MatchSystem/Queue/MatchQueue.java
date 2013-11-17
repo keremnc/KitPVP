@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 
 import com.mongodb.BasicDBObject;
 
-import net.frozenorb.KitPVP.MatchSystem.MatchTypes.Loadout;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 
 public class MatchQueue {
 	private Loadout type;

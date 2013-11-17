@@ -1,8 +1,11 @@
 package net.frozenorb.KitPVP.ListenerSystem.Listeners;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
@@ -167,11 +170,11 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerDeath(final PlayerDeathEvent e) {
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
-		e.getEntity().setHealth(20D);
-		e.getDrops().clear();
+
 		if (KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit() != null)
 			KitAPI.getStatManager().getLocalData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {
+			e.getDrops().clear();
 			for (int i = 0; i < 9; i += 1)
 				if (e.getEntity().getInventory().getItem(i) != null && e.getEntity().getInventory().getItem(i).getType() == Material.MUSHROOM_SOUP) {
 					final Item ite = e.getEntity().getLocation().getWorld().dropItemNaturally(e.getEntity().getLocation(), new ItemStack(Material.MUSHROOM_SOUP));
@@ -191,6 +194,31 @@ public class PlayerListener extends ListenerBase {
 					KitPVP.get().getCommandManager().teleport(e.getEntity(), CommandManager.EARLY_HG_LOCATION);
 				}
 			}, 5L);
+		} else {
+			final ArrayList<Item> items = new ArrayList<Item>();
+
+			for (ItemStack item : e.getDrops()) {
+				final Item ite = e.getEntity().getLocation().getWorld().dropItemNaturally(e.getEntity().getLocation(), item);
+				items.add(ite);
+			}
+			final Iterator<Item> drops = items.iterator();
+			final AtomicInteger times = new AtomicInteger(0);
+			while (drops.hasNext()) {
+				final Item ite = drops.next();
+				drops.remove();
+				times.set(times.get() + 1);
+				Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
+
+					@Override
+					public void run() {
+						if (ite.isValid() && !ite.isDead()) {
+							ite.remove();
+						}
+					}
+				}, 20 + times.get());
+
+			}
+			e.getDrops().clear();
 		}
 		final Player p = e.getEntity();
 		KitAPI.getServerManager().handleRespawn(p);
@@ -255,6 +283,16 @@ public class PlayerListener extends ListenerBase {
 			return;
 		}
 		ItemStack item = e.getItemDrop().getItemStack();
+		if (item.getType() == Material.BOWL) {
+			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+				@Override
+				public void run() {
+					e.getItemDrop().remove();
+				}
+			}, 40L);
+			return;
+		}
 		if (KitAPI.getMatchManager().getMatchItems().contains(item.getType()) || item.getType() == Material.PISTON_EXTENSION) {
 			e.setCancelled(true);
 			return;
@@ -359,6 +397,11 @@ public class PlayerListener extends ListenerBase {
 		}
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
 			Core.get().clearPlayer(e.getPlayer());
+			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
+		}
+		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
+			Core.get().clearPlayer(e.getPlayer());
+			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
 		}
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && !KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getTo())) {
 			KitAPI.getMatchManager().getMatches().remove(e.getPlayer().getName());

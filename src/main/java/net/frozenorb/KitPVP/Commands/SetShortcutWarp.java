@@ -40,6 +40,7 @@ public class SetShortcutWarp extends BaseCommand {
 				KitAPI.getKitPVP().getCommandManager().loadCommandsFromJson(KitAPI.getWarpDataManager().getData());
 				sender.sendMessage(ChatColor.YELLOW + "Registered.");
 				KitAPI.getWarpDataManager().saveData();
+				Bukkit.dispatchCommand(sender, "setwarp " + warpName);
 			}
 		} else
 			sender.sendMessage(ChatColor.RED + "You are not allowed to do this.");

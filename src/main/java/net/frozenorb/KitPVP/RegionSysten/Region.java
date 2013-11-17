@@ -8,6 +8,7 @@ import net.frozenorb.KitPVP.API.KitAPI;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
@@ -33,7 +34,8 @@ public class Region {
 
 		@Override
 		public void onWarp(Player p) {
-			KitAPI.getServerManager().applyHGInventory(p);
+			if (!p.hasPotionEffect(PotionEffectType.WATER_BREATHING))
+				KitAPI.getServerManager().applyHGInventory(p);
 		}
 	});
 	private static ArrayList<Region> regions = new ArrayList<Region>();

@@ -7,7 +7,7 @@ import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.Kit;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
-import net.frozenorb.KitPVP.MatchSystem.MatchTypes.Loadout;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 
@@ -107,6 +107,10 @@ public class KitPVP extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			KitAPI.getStatManager().getLocalData(p.getName()).saveToFile();
+			KitAPI.getStatManager().getStat(p.getName()).saveStat();
+		}
 	}
 
 	/*

@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.MatchSystem.MatchTypes;
+package net.frozenorb.KitPVP.MatchSystem.Loadouts;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public abstract class Loadout {
 	private static ArrayList<Loadout> matches = new ArrayList<Loadout>();
 
 	public static void init() {
-		for (Class<?> c : ClassGetter.getClassesForPackage(KitAPI.getKitPVP(), "net.frozenorb.KitPVP.MatchSystem.MatchTypes")) {
+		for (Class<?> c : ClassGetter.getClassesForPackage(KitAPI.getKitPVP(), "net.frozenorb.KitPVP.MatchSystem.Loadouts")) {
 			if (Loadout.class.isAssignableFrom(c)) {
 				if (!Modifier.isAbstract(c.getModifiers())) {
 					try {

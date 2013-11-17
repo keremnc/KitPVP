@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.MatchSystem.MatchTypes;
+package net.frozenorb.KitPVP.MatchSystem.Loadouts;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.Utilities.Utilities;
@@ -7,22 +7,22 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
-public class BuffedMatchType extends Loadout {
+public class StandardLoadout extends Loadout {
+
 	@Override
 	public String getName() {
-		return "Buffed";
-	}
-
-	@Override
-	public PotionEffect[] getPotionEffects() {
-		return new PotionEffect[] { new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1) };
+		return "Standard";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Standard with Strength II";
+		return "Standard Match Loadout";
+	}
+
+	@Override
+	public PotionEffect[] getPotionEffects() {
+		return new PotionEffect[] {};
 	}
 
 	@Override
@@ -36,6 +36,6 @@ public class BuffedMatchType extends Loadout {
 
 	@Override
 	public int getWeight() {
-		return 1;
+		return 0;
 	}
 }

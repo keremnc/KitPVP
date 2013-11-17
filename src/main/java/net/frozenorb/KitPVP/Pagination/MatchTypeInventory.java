@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.MatchSystem.MatchTypes.Loadout;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
 import net.frozenorb.Utilities.Core;
@@ -63,6 +63,11 @@ public class MatchTypeInventory extends PageInventory {
 					String name = item.getItemMeta().getDisplayName();
 					name = ChatColor.stripColor(name);
 					Loadout type = Loadout.getByName(name.replace("Ranked ", ""));
+					if (type == null) {
+						event.getWhoClicked().closeInventory();
+						KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType());
+						return;
+					}
 					MatchQueue queue = new MatchQueue((Player) event.getWhoClicked(), type, this.type);
 					KitAPI.getMatchManager().addToQueue(queue);
 				}
@@ -78,12 +83,15 @@ public class MatchTypeInventory extends PageInventory {
 			meta.setDisplayName((type == QueueType.RANKED ? "§a§lRanked " : "§a") + kit.getName());
 			ArrayList<String> lores = new ArrayList<String>();
 			lores.addAll(wrap(kit.getDescription()));
-			lores.add("");
-			if (type == QueueType.RANKED)
-				if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null)
+			if (type == QueueType.RANKED) {
+				if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null) {
+					lores.add("");
 					lores.add("§dThere is §e1§d player in this queue.");
-				else if (KitAPI.getMatchManager().getFirstUnranked(kit, getPlayer().getName()) != null)
-					lores.add("§dThere is §e1§d player in this queue.");
+				}
+			} else if (KitAPI.getMatchManager().getFirstUnranked(kit, getPlayer().getName()) != null) {
+				lores.add("");
+				lores.add("§dThere is §e1§d player in this queue.");
+			}
 			meta.setLore(lores);
 			item.setItemMeta(meta);
 			item.setAmount(1);

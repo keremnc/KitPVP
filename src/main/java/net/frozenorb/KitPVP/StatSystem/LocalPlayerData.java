@@ -96,20 +96,26 @@ public class LocalPlayerData {
 
 			@Override
 			public void run() {
-				try {
-					File saveTo = new File("data" + File.separator + "playerData" + File.separator + name.toLowerCase() + ".json");
-					if (!saveTo.exists())
-						saveTo.createNewFile();
-					BufferedWriter writer = new BufferedWriter(new FileWriter(saveTo));
-					writer.write(data.toString());
-					writer.flush();
-					writer.close();
-				} catch (IOException ex) {
-					System.out.println("Error on data file that follows \n" + name + ": " + toString());
-					ex.printStackTrace();
-				}
+				saveToFile();
 			}
 		});
+
+	}
+
+	public void saveToFile() {
+
+		try {
+			File saveTo = new File("data" + File.separator + "playerData" + File.separator + name.toLowerCase() + ".json");
+			if (!saveTo.exists())
+				saveTo.createNewFile();
+			BufferedWriter writer = new BufferedWriter(new FileWriter(saveTo));
+			writer.write(data.toString());
+			writer.flush();
+			writer.close();
+		} catch (IOException ex) {
+			System.out.println("Error on data file that follows \n" + name + ": " + toString());
+			ex.printStackTrace();
+		}
 
 	}
 

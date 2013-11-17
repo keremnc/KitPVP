@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.MatchSystem.MatchTypes.Loadout;
-import net.frozenorb.KitPVP.MatchSystem.MatchTypes.StandardLoadout;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.StandardLoadout;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchList;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
@@ -34,7 +34,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class MatchManager {
 
-	private static Material UNRANKED_MATCHUP_ITEM = Material.COAL;
+	private static Material UNRANKED_MATCHUP_ITEM = Material.EMERALD;
 	private static Material RANKED_MATCHUP_ITEM = Material.DIAMOND;
 	private static Material QUICK_MATCHUP_ITEM = Material.FEATHER;
 	private static String RANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Ranked Match Type!";
@@ -189,13 +189,13 @@ public class MatchManager {
 	public void addToQueue(MatchQueue queue) {
 		String requester = queue.getPlayer().getName();
 		if (queue.getQueueType() == QueueType.QUICK) {
-			if (findQuickMatch(requester) != null) {
-				MatchQueue un = findQuickMatch(requester);
+			if (findQuickUnrankedMatch(requester) != null) {
+				MatchQueue un = findQuickUnrankedMatch(requester);
 				matches.remove(un);
 				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue);
 			} else {
 				matches.add(queue);
-				queue.getPlayer().sendMessage(ChatColor.GREEN + "You have been added to the Quick Matchup queue!");
+				queue.getPlayer().sendMessage(ChatColor.GREEN + "You have been added to the Quick Unranked Matchup queue!");
 			}
 		} else if (queue.getQueueType() == QueueType.RANKED) {
 			Loadout requested = queue.getLoadout();
@@ -208,8 +208,8 @@ public class MatchManager {
 				queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bRanked§e Matchup with the §b" + requested.getName() + "§e loadout.");
 			}
 		} else if (queue.getQueueType() == QueueType.UNRANKED) {
-			if (findQuickMatch(requester) != null) {
-				MatchQueue un = findQuickMatch(requester);
+			if (findQuickUnrankedMatch(requester) != null) {
+				MatchQueue un = findQuickUnrankedMatch(requester);
 				matches.remove(un);
 				matchFound(queue.getPlayer(), un.getPlayer(), queue.getLoadout(), queue);
 				return;
@@ -261,7 +261,7 @@ public class MatchManager {
 		return null;
 	}
 
-	public MatchQueue findQuickMatch(String requester) {
+	public MatchQueue findQuickUnrankedMatch(String requester) {
 		for (int i = 0; i < matches.size(); i += 1) {
 			if (matches.get(i) != null)
 				if (matches.get(i).getQueueType() != QueueType.RANKED)
@@ -294,6 +294,21 @@ public class MatchManager {
 		p.updateInventory();
 	}
 
+	public void handleInteract(Player p, Material m) {
+
+		if (m == QUICK_MATCHUP_ITEM) {
+			addToQueue(new MatchQueue(p, new StandardLoadout(), QueueType.QUICK));
+		}
+		if (m == RANKED_MATCHUP_ITEM) {
+			new MatchTypeInventory(p, RANKED_MATCHUP_TITLE, QueueType.RANKED).loadTypes().openInventory();
+		}
+		if (m == UNRANKED_MATCHUP_ITEM) {
+			new MatchTypeInventory(p, UNRANKED_MATCHUP_TITLE, QueueType.UNRANKED).loadTypes().openInventory();
+
+		}
+
+	}
+
 	private class MatchListener implements Listener {
 
 		@EventHandler
@@ -302,20 +317,9 @@ public class MatchManager {
 			if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
 					if (p.getItemInHand() != null) {
+						e.setCancelled(true);
 						Material m = p.getItemInHand().getType();
-						if (m == QUICK_MATCHUP_ITEM) {
-							e.setCancelled(true);
-							addToQueue(new MatchQueue(p, new StandardLoadout(), QueueType.QUICK));
-						}
-						if (m == RANKED_MATCHUP_ITEM) {
-							e.setCancelled(true);
-							new MatchTypeInventory(p, RANKED_MATCHUP_TITLE, QueueType.RANKED).loadTypes().openInventory();
-						}
-						if (m == UNRANKED_MATCHUP_ITEM) {
-							e.setCancelled(true);
-							new MatchTypeInventory(p, UNRANKED_MATCHUP_TITLE, QueueType.UNRANKED).loadTypes().openInventory();
-
-						}
+						handleInteract(p, m);
 					}
 				}
 			}
@@ -367,6 +371,8 @@ public class MatchManager {
 					if (isInMatch(damager.getName())) {
 						if (currentMatches.get(p.getName()).getOpponent(p).getName().equalsIgnoreCase(damager.getName())) {
 							if (currentMatches.get(damager.getName()).getOpponent(damager).getName().equalsIgnoreCase(p.getName())) {
+								if (!currentMatches.get(damager.getName()).isInProgress())
+									e.setCancelled(true);
 								return;
 							}
 						}
