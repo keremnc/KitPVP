@@ -113,7 +113,9 @@ public class CommandManager {
 	}
 
 	public void teleport(Player p, Location loc) {
-		KitAPI.getRegionChecker().getRegion(loc).getMeta().onWarp(p);
+		if (KitAPI.getRegionChecker().getRegion(loc) != null) {
+			KitAPI.getRegionChecker().getRegion(loc).getMeta().onWarp(p);
+		}
 		p.teleport(loc);
 		p.closeInventory();
 	}

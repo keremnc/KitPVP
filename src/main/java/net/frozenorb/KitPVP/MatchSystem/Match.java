@@ -148,7 +148,8 @@ public class Match {
 	public void finish(final Player loser, final String loserName, MatchFinishReason reason) {
 		final Player winner = getOpponent(loserName);
 		loser.setHealth(20D);
-		winner.hidePlayer(loser);
+		setInProgress(false);
+		KitAPI.getServerManager().setVisible(loser, false);
 		loser.teleport(loser.getLocation().clone().add(0, 3, 0));
 		loser.setAllowFlight(true);
 		loser.setFlying(true);
@@ -202,12 +203,11 @@ public class Match {
 
 			@Override
 			public void run() {
-				winner.showPlayer(loser);
+				KitAPI.getServerManager().setVisible(loser, true);
 				loser.setAllowFlight(false);
 				loser.setFlying(false);
 				KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
 				KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-				setInProgress(false);
 				KitAPI.getArenaManager().unregisterArena(arena);
 				Core.get().clearPlayer(winner);
 				KitAPI.getKitPVP().getCommandManager().teleport(loser, CommandManager.DUEL_LOCATION);

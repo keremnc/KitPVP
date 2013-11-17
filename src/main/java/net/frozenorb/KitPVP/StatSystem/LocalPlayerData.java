@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 
 import org.bukkit.Bukkit;
 
@@ -61,7 +62,20 @@ public class LocalPlayerData {
 	public int get(StatObjective sb) {
 		if (data.containsField(sb.getName()))
 			return data.getInt(sb.getName());
+		data.append(sb.getName(), 0);
 		return 0;
+	}
+
+	/**
+	 * Gets KitData for this player
+	 * 
+	 * @return KitData
+	 */
+	public PlayerKitData getPlayerKitData() {
+		if (!data.containsField(StatObjective.KIT_DATA.getName()))
+			data.append(StatObjective.KIT_DATA.getName(), new PlayerKitData());
+		data.append(StatObjective.KIT_DATA.getName(), new PlayerKitData((BasicDBObject) data.get(StatObjective.KIT_DATA.getName())));
+		return (PlayerKitData) data.get(StatObjective.KIT_DATA.getName());
 	}
 
 	/**

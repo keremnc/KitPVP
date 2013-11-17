@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.KitSystem.Pagination;
+package net.frozenorb.KitPVP.Pagination;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,11 +78,22 @@ public class KitInventory extends PageInventory {
 
 	public void setKits() {
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		for (Kit kit : kiterate) {
+		for (final Kit kit : kiterate) {
 			ItemStack item = kit.getKitIcon();
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName((kit.hasKit(user) ? "§a" : "§c") + kit.getName());
-			meta.setLore(wrap(kit.getDescription()));
+			ArrayList<String> lore = new ArrayList<String>() {
+				private static final long serialVersionUID = 1;
+				{
+					addAll(wrap(kit.getDescription()));
+					add("");
+					add("§6Uses: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
+					add("§6Kills: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getKills());
+					add("§6Deaths: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getDeaths());
+
+				}
+			};
+			meta.setLore(lore);
 			item.setItemMeta(meta);
 			item.setAmount(1);
 			Attributes att = new Attributes(item);

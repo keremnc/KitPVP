@@ -6,13 +6,21 @@ import java.util.ArrayList;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 
 public class Region {
-	public static Region SPAWN = new Region(DefaultFlag.PISTONS);
+	public static Region SPAWN = new Region(DefaultFlag.PISTONS, new RegionMeta() {
+
+		@Override
+		public void onWarp(Player p) {
+			for (Material m : KitAPI.getMatchManager().getMatchItems())
+				p.getInventory().remove(m);
+		}
+	});
 	public static Region DONOR_SHOP = new Region(DefaultFlag.EXP_DROPS);
 	public static Region DUEL_SPAWN = new Region(DefaultFlag.MUSHROOMS, new RegionMeta() {
 
@@ -21,7 +29,7 @@ public class Region {
 			KitAPI.getMatchManager().applyArenaInventory(p);
 		}
 	});
-	public static Region EARLY_HG = new Region(DefaultFlag.DESTROY_VEHICLE, new RegionMeta() {
+	public static Region EARLY_HG = new Region(DefaultFlag.MYCELIUM_SPREAD, new RegionMeta() {
 
 		@Override
 		public void onWarp(Player p) {

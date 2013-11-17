@@ -120,6 +120,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 			for (PotionEffect pot : k.getPotionEffects()) {
 				p.addPotionEffect(pot);
 			}
+			KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(this).incrementUses(1);
 			KitAPI.getKitManager().getKitsOnPlayers().put(p.getName(), k);
 			p.sendMessage("§6You have chosen the kit §a" + k.getName() + "§6.");
 		} else {

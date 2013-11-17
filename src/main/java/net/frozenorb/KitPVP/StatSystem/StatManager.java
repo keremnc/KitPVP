@@ -66,13 +66,10 @@ public class StatManager {
 	 * Loads local playerData
 	 */
 	public void loadLocalData() {
-
 		File dir = new File("data" + File.separator + "playerData");
-
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
-
 		FilenameFilter statsFilter = new FilenameFilter() {
 			public boolean accept(File paramFile, String paramString) {
 				if (paramString.endsWith("json"))
@@ -101,7 +98,7 @@ public class StatManager {
 	 * @param name
 	 *            the name of the player
 	 */
-	public void loadStats(String name) {
+	public void loadStats(final String name) {
 		PlayerProfile pp = Shared.get().getProfileManager().getProfile(name);
 		if (pp != null) {
 			BasicDBObject object = pp.getJson();
@@ -111,9 +108,16 @@ public class StatManager {
 			}
 			stats.put(name.toLowerCase(), stat);
 		} else {
-			BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
-			if (db != null)
-				stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
+			Bukkit.getScheduler().runTaskAsynchronously(KitAPI.getKitPVP(), new Runnable() {
+
+				@Override
+				public void run() {
+					BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
+					if (db != null)
+						stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
+
+				}
+			});
 		}
 	}
 

@@ -3,7 +3,7 @@ package net.frozenorb.KitPVP.ListenerSystem;
 import java.util.ArrayList;
 
 import net.frozenorb.KitPVP.Reflection.ClassGetter;
-import net.frozenorb.mShared.Shared;
+import net.frozenorb.Utilities.Core;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -22,7 +22,7 @@ public class ListenerBase implements Listener {
 			}
 
 		}
-		Shared.get().getUtilities().box(pk.toArray(new String[] {}), "Loading listeners");
+		Core.get().box(pk.toArray(new String[] {}), "Loading listeners");
 
 	}
 }

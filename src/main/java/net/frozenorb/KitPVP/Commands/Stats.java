@@ -34,7 +34,7 @@ public class Stats extends BaseCommand {
 		String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", s.getPlayerName(), 0);
 		String kills = String.format("§6Kills:§f %s", s.get(StatObjective.KILLS));
 		String deaths = String.format("§6Deaths:§f %s", s.get(StatObjective.DEATHS));
-		String kd = String.format("§6KD:§f %s", s.get(StatObjective.KD_RATIO));
+		String kd = String.format("§6KD:§f %s", s.getDouble(StatObjective.KD_RATIO));
 		String cks = String.format("§6Current Killstreak:§f %s", s.get(StatObjective.KILLSTREAK));
 		String tks = String.format("§6Highest Killstreak:§f %s", s.get(StatObjective.HIGHEST_KILLSTREAK));
 		String wins = String.format("§61v1 Wins:§f %s", s.get(StatObjective.DUEL_WINS));

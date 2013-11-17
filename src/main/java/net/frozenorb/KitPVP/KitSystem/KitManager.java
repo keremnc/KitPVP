@@ -3,6 +3,7 @@ package net.frozenorb.KitPVP.KitSystem;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.Reflection.ClassGetter;
+import net.frozenorb.Utilities.Core;
 
 public class KitManager {
 	private KitPVP plugin;
@@ -51,11 +53,12 @@ public class KitManager {
 
 	@SuppressWarnings({ "rawtypes" })
 	public void loadKits() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException {
+		ArrayList<String> kitClasses = new ArrayList<String>();
 		for (Class perkClass : ClassGetter.getClassesForPackage(plugin, packageName)) {
 			if (Kit.class.isAssignableFrom(perkClass)) {
 				if (!Modifier.isAbstract(perkClass.getModifiers())) {
 					if ((perkClass.getCanonicalName() != null))
-						System.out.println("Loading kits from class:" + "\n--------------------------------------------------------------------------------\n" + perkClass.getCanonicalName() + "\n--------------------------------------------------------------------------------\n");
+						kitClasses.add(perkClass.getCanonicalName());
 					Constructor ctor = perkClass.getConstructors()[0];
 					ctor.setAccessible(true);
 					Kit kit = (Kit) ctor.newInstance();
@@ -63,12 +66,14 @@ public class KitManager {
 				}
 			}
 		}
+		Core.get().box(packages.toArray(new String[] {}), "Loading kits from packages");
+
 		for (String pack : packages) {
 			for (Class perkClass : ClassGetter.getClassesForPackage(plugin, pack)) {
 				if (Kit.class.isAssignableFrom(perkClass)) {
 					if (!Modifier.isAbstract(perkClass.getModifiers())) {
 						if ((perkClass.getCanonicalName() != null))
-							System.out.println("Loading kits from class:" + "\n--------------------------------------------------------------------------------\n" + perkClass.getCanonicalName() + "\n--------------------------------------------------------------------------------\n");
+							kitClasses.add(perkClass.getCanonicalName());
 						Constructor ctor = perkClass.getConstructors()[0];
 						ctor.setAccessible(true);
 						Kit kit = (Kit) ctor.newInstance();
@@ -78,6 +83,7 @@ public class KitManager {
 
 			}
 		}
+		Core.get().box(kitClasses.toArray(new String[] {}), "Kits loaded from classes");
 		Collections.sort(KitPVP.getKits(), new Comparator<Kit>() {
 			@Override
 			public int compare(Kit o1, Kit o2) {

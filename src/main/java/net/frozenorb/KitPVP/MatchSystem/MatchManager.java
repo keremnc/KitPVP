@@ -6,12 +6,12 @@ import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.KitSystem.Pagination.MatchTypeInventory;
 import net.frozenorb.KitPVP.MatchSystem.MatchTypes.Loadout;
 import net.frozenorb.KitPVP.MatchSystem.MatchTypes.StandardLoadout;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchList;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
+import net.frozenorb.KitPVP.Pagination.MatchTypeInventory;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Core;
 

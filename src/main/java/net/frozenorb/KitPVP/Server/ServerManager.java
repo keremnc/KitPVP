@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +16,7 @@ import org.bukkit.util.Vector;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.KitSystem.Pagination.KitInventory;
+import net.frozenorb.KitPVP.Pagination.KitInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
@@ -81,12 +82,13 @@ public class ServerManager {
 		p.setHealth(20D);
 		p.setVelocity(new Vector(0, 0, 0));
 		p.setFireTicks(1);
+
+		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, p.getLocation()))
+			return;
 		if (warpToMatch.contains(p.getName())) {
 			KitAPI.getKitPVP().getCommandManager().teleport(p, CommandManager.DUEL_LOCATION);
 			return;
 		}
-		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, p.getLocation()))
-			return;
 		if (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())
 			return;
 		p.teleport(getSpawn());
@@ -147,12 +149,28 @@ public class ServerManager {
 		return soups;
 	}
 
+	public void setVisible(Player player, boolean visible) {
+		if (!visible) {
+			final byte b = Byte.parseByte("0110000", 2);
+			((CraftPlayer) player).getHandle().getDataWatcher().watch(0, b);
+		} else {
+			final byte b = Byte.parseByte("0000000", 2);
+			((CraftPlayer) player).getHandle().getDataWatcher().watch(0, b);
+
+		}
+
+	}
+
 	public void applyHGInventory(Player p) {
 		Core.get().clearPlayer(p);
-		p.getInventory().setItem(0, Utilities.generateItem(Material.MUSHROOM_SOUP, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
-		KitAPI.getPlayerManager().fillSoup(p.getInventory());
 		for (int i = 19; i < 26; i += 1) {
-			p.getInventory().setItem(0, new ItemStack(Material.MUSHROOM_SOUP));
+			p.getInventory().setItem(i, new ItemStack(Material.MUSHROOM_SOUP));
+		}
+		p.getInventory().setItem(0, Utilities.generateItem(Material.STONE_SWORD, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
+		KitAPI.getPlayerManager().fillSoup(p.getInventory());
+		for (int i = 9; i < 36; i += 1) {
+			if (p.getInventory().getItem(i) == null)
+				p.getInventory().setItem(i, new ItemStack(Material.PISTON_EXTENSION));
 		}
 	}
 

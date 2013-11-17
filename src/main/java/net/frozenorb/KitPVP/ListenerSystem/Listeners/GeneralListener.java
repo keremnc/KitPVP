@@ -2,7 +2,9 @@ package net.frozenorb.KitPVP.ListenerSystem.Listeners;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
+import net.frozenorb.KitPVP.RegionSysten.Region;
 
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,8 +20,15 @@ public class GeneralListener extends ListenerBase {
 
 	@EventHandler
 	public void onItemPickup(PlayerPickupItemEvent e) {
-		e.getItem().remove();
-		e.setCancelled(true);
+		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getPlayer().getLocation())) {
+			if (e.getItem().getItemStack().getType() != Material.MUSHROOM_SOUP) {
+				e.getItem().remove();
+				e.setCancelled(true);
+			}
+		} else {
+			e.getItem().remove();
+			e.setCancelled(true);
+		}
 	}
 
 	@EventHandler

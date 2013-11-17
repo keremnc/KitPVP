@@ -7,6 +7,7 @@ import java.util.Random;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
+import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
@@ -26,6 +27,7 @@ import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Snowball;
@@ -48,7 +50,6 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 
 import com.mongodb.BasicDBObject;
@@ -82,7 +83,7 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
-		if (e.getBlock().getType() == Material.RED_MUSHROOM || e.getBlock().getType() == Material.BROWN_MUSHROOM) {
+		if ((e.getBlock().getType() == Material.RED_MUSHROOM || e.getBlock().getType() == Material.BROWN_MUSHROOM) && e.getPlayer().getInventory().firstEmpty() != -1) {
 			final Material mat = e.getBlock().getType();
 			if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getBlock().getLocation())) {
 				e.getPlayer().getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP));
@@ -95,6 +96,11 @@ public class PlayerListener extends ListenerBase {
 					}
 				}, 300L);
 				return;
+			}
+		}
+		if ((e.getBlock().getType() == Material.RED_MUSHROOM || e.getBlock().getType() == Material.BROWN_MUSHROOM) && e.getPlayer().getInventory().firstEmpty() == -1) {
+			if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getBlock().getLocation())) {
+				e.setCancelled(true);
 			}
 		}
 		if (!e.getPlayer().hasPermission("kit.build")) {
@@ -111,7 +117,7 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
 		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) == null) {
-			KitAPI.getStatManager().setLocalData(e.getPlayer().getName().toLowerCase(), new LocalPlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO)));
+			KitAPI.getStatManager().setLocalData(e.getPlayer().getName().toLowerCase(), new LocalPlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
 		}
 		KitAPI.getStatManager().loadStats(e.getPlayer().getName());
 		KitAPI.getScoreboardManager().loadScoreboard(e.getPlayer());
@@ -134,6 +140,7 @@ public class PlayerListener extends ListenerBase {
 		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) != null) {
 			KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).save();
 		}
+		KitAPI.getStatManager().getStat(e.getPlayer().getName()).saveStat();
 	}
 
 	@EventHandler
@@ -157,16 +164,33 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerDeath(PlayerDeathEvent e) {
+	public void onPlayerDeath(final PlayerDeathEvent e) {
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
+		e.getEntity().setHealth(20D);
 		e.getDrops().clear();
+		if (KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit() != null)
+			KitAPI.getStatManager().getLocalData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {
-			KitPVP.get().getCommandManager().teleport(e.getEntity(), CommandManager.EARLY_HG_LOCATION);
 			for (int i = 0; i < 9; i += 1)
 				if (e.getEntity().getInventory().getItem(i) != null && e.getEntity().getInventory().getItem(i).getType() == Material.MUSHROOM_SOUP) {
-					e.getDrops().add(new ItemStack(Material.MUSHROOM_SOUP));
+					final Item ite = e.getEntity().getLocation().getWorld().dropItemNaturally(e.getEntity().getLocation(), new ItemStack(Material.MUSHROOM_SOUP));
+					Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+						@Override
+						public void run() {
+							if (ite.isValid() && !ite.isDead())
+								ite.remove();
+						};
+					}, 60L);
 				}
+			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+				@Override
+				public void run() {
+					KitPVP.get().getCommandManager().teleport(e.getEntity(), CommandManager.EARLY_HG_LOCATION);
+				}
+			}, 5L);
 		}
 		final Player p = e.getEntity();
 		KitAPI.getServerManager().handleRespawn(p);
@@ -199,6 +223,9 @@ public class PlayerListener extends ListenerBase {
 		assist.remove(p.getName());
 		if (p.getKiller() != null && p.getKiller() instanceof Player) {
 			Player killer = p.getKiller();
+			if (KitAPI.getPlayerManager().getProfile(killer.getName()).getLastUsedKit() != null)
+				KitAPI.getStatManager().getLocalData(killer.getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(killer.getName()).getLastUsedKit()).incrementKills(1);
+
 			KitAPI.getStatManager().checkCombo(killer);
 			if (!killer.getName().equalsIgnoreCase(p.getName())) {
 				Stat killerStat = KitAPI.getStatManager().getStat(killer.getName());
@@ -214,11 +241,23 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onPlayerDropItem(PlayerDropItemEvent e) {
+	public void onPlayerDropItem(final PlayerDropItemEvent e) {
 		Player p = e.getPlayer();
+		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, p.getLocation())) {
+			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+				@Override
+				public void run() {
+					if (e.getItemDrop().isValid() && !e.getItemDrop().isDead())
+						e.getItemDrop().remove();
+				}
+			}, 60L);
+			return;
+		}
 		ItemStack item = e.getItemDrop().getItemStack();
 		if (KitAPI.getMatchManager().getMatchItems().contains(item.getType()) || item.getType() == Material.PISTON_EXTENSION) {
 			e.setCancelled(true);
+			return;
 		}
 		if (item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
 			p.sendMessage(ChatColor.RED + "You can only drop this by using /drop.");
@@ -270,7 +309,7 @@ public class PlayerListener extends ListenerBase {
 						da.sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
 					}
 				}
-				if (((EntityDamageByEntityEvent) e).getDamager() instanceof Arrow) {
+				if (((EntityDamageByEntityEvent) e).getDamager() instanceof Arrow && ((Arrow) ((EntityDamageByEntityEvent) e).getDamager()).getShooter() instanceof Player) {
 					Player da = (Player) ((Arrow) ((EntityDamageByEntityEvent) e).getDamager()).getShooter();
 					if (KitAPI.getPlayerManager().getSpawnProtection().contains(da.getName()) && !KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
 						KitAPI.getPlayerManager().getSpawnProtection().remove(da.getName());
@@ -313,11 +352,13 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent e) {
-		if (e.getCause() == TeleportCause.END_PORTAL)
-			return;
-		KitAPI.getRegionChecker().getRegion(e.getTo()).getMeta().onWarp(e.getPlayer());
+		if (KitAPI.getRegionChecker().getRegion(e.getTo()) != null)
+			KitAPI.getRegionChecker().getRegion(e.getTo()).getMeta().onWarp(e.getPlayer());
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo())) {
 			KitAPI.getMatchManager().getCurrentMatches().remove(e.getPlayer().getName());
+		}
+		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
+			Core.get().clearPlayer(e.getPlayer());
 		}
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && !KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getTo())) {
 			KitAPI.getMatchManager().getMatches().remove(e.getPlayer().getName());
@@ -389,7 +430,7 @@ public class PlayerListener extends ListenerBase {
 				KitAPI.getPlayerManager().getSpawnProtection().remove(damager.getName());
 			}
 		}
-		if (e.getEntity() instanceof Player && e.getDamager() instanceof Arrow) {
+		if (e.getEntity() instanceof Player && e.getDamager() instanceof Arrow && ((Arrow) e.getDamager()).getShooter() instanceof Player) {
 			Location loc = e.getEntity().getLocation();
 			Player damager = (Player) ((Arrow) e.getDamager()).getShooter();
 			Player p = (Player) e.getEntity();
@@ -424,7 +465,7 @@ public class PlayerListener extends ListenerBase {
 					d.put(damager.getName(), (e.getDamage()));
 					assist.put(victim.getName(), d);
 				}
-			} else if (e.getEntity() instanceof Player && e.getDamager() instanceof Arrow) {
+			} else if (e.getEntity() instanceof Player && e.getDamager() instanceof Arrow && ((Projectile) e.getDamager()).getShooter() instanceof Player) {
 				Player victim = (Player) e.getEntity();
 
 				if (totalDamage.containsKey(victim.getName())) {

@@ -1,5 +1,7 @@
 package net.frozenorb.KitPVP.StatSystem;
 
+import net.frozenorb.mShared.Shared;
+
 import com.mongodb.BasicDBObject;
 
 public class Stat {
@@ -60,6 +62,19 @@ public class Stat {
 	}
 
 	/**
+	 * Gets the given {@link StatObjective} from the stat JSON object
+	 * 
+	 * @param sb
+	 *            the objective to get it from
+	 * @return value
+	 */
+	public double getDouble(StatObjective sb) {
+		if (statJson.containsField(sb.getName()))
+			return statJson.getDouble(sb.getName());
+		return 0;
+	}
+
+	/**
 	 * Sets the given {@link StatObjective} to the value
 	 * 
 	 * @param obj
@@ -70,5 +85,20 @@ public class Stat {
 	public void set(StatObjective obj, int value) {
 		statJson.put(obj.getName(), value);
 
+	}
+
+	/**
+	 * Saves the stat to the API.
+	 */
+	public void saveStat() {
+		BasicDBObject obj = new BasicDBObject("type", "stats").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("player", getPlayerName());
+		BasicDBObject pls = new BasicDBObject();
+		for (StatObjective sbobj : StatObjective.values()) {
+			if (!sbobj.isLocal()) {
+				pls.append(sbobj.getName(), get(sbobj));
+			}
+		}
+		obj.append("stats", pls);
+		Shared.get().getEventManager().registerNewEvent(obj);
 	}
 }

@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.KitSystem.Pagination;
+package net.frozenorb.KitPVP.Pagination;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 

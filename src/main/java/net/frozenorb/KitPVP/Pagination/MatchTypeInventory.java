@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.KitSystem.Pagination;
+package net.frozenorb.KitPVP.Pagination;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +76,15 @@ public class MatchTypeInventory extends PageInventory {
 			ItemStack item = kit.getIcon();
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName((type == QueueType.RANKED ? "§a§lRanked " : "§a") + kit.getName());
-			meta.setLore(wrap(kit.getDescription()));
+			ArrayList<String> lores = new ArrayList<String>();
+			lores.addAll(wrap(kit.getDescription()));
+			lores.add("");
+			if (type == QueueType.RANKED)
+				if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null)
+					lores.add("§dThere is §e1§d player in this queue.");
+				else if (KitAPI.getMatchManager().getFirstUnranked(kit, getPlayer().getName()) != null)
+					lores.add("§dThere is §e1§d player in this queue.");
+			meta.setLore(lores);
 			item.setItemMeta(meta);
 			item.setAmount(1);
 			Attributes att = new Attributes(item);

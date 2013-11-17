@@ -7,11 +7,19 @@ package net.frozenorb.KitPVP.StatSystem;
  * 
  */
 public enum StatObjective {
-	KILLS("kills"), DEATHS("deaths"), DUEL_WINS("1v1wins"), DUEL_LOSSES("1v1losses"), HIGHEST_KILLSTREAK("highestKillstreak"), KD_RATIO("kd"), KILLSTREAK("LOCAL"), ELO("elo");
+	KILLS("kills", false), DEATHS("deaths", false), DUEL_WINS("1v1wins", false), DUEL_LOSSES("1v1losses", false), HIGHEST_KILLSTREAK("highestKillstreak", false), KD_RATIO("kd",
+			false), KILLSTREAK("LOCAL", true), ELO("elo", true), KIT_DATA("kitData", true);
 	private String name;
+	private boolean local;
 
-	private StatObjective(String name) {
+	private StatObjective(String name, boolean local) {
 		this.name = name;
+		this.local = local;
+
+	}
+
+	public boolean isLocal() {
+		return local;
 	}
 
 	public String getName() {
