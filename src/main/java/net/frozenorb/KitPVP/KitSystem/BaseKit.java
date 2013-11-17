@@ -53,7 +53,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	 */
 	@Override
 	public String getPermission() {
-		return "kitpvp.kit." + this.getName().toLowerCase();
+		return "kitpvp.kit." + this.getName().toLowerCase().replace(" ", "");
 	}
 
 	/**
@@ -89,7 +89,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	 * @return true if can use
 	 */
 	public boolean hasKit(Player p) {
-		return (p.hasPermission(getPermission()));
+		return (Core.get().hasPermission(p, getPermission()));
 	}
 
 	/*
@@ -107,7 +107,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 			sender.sendMessage(ChatColor.RED + "You may only use one kit per life!");
 			return;
 		}
-		if (p.hasPermission(k.getPermission())) {
+		if (Core.get().hasPermission(p, k.getPermission())) {
 			PlayerKitSelectEvent e = new PlayerKitSelectEvent(p, this);
 			Bukkit.getPluginManager().callEvent(e);
 			if (e.isCancelled())

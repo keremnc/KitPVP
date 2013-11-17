@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.KitSystem.Kit;
+import net.frozenorb.Utilities.Core;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -22,12 +23,12 @@ public class Kits extends BaseCommand {
 		ArrayList<String> kitz = new ArrayList<String>();
 
 		for (Kit ki : KitPVP.getKits()) {
-			if (s.hasPermission(ki.getPermission())) {
+			if (Core.get().hasPermission(s, ki.getPermission())) {
 				kitz.add("§a" + ki.getName());
 			}
 		}
 		for (Kit ki : KitPVP.getKits()) {
-			if (!(s.hasPermission(ki.getPermission()))) {
+			if (!(Core.get().hasPermission(s, ki.getPermission()))) {
 				kitz.add("§c" + ki.getName());
 			}
 
