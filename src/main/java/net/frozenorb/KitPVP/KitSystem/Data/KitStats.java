@@ -36,6 +36,13 @@ public class KitStats extends BasicDBObject {
 		return 0;
 	}
 
+	public int getAbility() {
+		if (containsField("ability"))
+			return getInt("ability");
+		put("ability", 0);
+		return 0;
+	}
+
 	public void setKills(int i) {
 		put("kills", i);
 	}
@@ -48,6 +55,10 @@ public class KitStats extends BasicDBObject {
 		put("uses", i);
 	}
 
+	public void setAbility(int i) {
+		put("ability", i);
+	}
+
 	public void incrementKills(int i) {
 		put("kills", getKills() + i);
 	}
@@ -58,5 +69,9 @@ public class KitStats extends BasicDBObject {
 
 	public void incrementUses(int i) {
 		put("uses", getUses() + i);
+	}
+
+	public void incrementAbility(int i) {
+		put("ability", getAbility() + i);
 	}
 }

@@ -25,32 +25,17 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	/*
 	 * ---------------CLASS METHODS---------------
 	 */
-	/**
-	 * Gets the weight of the kit
-	 * 
-	 * @return weight
-	 */
 	@Override
 	public int getWeight() {
 		return 10;
 	}
 
-	/**
-	 * Gets the kit name based on the class name
-	 * 
-	 * @return name of the kit
-	 */
 	@Override
 	public String getName() {
 		Kit k = this;
 		return k.getClass().getSimpleName();
 	}
 
-	/**
-	 * Gets the permission of the kit
-	 * 
-	 * @return permission
-	 */
 	@Override
 	public String getPermission() {
 		return "kitpvp.kit." + this.getName().toLowerCase().replace(" ", "");
@@ -81,15 +66,19 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		return new ItemStack(getIconMaterial());
 	}
 
-	/**
-	 * Gets whether the player can use the kit
-	 * 
-	 * @param p
-	 *            player
-	 * @return true if can use
-	 */
+	@Override
 	public boolean hasKit(Player p) {
 		return (Core.get().hasPermission(p, getPermission()));
+	}
+
+	@Override
+	public boolean hasAbilityMeta() {
+		return getMetaName() != null;
+	}
+
+	@Override
+	public String getMetaName() {
+		return null;
 	}
 
 	/*
@@ -128,9 +117,6 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		}
 	}
 
-	/**
-	 * Runs the equip method when the kit name command is run
-	 */
 	@Override
 	public final void execute() {
 		equip((Player) sender);

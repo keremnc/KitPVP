@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.bukkit.entity.Player;
+
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.Reflection.ClassGetter;
 import net.frozenorb.Utilities.Core;
@@ -49,6 +51,45 @@ public class KitManager {
 
 	public boolean hasKitOn(String str) {
 		return playerKits.containsKey(str);
+	}
+
+	private HashMap<Kit, HashMap<String, Long>> cooldowns = new HashMap<Kit, HashMap<String, Long>>();
+
+	public boolean canUseAbility(Player p, Kit k) {
+		if (cooldowns.containsKey(k)) {
+			HashMap<String, Long> cooldown = cooldowns.get(k);
+			if (cooldown.containsKey(p.getName())) {
+				if (cooldown.get(p.getName()) > System.currentTimeMillis()) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return true;
+
+	}
+
+	public int getCooldownLeft(Player p, Kit k) {
+		if (cooldowns.containsKey(k)) {
+			HashMap<String, Long> cooldown = cooldowns.get(k);
+			if (cooldown.containsKey(p.getName())) {
+				return (int) (cooldown.get(p.getName()) - System.currentTimeMillis());
+			}
+			return 0;
+		}
+		return 0;
+
+	}
+
+	public void useAbility(Player p, Kit k, int millis) {
+		if (cooldowns.containsKey(k)) {
+			HashMap<String, Long> clds = cooldowns.get(k);
+			clds.put(p.getName(), System.currentTimeMillis() + millis);
+		} else {
+			HashMap<String, Long> clds = new HashMap<String, Long>();
+			clds.put(p.getName(), System.currentTimeMillis() + millis);
+			cooldowns.put(k, clds);
+		}
 	}
 
 	@SuppressWarnings({ "rawtypes" })

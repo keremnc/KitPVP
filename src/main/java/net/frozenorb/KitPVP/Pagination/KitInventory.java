@@ -92,7 +92,9 @@ public class KitInventory extends PageInventory {
 					add("§6Kills: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getKills());
 					add("§6Deaths: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getDeaths());
 					add("§6Uses: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
-
+					if (kit.hasAbilityMeta()) {
+						add("§6" + kit.getMetaName() + ": " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getAbility());
+					}
 				}
 			};
 			meta.setLore(lore);

@@ -297,7 +297,7 @@ public class PlayerListener extends ListenerBase {
 			e.setCancelled(true);
 			return;
 		}
-		if (item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
+		if (item.getType() == Material.ENCHANTED_BOOK || item.getType() == Material.WATCH || item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
 			p.sendMessage(ChatColor.RED + "You can only drop this by using /drop.");
 			e.setCancelled(true);
 		} else {

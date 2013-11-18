@@ -1,11 +1,15 @@
 package net.frozenorb.KitPVP.KitSystem.Kits;
 
+import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.BaseKit;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
@@ -15,7 +19,17 @@ public class Archer extends BaseKit {
 
 	@Override
 	public Listener getListener() {
-		return null;
+		return new Listener() {
+			@EventHandler
+			public void onArrowFire(EntityShootBowEvent e) {
+				if (e.getEntity() instanceof Player) {
+					Player p = (Player) e.getEntity();
+					if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(p.getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(p.getName()).getName().equals(getName()))
+						KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
+				}
+			}
+		};
+
 	}
 
 	@Override
@@ -38,7 +52,17 @@ public class Archer extends BaseKit {
 	}
 
 	@Override
+	public int getWeight() {
+		return 2;
+	}
+
+	@Override
 	public Material getIconMaterial() {
 		return Material.BOW;
+	}
+
+	@Override
+	public String getMetaName() {
+		return "Arrows fired";
 	}
 }

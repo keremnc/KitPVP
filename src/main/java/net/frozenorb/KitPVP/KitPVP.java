@@ -10,6 +10,7 @@ import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
+import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class KitPVP extends JavaPlugin {
 	private ReflectionManager reflectionManager;
 	private CommandManager commandManager;
+	private LeaderboardUpdater leaderboardUpdater;
 	private static KitPVP instance; // plugin instance
 	private static ArrayList<Kit> kits = new ArrayList<Kit>();
 
@@ -56,6 +58,15 @@ public class KitPVP extends JavaPlugin {
 	}
 
 	/**
+	 * Gets the LeaderboardUpdater instance
+	 * 
+	 * @return leaderboardupdater
+	 */
+	public LeaderboardUpdater getLeaderboardUpdater() {
+		return leaderboardUpdater;
+	}
+
+	/**
 	 * Gets the instance of the Reflection Manager
 	 * 
 	 * @return reflection manager
@@ -73,8 +84,10 @@ public class KitPVP extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		this.reflectionManager = new ReflectionManager();
-		this.commandManager = new CommandManager();
+		leaderboardUpdater = new LeaderboardUpdater();
+		leaderboardUpdater.runTaskTimerAsynchronously(this, 0L, 30 * 20L);
+		reflectionManager = new ReflectionManager();
+		commandManager = new CommandManager();
 		KitAPI.getStatManager().loadLocalData();
 		KitAPI.init(this);
 		try {

@@ -81,4 +81,21 @@ public interface Kit {
 	 * @return true if can use
 	 */
 	public boolean hasKit(Player p);
+
+	/**
+	 * Gets whether the kit has ability meta
+	 * <p>
+	 * Displayed in the pagination book
+	 * 
+	 * @return has meta
+	 */
+	public boolean hasAbilityMeta();
+
+	/**
+	 * Gets the name of the ability meta
+	 * 
+	 * @return name
+	 */
+	public String getMetaName();
+
 }
