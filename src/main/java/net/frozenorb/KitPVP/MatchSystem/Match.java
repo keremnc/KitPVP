@@ -267,6 +267,16 @@ public class Match {
 			@Override
 			public void run() {
 				challenger.teleport(a.getSecondLocation());
+				victim.setHealth(((Damageable) victim).getMaxHealth());
+				challenger.setHealth(((Damageable) challenger).getMaxHealth());
+				getType().applyInventory(victim.getInventory());
+				getType().applyInventory(challenger.getInventory());
+				for (PotionEffect pot : getType().getPotionEffects()) {
+					victim.addPotionEffect(pot);
+					challenger.addPotionEffect(pot);
+				}
+				victim.showPlayer(challenger);
+				challenger.showPlayer(victim);
 			}
 		}, 6L);
 		invitedPlayer = null;

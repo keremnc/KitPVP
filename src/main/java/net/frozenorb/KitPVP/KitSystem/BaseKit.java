@@ -3,6 +3,7 @@ package net.frozenorb.KitPVP.KitSystem;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
+import net.frozenorb.KitPVP.RegionSysten.RegionMeta;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mBasic.util.Attributes;
 
@@ -25,21 +26,6 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	/*
 	 * ---------------CLASS METHODS---------------
 	 */
-	@Override
-	public int getWeight() {
-		return 10;
-	}
-
-	@Override
-	public String getName() {
-		Kit k = this;
-		return k.getClass().getSimpleName();
-	}
-
-	@Override
-	public String getPermission() {
-		return "kitpvp.kit." + this.getName().toLowerCase().replace(" ", "");
-	}
 
 	/**
 	 * Called when the kit is equipped, used for custom kit designs
@@ -66,19 +52,33 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		return new ItemStack(getIconMaterial());
 	}
 
+	/*
+	 * --------------------OVERRIDEN METHODS------------------
+	 */
+
 	@Override
 	public boolean hasKit(Player p) {
 		return (Core.get().hasPermission(p, getPermission()));
 	}
 
 	@Override
-	public boolean hasAbilityMeta() {
-		return getMetaName() != null;
+	public String getMetaName() {
+		return null;
 	}
 
 	@Override
-	public String getMetaName() {
-		return null;
+	public int getWeight() {
+		return 10;
+	}
+
+	@Override
+	public String getName() {
+		return getClass().getSimpleName();
+	}
+
+	@Override
+	public String getPermission() {
+		return "kitpvp.kit." + getName().toLowerCase().replace(" ", "");
 	}
 
 	/*
@@ -91,27 +91,56 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	 *            the player to receive the kit
 	 */
 	public final void equip(Player p) {
-		Kit k = this;
 		if (KitAPI.getKitManager().hasKitOn(p.getName())) {
 			sender.sendMessage(ChatColor.RED + "You may only use one kit per life!");
 			return;
 		}
-		if (Core.get().hasPermission(p, k.getPermission())) {
+		if (KitAPI.getRegionChecker().getRegion(p.getLocation()) != null) {
+			RegionMeta meta = KitAPI.getRegionChecker().getRegion(p.getLocation()).getMeta();
+
+			if (meta.getBlockedKits() != null) {
+				for (Class<? super Kit> clazz : meta.getBlockedKits()) {
+					Kit kit = KitAPI.getKitManager().getByName(clazz.getSimpleName());
+					if (kit.getName().equalsIgnoreCase(getName())) {
+						p.sendMessage(ChatColor.RED + "That kit is blocked in this region!");
+						return;
+					}
+				}
+			}
+			if (meta.getUsableKits() != null) {
+				if (meta.getUsableKits().length == 0) {
+					p.sendMessage(ChatColor.RED + "You are not able to use kits in this region!");
+					return;
+				}
+				label: {
+					for (Class<? super Kit> clazz : meta.getUsableKits()) {
+						Kit kit = KitAPI.getKitManager().getByName(clazz.getSimpleName());
+						if (kit.getName().equalsIgnoreCase(getName())) {
+							break label;
+						}
+					}
+					p.sendMessage(ChatColor.RED + "That kit is not allowed in this region.");
+					return;
+				}
+			}
+		}
+
+		if (Core.get().hasPermission(p, getPermission()) || p.hasPermission(getPermission())) {
 			PlayerKitSelectEvent e = new PlayerKitSelectEvent(p, this);
 			Bukkit.getPluginManager().callEvent(e);
 			if (e.isCancelled())
 				return;
 			Core.get().clearPlayer(p);
-			p.getInventory().setArmorContents(k.transformInventory(p.getInventory()).getArmorContents());
-			p.getInventory().setContents(k.transformInventory(p.getInventory()).getContents());
+			p.getInventory().setArmorContents(transformInventory(p.getInventory()).getArmorContents());
+			p.getInventory().setContents(transformInventory(p.getInventory()).getContents());
 			for (int i = 1; i < 36; i += 1)
 				p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP));
-			for (PotionEffect pot : k.getPotionEffects()) {
+			for (PotionEffect pot : getPotionEffects()) {
 				p.addPotionEffect(pot);
 			}
 			KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(this).incrementUses(1);
-			KitAPI.getKitManager().getKitsOnPlayers().put(p.getName(), k);
-			p.sendMessage("§6You have chosen the kit §a" + k.getName() + "§6.");
+			KitAPI.getKitManager().getKitsOnPlayers().put(p.getName(), this);
+			p.sendMessage("§6You have chosen the kit §a" + getName() + "§6.");
 		} else {
 			p.sendMessage(ChatColor.RED + "You do not have access to that kit!");
 		}
@@ -127,6 +156,11 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	@Override
 	public final String toString() {
 		return getName();
+	}
+
+	@Override
+	public final boolean hasAbilityMeta() {
+		return getMetaName() != null;
 	}
 
 	@Override

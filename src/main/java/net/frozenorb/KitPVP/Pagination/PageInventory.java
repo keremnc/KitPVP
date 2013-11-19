@@ -28,6 +28,7 @@ public abstract class PageInventory extends ClickInventory {
 	protected int maxInvSize = 54;
 	protected HashMap<Integer, ItemStack[]> pages = new HashMap<Integer, ItemStack[]>();
 	protected Player user;
+	protected ItemStack lastItem = null;
 
 	public PageInventory(Player player, boolean dynamicInventory) {
 		dynamicInventorySize = dynamicInventory;
@@ -120,11 +121,21 @@ public abstract class PageInventory extends ClickInventory {
 			inv = Bukkit.createInventory(null, size, getTitle());
 			setPage(currentPage);
 		}
+		if (lastItem != null)
+			inv.setItem(inv.getSize() - 1, lastItem);
 		user.openInventory(inv);
 	}
 
 	public void setBackPage(ItemStack newBack) {
 		backAPage = newBack;
+	}
+
+	public ItemStack getLastItem() {
+		return lastItem;
+	}
+
+	public void setLastItem(ItemStack lastItem) {
+		this.lastItem = lastItem;
 	}
 
 	public void setForwardsPage(ItemStack newForwards) {
@@ -146,7 +157,7 @@ public abstract class PageInventory extends ClickInventory {
 				listenForClose = false;
 				inv = Bukkit.createInventory(null, pageItems.length, getTitle());
 				inv.setContents(pageItems);
-//				user.closeInventory();
+				// user.closeInventory();
 				Bukkit.getScheduler().scheduleSyncDelayedTask(KitPVP.get(), new Runnable() {
 					public void run() {
 						user.openInventory(inv);

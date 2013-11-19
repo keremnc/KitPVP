@@ -39,7 +39,7 @@ public class Arena extends BaseCommand {
 
 	@Override
 	public void execute() {
-		if (sender.hasPermission("arena.modify")) {
+		if (sender.hasPermission("kitpvp.arena.modify")) {
 			if (args.length > 0) {
 				Location l = ((Player) sender).getLocation();
 				if (args[0].equalsIgnoreCase("warp")) {

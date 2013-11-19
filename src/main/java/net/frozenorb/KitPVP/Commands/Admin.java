@@ -22,7 +22,7 @@ public class Admin extends BaseCommand {
 
 		Player p = (Player) sender;
 
-		if (!p.hasPermission("kit.adminmode")) {
+		if (!p.hasPermission("kitpvp.admin")) {
 			return;
 		}
 

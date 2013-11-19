@@ -89,6 +89,10 @@ public class Stat {
 
 	/**
 	 * Saves the stat to the API.
+	 * <p>
+	 * Does <b>NOT</b> save to the API on method call, instead it registers a new Event with the mShared Event Manager.
+	 * <p>
+	 * Try not to fuck up the outbound request queue, limit sending as much as possible.
 	 */
 	public void saveStat() {
 		BasicDBObject obj = new BasicDBObject("type", "stats").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("player", getPlayerName());

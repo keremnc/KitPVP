@@ -15,6 +15,7 @@ public class MatchQueue {
 		this.qType = qType;
 		this.player = player;
 		this.type = type;
+
 	}
 
 	public Player getPlayer() {

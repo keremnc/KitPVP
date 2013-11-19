@@ -14,7 +14,8 @@ import net.frozenorb.KitPVP.StatSystem.StatObjective;
  * 
  */
 public class EloManager {
-	public static int STARTING_ELO = 1500;
+	public static int STARTING_ELO = 1500; // the starting elo for new players
+	public static int MAX_CHANGE = 20; // max gain/loss a player can get in one match
 
 	/**
 	 * Gets the estimation
@@ -66,8 +67,8 @@ public class EloManager {
 		int newRankB = (int) (loser + getKeremFactor(loser) * -ests[1]);
 		int gain = Math.round(newRankA) - winner;
 		int loss = Math.round(newRankB) - loser;
-		ret[0] = gain > 20 ? winner + 20 : Math.round(newRankA);
-		ret[1] = loss < -20 ? loser - 20 : Math.round(newRankB);
+		ret[0] = gain > MAX_CHANGE ? winner + MAX_CHANGE : Math.round(newRankA);
+		ret[1] = loss < -MAX_CHANGE ? loser - MAX_CHANGE : Math.round(newRankB);
 		return ret;
 	}
 

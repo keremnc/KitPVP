@@ -20,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.BaseKit;
+import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 
 public class Undertaker extends BaseKit {
@@ -57,37 +58,38 @@ public class Undertaker extends BaseKit {
 
 			@EventHandler
 			public void onEntityInteract(PlayerInteractEntityEvent e) {
-				if (e.getRightClicked() instanceof Player && e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.EMERALD) {
-					final Player p = (Player) e.getRightClicked();
-					if (KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
-						e.setCancelled(true);
-						e.getPlayer().sendMessage(ChatColor.RED + "That player has spawn protection.");
-						return;
-					}
-					if (p.getInventory().getChestplate() != null) {
-						final ItemStack chest = p.getInventory().getChestplate();
-						if (!KitAPI.getKitManager().canUseAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()))) {
-							e.getPlayer().sendMessage(ChatColor.RED + "You cannot use this another " + (KitAPI.getKitManager().getCooldownLeft(e.getPlayer(), KitAPI.getKitManager().getByName("Undertaker")) / 1000) + " seconds.");
+				if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(e.getPlayer().getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(e.getPlayer().getName()).getName().equals(getName()))
+					if (!KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getPlayer().getLocation()) && e.getRightClicked() instanceof Player && e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.EMERALD) {
+						final Player p = (Player) e.getRightClicked();
+						if (KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
+							e.setCancelled(true);
+							e.getPlayer().sendMessage(ChatColor.RED + "That player has spawn protection.");
 							return;
 						}
-						KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
-						KitAPI.getKitManager().useAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()), 15000);
-						p.getInventory().setChestplate(null);
-						p.sendMessage(ChatColor.RED + "Your chestplate was removed by an Undertaker!");
-						BukkitRunnable run = new BukkitRunnable() {
-
-							@Override
-							public void run() {
-								if (p.isOnline())
-									p.getInventory().setChestplate(chest);
+						if (p.getInventory().getChestplate() != null) {
+							final ItemStack chest = p.getInventory().getChestplate();
+							if (!KitAPI.getKitManager().canUseAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()))) {
+								e.getPlayer().sendMessage(ChatColor.RED + "You cannot use this another " + (KitAPI.getKitManager().getCooldownLeft(e.getPlayer(), KitAPI.getKitManager().getByName("Undertaker")) / 1000) + " seconds.");
+								return;
 							}
-						};
-						tasks.put(p.getName(), run);
-						run.runTaskLater(KitPVP.get(), 100L);
-						return;
+							KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
+							KitAPI.getKitManager().useAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()), 15000);
+							p.getInventory().setChestplate(null);
+							p.sendMessage(ChatColor.RED + "Your chestplate was removed by an Undertaker!");
+							BukkitRunnable run = new BukkitRunnable() {
+
+								@Override
+								public void run() {
+									if (p.isOnline())
+										p.getInventory().setChestplate(chest);
+								}
+							};
+							tasks.put(p.getName(), run);
+							run.runTaskLater(KitPVP.get(), 100L);
+							return;
+						}
+						e.getPlayer().sendMessage(ChatColor.GOLD + p.getName() + " doesn't have a chestplate to remove!");
 					}
-					e.getPlayer().sendMessage(ChatColor.GOLD + p.getName() + " doesn't have a chestplate to remove!");
-				}
 			}
 		};
 	}
