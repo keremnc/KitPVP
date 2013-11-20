@@ -7,10 +7,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 /**
  * Class that will remove a player from a list, with customizable time left
  * 
- * @author Jonathan Halterman
+ * @author Kerem Celik
  * @since 11/11/2013
  */
-public class CombatLogRunnable extends BukkitRunnable {
+public abstract class CombatLogRunnable extends BukkitRunnable {
 
 	private Player player;
 	private int time;
@@ -51,10 +51,13 @@ public class CombatLogRunnable extends BukkitRunnable {
 	public void run() {
 		time--;
 		if (time == 0) {
-			player.sendMessage(ChatColor.GREEN + "You are now able to log out!");
+			player.sendMessage(ChatColor.GREEN + "You may now log out safely.");
 			cancel();
+			onFinish();
 
 		}
 	}
+
+	public abstract void onFinish();
 
 }

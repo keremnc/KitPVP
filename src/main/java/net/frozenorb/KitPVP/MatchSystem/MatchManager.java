@@ -341,7 +341,7 @@ public class MatchManager {
 								}
 							}
 						}
-						if (!p.getInventory().contains(QUICK_MATCHUP_ITEM) && p.getInventory().getItem(p.getInventory().first(QUICK_MATCHUP_ITEM)).getDurability() == 10) {
+						if (!p.getInventory().contains(QUICK_MATCHUP_ITEM) && p.getInventory().first(QUICK_MATCHUP_ITEM) != -1 && p.getInventory().getItem(p.getInventory().first(QUICK_MATCHUP_ITEM)).getDurability() == 10) {
 							cancel();
 						}
 					}

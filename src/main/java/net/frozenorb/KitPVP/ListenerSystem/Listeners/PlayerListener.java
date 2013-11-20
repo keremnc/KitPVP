@@ -19,6 +19,7 @@ import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
+import net.frozenorb.KitPVP.Types.CombatLogRunnable;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
 
@@ -60,9 +61,12 @@ import com.mongodb.BasicDBObject;
 @SuppressWarnings("deprecation")
 public class PlayerListener extends ListenerBase {
 	public static boolean CHAT_MUTED = false;
+	private static PlayerListener instance;
+	private static int COMBAT_LOG_TIME = 8;
 	private static HashMap<String, HashMap<String, Double>> assist = new HashMap<String, HashMap<String, Double>>();
 	private static Map<String, Double> totalDamage = new HashMap<String, Double>();
-	private static PlayerListener instance;
+	private HashMap<String, String> combatLog = new HashMap<String, String>();
+	private HashMap<String, CombatLogRunnable> combatLogRunnables = new HashMap<String, CombatLogRunnable>();
 
 	public PlayerListener() {
 		instance = this;
@@ -135,6 +139,10 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
+		Player p = e.getPlayer();
+		if (this.combatLogRunnables.containsKey(p.getName()))
+			p.setHealth(0.0D);
+
 		e.setQuitMessage(null);
 		if (KitAPI.getServerManager().isClearOnLogout(e.getPlayer().getName())) {
 			e.getPlayer().getInventory().clear();
@@ -367,6 +375,9 @@ public class PlayerListener extends ListenerBase {
 		Location from = e.getFrom();
 		double fromX = from.getX(), fromZ = from.getZ(), fromY = from.getY(), toX = to.getX(), toZ = to.getZ(), toY = to.getY();
 		if (fromX != toX || fromZ != toZ || fromY != toY) {
+			if (to.distance(from) > 0.1 && combatLogRunnables.containsKey(e.getPlayer().getName())) {
+				combatLogRunnables.get(e.getPlayer().getName()).setTime(COMBAT_LOG_TIME);
+			}
 			GamerProfile profile = KitAPI.getPlayerManager().getProfile(e.getPlayer().getName());
 			if (profile.isObject("cancelMove")) {
 				e.setTo(e.getFrom());
@@ -459,6 +470,31 @@ public class PlayerListener extends ListenerBase {
 
 			}
 
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+	public void onEntityDamageByEntityMonitor(EntityDamageByEntityEvent e) {
+		if (((e.getEntity() instanceof Player)) && ((e.getDamager() instanceof Player))) {
+			final Player p = (Player) e.getEntity();
+			Player dmg = (Player) e.getDamager();
+			if (!this.combatLog.containsKey(p.getName())) {
+				p.sendMessage(ChatColor.RED + "You have been combat-tagged by " + dmg.getName() + "!");
+				this.combatLog.put(((Player) e.getEntity()).getName(), ((Player) e.getDamager()).getName());
+				CombatLogRunnable c = new CombatLogRunnable(p, COMBAT_LOG_TIME) {
+
+					@Override
+					public void onFinish() {
+						combatLog.remove(p.getName());
+						combatLogRunnables.remove(p.getName());
+
+					}
+				};
+				c.runTaskTimer(KitPVP.get(), 20L, 20L);
+				this.combatLogRunnables.put(((Player) e.getEntity()).getName(), c);
+			} else {
+				((CombatLogRunnable) this.combatLogRunnables.get(p.getName())).setTime(COMBAT_LOG_TIME);
+			}
 		}
 	}
 
