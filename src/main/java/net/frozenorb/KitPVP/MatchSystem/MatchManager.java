@@ -305,8 +305,9 @@ public class MatchManager {
 	}
 
 	public void handleInteract(final Player p, final Material m, final int data, final ItemStack item) {
-
 		if (m == QUICK_MATCHUP_ITEM) {
+			if (item == null)
+				return;
 			GamerProfile profile = KitAPI.getPlayerManager().getProfile(p.getName());
 			if (data == 8) {
 				item.setDurability((short) 10);
