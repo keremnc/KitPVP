@@ -65,7 +65,7 @@ public class MatchTypeInventory extends PageInventory {
 					Loadout type = Loadout.getByName(name.replace("Ranked ", ""));
 					if (type == null) {
 						event.getWhoClicked().closeInventory();
-						KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType());
+						KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType(), (int) item.getDurability());
 						return;
 					}
 					MatchQueue queue = new MatchQueue((Player) event.getWhoClicked(), type, this.type);

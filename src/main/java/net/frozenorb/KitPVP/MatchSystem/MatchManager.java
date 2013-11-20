@@ -12,6 +12,7 @@ import net.frozenorb.KitPVP.MatchSystem.Queue.MatchList;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
 import net.frozenorb.KitPVP.Pagination.MatchTypeInventory;
+import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Core;
@@ -20,6 +21,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,12 +35,15 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
+@SuppressWarnings("deprecation")
 public class MatchManager {
 
 	private static Material UNRANKED_MATCHUP_ITEM = Material.SLIME_BALL;
 	private static Material RANKED_MATCHUP_ITEM = Material.EYE_OF_ENDER;
-	private static Material QUICK_MATCHUP_ITEM = Material.FIREWORK_CHARGE;
+	private static Material QUICK_MATCHUP_ITEM = Material.INK_SACK;
 	private static String RANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Ranked Match Type!";
 	private static String UNRANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Casual Match Type!";
 	private static ItemStack UNRANKED_ITEM, RANKED_ITEM, QUICK_ITEM;
@@ -47,21 +52,21 @@ public class MatchManager {
 
 	public MatchManager() {
 		Bukkit.getPluginManager().registerEvents(new MatchListener(), KitAPI.getKitPVP());
-		UNRANKED_ITEM = Core.get().generateItem(UNRANKED_MATCHUP_ITEM, 0, "§bCasual Matchup", new ArrayList<String>() {
+		UNRANKED_ITEM = Core.get().generateItem(UNRANKED_MATCHUP_ITEM, 0, "§b§lCasual Matchup", new ArrayList<String>() {
 			private static final long serialVersionUID = -3830569489943814868L;
 
 			{
 				add("§9Click to open the Casual Matchup queue.");
 			}
 		});
-		RANKED_ITEM = Core.get().generateItem(RANKED_MATCHUP_ITEM, 0, "§bRanked Matchup", new ArrayList<String>() {
+		RANKED_ITEM = Core.get().generateItem(RANKED_MATCHUP_ITEM, 0, "§b§lRanked Matchup", new ArrayList<String>() {
 			private static final long serialVersionUID = -3830569489943814868L;
 
 			{
 				add("§9Click to open the Ranked Matchup queue.");
 			}
 		});
-		QUICK_ITEM = Core.get().generateItem(QUICK_MATCHUP_ITEM, 0, "§bQuick Matchup", new ArrayList<String>() {
+		QUICK_ITEM = Core.get().generateItem(QUICK_MATCHUP_ITEM, 8, "§b§lQuick Matchup", new ArrayList<String>() {
 			private static final long serialVersionUID = -3830569489943814868L;
 
 			{
@@ -284,7 +289,10 @@ public class MatchManager {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
+	public void removePlayer(String playerName) {
+		matches.remove(playerName);
+	}
+
 	public void applyArenaInventory(Player p) {
 		Core.get().clearPlayer(p);
 		p.setMaxHealth(20D);
@@ -296,10 +304,61 @@ public class MatchManager {
 		p.updateInventory();
 	}
 
-	public void handleInteract(Player p, Material m) {
+	public void handleInteract(final Player p, final Material m, final int data, final ItemStack item) {
 
 		if (m == QUICK_MATCHUP_ITEM) {
-			addToQueue(new MatchQueue(p, new StandardLoadout(), QueueType.QUICK));
+			GamerProfile profile = KitAPI.getPlayerManager().getProfile(p.getName());
+			if (data == 8) {
+				item.setDurability((short) 10);
+				addToQueue(new MatchQueue(p, new StandardLoadout(), QueueType.QUICK));
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName("§c§lSearching for a match...");
+				meta.setLore(new ArrayList<String>() {
+					private static final long serialVersionUID = 1L;
+
+					{
+						add("§9You are in the Quick Matchup Queue.");
+						add("§9Click this to leave the Quick Matchup Queue");
+					}
+				});
+				item.setItemMeta(meta);
+				p.playSound(p.getLocation(), Sound.NOTE_PLING, 20F, 20F);
+				if (profile.getJSON().containsField("periodTask")) {
+					Bukkit.getScheduler().cancelTask(profile.getJSON().getInt("periodTask"));
+					profile.getJSON().remove("periodTask");
+				}
+				int task = new BukkitRunnable() {
+
+					@Override
+					public void run() {
+						if (p.getItemInHand() != null && p.getItemInHand().getType() == QUICK_MATCHUP_ITEM && ((int) p.getItemInHand().getDurability()) == 10) {
+							if (p.getItemInHand().hasItemMeta() && p.getItemInHand().getItemMeta().getLore() != null) {
+								String display = p.getItemInHand().getItemMeta().getDisplayName();
+								if (p.getItemInHand().getItemMeta().getLore().contains(ChatColor.BLUE + "You are in the Quick Matchup Queue.")) {
+									ItemMeta meta = p.getItemInHand().getItemMeta();
+									meta.setDisplayName(display.concat(".").replace("....", ""));
+									p.getItemInHand().setItemMeta(meta);
+								}
+							}
+						}
+						if (!p.getInventory().contains(QUICK_MATCHUP_ITEM) && p.getInventory().getItem(p.getInventory().first(QUICK_MATCHUP_ITEM)).getDurability() == 10) {
+							cancel();
+						}
+					}
+				}.runTaskTimer(KitAPI.getKitPVP(), 15L, 15L).getTaskId();
+				profile.getJSON().put("periodTask", task);
+			} else {
+				if (profile.getJSON().containsField("periodTask")) {
+					Bukkit.getScheduler().cancelTask(profile.getJSON().getInt("periodTask"));
+					profile.getJSON().remove("periodTask");
+				}
+				removePlayer(p.getName());
+				item.setDurability((short) 8);
+				item.setItemMeta(QUICK_ITEM.getItemMeta());
+				p.sendMessage(ChatColor.RED + "You have been removed from the quick matchup queue.");
+				p.playSound(p.getLocation(), Sound.ARROW_HIT, 20F, 20F);
+			}
+			p.updateInventory();
 		}
 		if (m == RANKED_MATCHUP_ITEM) {
 			new MatchTypeInventory(p, RANKED_MATCHUP_TITLE, QueueType.RANKED).loadTypes().openInventory();
@@ -311,8 +370,11 @@ public class MatchManager {
 
 	}
 
-	private class MatchListener implements Listener {
+	public void handleInteract(Player p, Material m, int data) {
+		handleInteract(p, m, data, null);
+	}
 
+	private class MatchListener implements Listener {
 		@EventHandler
 		public void onPlayerInteract(PlayerInteractEvent e) {
 			Player p = e.getPlayer();
@@ -327,8 +389,9 @@ public class MatchManager {
 				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
 						e.setCancelled(true);
+						int data = (int) p.getItemInHand().getDurability();
 						Material m = p.getItemInHand().getType();
-						handleInteract(p, m);
+						handleInteract(p, m, data, p.getItemInHand());
 					}
 				}
 			}
