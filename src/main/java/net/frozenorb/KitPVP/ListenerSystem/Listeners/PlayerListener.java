@@ -118,6 +118,7 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
+		e.setJoinMessage(null);
 		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
 		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) == null) {
 			KitAPI.getStatManager().setLocalData(e.getPlayer().getName().toLowerCase(), new LocalPlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
@@ -134,6 +135,7 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
+		e.setQuitMessage(null);
 		if (KitAPI.getServerManager().isClearOnLogout(e.getPlayer().getName())) {
 			e.getPlayer().getInventory().clear();
 			e.getPlayer().getInventory().setArmorContents(null);
