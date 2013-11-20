@@ -13,6 +13,7 @@ import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -83,6 +84,10 @@ public class KitPVP extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
+		for (Entity e : Bukkit.getWorlds().get(0).getEntities()) {
+			if (!(e instanceof Player))
+				e.remove();
+		}
 		instance = this;
 		leaderboardUpdater = new LeaderboardUpdater();
 		leaderboardUpdater.runTaskTimerAsynchronously(this, 0L, 30 * 20L);
@@ -110,7 +115,7 @@ public class KitPVP extends JavaPlugin {
 				}
 			}
 		}, 20L);
-
+		KitAPI.getKitManager().loadFromFile();
 		Loadout.init();
 
 	}
@@ -120,6 +125,11 @@ public class KitPVP extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
+		KitAPI.getKitManager().saveToFile();
+		for (Entity e : Bukkit.getWorlds().get(0).getEntities()) {
+			if (!(e instanceof Player))
+				e.remove();
+		}
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			KitAPI.getStatManager().getLocalData(p.getName()).saveToFile();
 			KitAPI.getStatManager().getStat(p.getName()).saveStat();

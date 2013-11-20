@@ -1,5 +1,11 @@
 package net.frozenorb.KitPVP.KitSystem;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -8,8 +14,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import org.bukkit.entity.Player;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.Reflection.ClassGetter;
@@ -40,6 +50,52 @@ public class KitManager {
 				return k;
 		}
 		return null;
+	}
+
+	public void saveToFile() {
+		try {
+			new File("data").mkdir();
+			File f = new File("data" + File.separator + "persistentKits.json");
+			f.createNewFile();
+			BasicDBObject kits = new BasicDBObject();
+			for (Entry<String, Kit> entry : playerKits.entrySet()) {
+				kits.append(entry.getKey(), entry.getValue().getName());
+			}
+			BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+			writer.write(kits.toString());
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void loadFromFile() {
+		new File("data").mkdir();
+		StringBuilder builder = new StringBuilder();
+
+		File f = new File("data" + File.separator + "persistentKits.json");
+		if (!f.exists())
+			return;
+		try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+
+			String sCurrentLine;
+			while ((sCurrentLine = br.readLine()) != null) {
+				builder.append(sCurrentLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String str = builder.toString();
+		BasicDBObject db = (BasicDBObject) JSON.parse(str);
+		if (db != null) {
+			for (Entry<String, Object> entry : db.entrySet()) {
+				Kit k = getByName((String) entry.getValue());
+				if (k != null) {
+					playerKits.put(entry.getKey(), k);
+				}
+			}
+		}
 	}
 
 	public Kit getKitOnPlayer(String str) {

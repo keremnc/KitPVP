@@ -78,7 +78,6 @@ public class ServerManager {
 	}
 
 	public void handleRespawn(final Player p) {
-		final GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
 		KitAPI.getKitManager().getKitsOnPlayers().remove(p.getName());
 		p.setHealth(20D);
 		p.setVelocity(new Vector(0, 0, 0));
@@ -103,26 +102,8 @@ public class ServerManager {
 					return;
 				if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation()))
 					return;
-				ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
-				ItemMeta meta = book.getItemMeta();
-				meta.setDisplayName(ChatColor.RED + "§lKits");
-				ArrayList<String> lore = new ArrayList<String>();
-				lore.add("§9Open your kit menu.");
-				meta.setLore(lore);
-				book.setItemMeta(meta);
-				p.getInventory().setItem(0, book);
-				if (prof.getLastUsedKit() != null) {
-					ItemStack books = new ItemStack(Material.WATCH);
-					ItemMeta metas = books.getItemMeta();
-					metas.setDisplayName(ChatColor.GREEN + "Last Kit: §e§l" + prof.getLastUsedKit().getName());
-					ArrayList<String> lores = new ArrayList<String>();
-					lores.add("§9Select your last used kit.");
-					metas.setLore(lores);
-					books.setItemMeta(metas);
-					p.getInventory().setItem(1, books);
-				}
-				p.updateInventory();
-				p.getInventory().setHeldItemSlot(0);
+				addSpawnItems(p);
+
 			}
 		}, 5L);
 	}
@@ -147,6 +128,15 @@ public class ServerManager {
 			books.setItemMeta(metas);
 			p.getInventory().setItem(1, books);
 		}
+		ItemStack feather = new ItemStack(Material.FEATHER);
+		ItemMeta fm = feather.getItemMeta();
+		fm.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Warp to the 1v1 Arena.");
+		ArrayList<String> fl = new ArrayList<String>();
+		fl.add("§9Right click this to warp the the 1v1 Arena!");
+		fm.setLore(fl);
+		feather.setItemMeta(fm);
+		p.getInventory().setItem(8, feather);
+
 		p.updateInventory();
 		p.getInventory().setHeldItemSlot(0);
 	}

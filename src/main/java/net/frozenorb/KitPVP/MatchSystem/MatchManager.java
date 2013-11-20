@@ -12,6 +12,7 @@ import net.frozenorb.KitPVP.MatchSystem.Queue.MatchList;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
 import net.frozenorb.KitPVP.Pagination.MatchTypeInventory;
+import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Core;
 
@@ -26,6 +27,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -34,9 +36,9 @@ import org.bukkit.inventory.ItemStack;
 
 public class MatchManager {
 
-	private static Material UNRANKED_MATCHUP_ITEM = Material.EMERALD;
-	private static Material RANKED_MATCHUP_ITEM = Material.DIAMOND;
-	private static Material QUICK_MATCHUP_ITEM = Material.FEATHER;
+	private static Material UNRANKED_MATCHUP_ITEM = Material.SLIME_BALL;
+	private static Material RANKED_MATCHUP_ITEM = Material.EYE_OF_ENDER;
+	private static Material QUICK_MATCHUP_ITEM = Material.FIREWORK_CHARGE;
 	private static String RANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Ranked Match Type!";
 	private static String UNRANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Casual Match Type!";
 	private static ItemStack UNRANKED_ITEM, RANKED_ITEM, QUICK_ITEM;
@@ -314,9 +316,16 @@ public class MatchManager {
 		@EventHandler
 		public void onPlayerInteract(PlayerInteractEvent e) {
 			Player p = e.getPlayer();
-			if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
-					if (p.getItemInHand() != null) {
+			if (p.getItemInHand() != null) {
+				if (p.getItemInHand().hasItemMeta()) {
+					String display = p.getItemInHand().getItemMeta().getDisplayName();
+					if (display != null && display.contains("Warp to the 1v1 Arena.")) {
+						KitPVP.get().getCommandManager().teleport(p, CommandManager.DUEL_LOCATION);
+						return;
+					}
+				}
+				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+					if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
 						e.setCancelled(true);
 						Material m = p.getItemInHand().getType();
 						handleInteract(p, m);
@@ -330,6 +339,13 @@ public class MatchManager {
 			if (!e.getPlayer().isOp() && isInMatch(e.getPlayer().getName()) && currentMatches.get(e.getPlayer().getName()).isInProgress()) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to use commands in a match!");
+			}
+		}
+
+		@EventHandler
+		public void onProjectileLaunch(ProjectileLaunchEvent e) {
+			if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getEntity().getLocation())) {
+				e.setCancelled(true);
 			}
 		}
 

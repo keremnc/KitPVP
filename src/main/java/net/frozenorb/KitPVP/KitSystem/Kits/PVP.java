@@ -2,6 +2,7 @@ package net.frozenorb.KitPVP.KitSystem.Kits;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
@@ -10,7 +11,8 @@ import org.bukkit.potion.PotionEffectType;
 import net.frozenorb.KitPVP.KitSystem.BaseKit;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 
-public class PVP extends BaseKit{
+public class PVP extends BaseKit {
+
 
 	@Override
 	public PlayerInventory transformInventory(PlayerInventory inv) {
@@ -42,5 +44,10 @@ public class PVP extends BaseKit{
 	@Override
 	public Material getIconMaterial() {
 		return Material.DIAMOND_SWORD;
+	}
+
+	@Override
+	public boolean hasKit(Player p) {
+		return true;
 	}
 }
