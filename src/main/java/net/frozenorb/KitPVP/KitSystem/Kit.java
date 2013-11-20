@@ -98,4 +98,12 @@ public interface Kit {
 	 */
 	public String getMetaName();
 
+	/**
+	 * Applies the kit to the player, without checking of spawn protectcion or permission
+	 * 
+	 * @param p
+	 *            the player to equip the kit to
+	 */
+	public void applyKit(Player p);
+
 }

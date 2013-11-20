@@ -81,6 +81,20 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		return "kitpvp.kit." + getName().toLowerCase().replace(" ", "");
 	}
 
+	@Override
+	public void applyKit(Player p) {
+		Core.get().clearPlayer(p);
+		p.getInventory().setArmorContents(transformInventory(p.getInventory()).getArmorContents());
+		p.getInventory().setContents(transformInventory(p.getInventory()).getContents());
+		for (int i = 1; i < 36; i += 1)
+			p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP));
+		for (PotionEffect pot : getPotionEffects()) {
+			p.addPotionEffect(pot);
+		}
+		KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(this).incrementUses(1);
+		KitAPI.getKitManager().getKitsOnPlayers().put(p.getName(), this);
+	}
+
 	/*
 	 * ----------FINAL METHODS-----------
 	 */
@@ -91,7 +105,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	 *            the player to receive the kit
 	 */
 	public final void equip(Player p) {
-		if (KitAPI.getKitManager().hasKitOn(p.getName())) {
+		if (KitAPI.getKitManager().hasKitOn(p.getName()) && !KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
 			sender.sendMessage(ChatColor.RED + "You may only use one kit per life!");
 			return;
 		}
@@ -130,16 +144,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 			Bukkit.getPluginManager().callEvent(e);
 			if (e.isCancelled())
 				return;
-			Core.get().clearPlayer(p);
-			p.getInventory().setArmorContents(transformInventory(p.getInventory()).getArmorContents());
-			p.getInventory().setContents(transformInventory(p.getInventory()).getContents());
-			for (int i = 1; i < 36; i += 1)
-				p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP));
-			for (PotionEffect pot : getPotionEffects()) {
-				p.addPotionEffect(pot);
-			}
-			KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(this).incrementUses(1);
-			KitAPI.getKitManager().getKitsOnPlayers().put(p.getName(), this);
+			applyKit(p);
 			p.sendMessage("§6You have chosen the kit §a" + getName() + "§6.");
 		} else {
 			p.sendMessage(ChatColor.RED + "You do not have access to that kit!");
