@@ -13,7 +13,6 @@ import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
 import net.frozenorb.KitPVP.Pagination.MatchTypeInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
-import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Core;
 
@@ -44,9 +43,10 @@ public class MatchManager {
 	private static Material UNRANKED_MATCHUP_ITEM = Material.SLIME_BALL;
 	private static Material RANKED_MATCHUP_ITEM = Material.EYE_OF_ENDER;
 	private static Material QUICK_MATCHUP_ITEM = Material.INK_SACK;
+	private static Material SELECT_PLAYER_ITEM = Material.BLAZE_ROD;
 	private static String RANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Ranked Match Type!";
 	private static String UNRANKED_MATCHUP_TITLE = ChatColor.BLUE + "Choose a Casual Match Type!";
-	private static ItemStack UNRANKED_ITEM, RANKED_ITEM, QUICK_ITEM;
+	private static ItemStack UNRANKED_ITEM, RANKED_ITEM, QUICK_ITEM, SELECT_ITEM;
 	private HashMap<String, Match> currentMatches = new HashMap<String, Match>();
 	private MatchList matches = new MatchList();
 
@@ -74,6 +74,14 @@ public class MatchManager {
 				add("§9You will be inserted into a random, unranked match.");
 			}
 		});
+		SELECT_ITEM = Core.get().generateItem(SELECT_PLAYER_ITEM, 8, "§a§l1v1 Stick", new ArrayList<String>() {
+			private static final long serialVersionUID = -3830569489943814868L;
+
+			{
+				add("§9Right click a player to challenge them.");
+				add("§9Left click to accept the most recent request.");
+			}
+		});
 	}
 
 	public ArrayList<Material> getMatchItems() {
@@ -83,6 +91,8 @@ public class MatchManager {
 				add(UNRANKED_MATCHUP_ITEM);
 				add(RANKED_MATCHUP_ITEM);
 				add(QUICK_MATCHUP_ITEM);
+				add(SELECT_PLAYER_ITEM);
+
 			}
 		};
 	}
@@ -160,46 +170,13 @@ public class MatchManager {
 
 	}
 
-	public void handleRightClick(Player sender, final Player reci) {
-		if (hasInvitationTo(reci.getName(), sender.getName())) {
-			sender.sendMessage(ChatColor.RED + "You already have a request to " + reci.getDisplayName() + "§c.");
-			return;
-		}
-		if (isInMatch(reci.getName())) {
-			Match m = currentMatches.get(reci.getName());
-			if (m.isInProgress()) {
-				sender.sendMessage(String.format("§c%s is currently in a match!", reci.getName()));
-				return;
-			} else if (hasInvitationTo(sender.getName(), reci.getName())) {
-				m.accept(sender);
-				currentMatches.put(sender.getName(), m);
-				m.startMatch();
-			}
-		} else if (isInMatch(sender.getName())) {
-			Match m = currentMatches.get(sender.getName());
-			if (m.isInProgress()) {
-				sender.sendMessage("§cYou are currently in a match!");
-				return;
-			}
-
-		} else {
-			Match m = new Match(sender, new StandardLoadout()) {
-				{
-					invitePlayer(reci);
-				}
-			};
-			currentMatches.put(sender.getName(), m);
-
-		}
-	}
-
 	public void addToQueue(MatchQueue queue) {
 		String requester = queue.getPlayer().getName();
 		if (queue.getQueueType() == QueueType.QUICK) {
 			if (findQuickUnrankedMatch(requester) != null) {
 				MatchQueue un = findQuickUnrankedMatch(requester);
 				matches.remove(un);
-				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue);
+				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue, true);
 			} else {
 				matches.add(queue);
 				queue.getPlayer().sendMessage(ChatColor.GREEN + "You have been added to the Quick Unranked Matchup queue!");
@@ -209,7 +186,7 @@ public class MatchManager {
 			if (getFirstRanked(requested, requester) != null) {
 				MatchQueue un = getFirstRanked(requested, requester);
 				matches.remove(un);
-				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue);
+				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue, true);
 			} else {
 				matches.add(queue);
 				queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bRanked§e Matchup with the §b" + requested.getName() + "§e loadout.");
@@ -218,14 +195,14 @@ public class MatchManager {
 			if (findQuickUnrankedMatch(requester) != null) {
 				MatchQueue un = findQuickUnrankedMatch(requester);
 				matches.remove(un);
-				matchFound(queue.getPlayer(), un.getPlayer(), queue.getLoadout(), queue);
+				matchFound(queue.getPlayer(), un.getPlayer(), queue.getLoadout(), queue, true);
 				return;
 			}
 			Loadout requested = queue.getLoadout();
 			if (getFirstUnranked(requested, requester) != null) {
 				MatchQueue un = getFirstUnranked(requested, requester);
 				matches.remove(un);
-				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue);
+				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue, true);
 			} else {
 				matches.add(queue);
 				queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bUnranked§e Matchup with the §b" + requested.getName() + "§e loadout.");
@@ -234,7 +211,7 @@ public class MatchManager {
 		}
 	}
 
-	public void matchFound(Player p1, Player p2, Loadout loadout, final MatchQueue type) {
+	public void matchFound(Player p1, Player p2, Loadout loadout, final MatchQueue type, boolean create) {
 		int p1Elo = KitAPI.getEloManager().getElo(p1.getName());
 		int p2Elo = KitAPI.getEloManager().getElo(p2.getName());
 		String p1color = KitAPI.getEloManager().getColor(p1Elo, p2Elo);
@@ -248,12 +225,13 @@ public class MatchManager {
 		String[] msgp2 = { header, p2Found, lineTwo, footer };
 		p1.sendMessage(msgp1);
 		p2.sendMessage(msgp2);
-		new Match(p1, p2, loadout) {
-			{
-				setRanked(type.getQueueType() == QueueType.RANKED);
-				startMatch();
-			}
-		};
+		if (create)
+			new Match(p1, p2, loadout) {
+				{
+					setRanked(type.getQueueType() == QueueType.RANKED);
+					startMatch();
+				}
+			};
 
 	}
 
@@ -301,19 +279,20 @@ public class MatchManager {
 		p.getInventory().setItem(0, QUICK_ITEM);
 		p.getInventory().setItem(1, UNRANKED_ITEM);
 		p.getInventory().setItem(2, RANKED_ITEM);
+		p.getInventory().setItem(8, SELECT_ITEM);
 		p.updateInventory();
 	}
 
 	public void handleInteract(final Player p, final Material m, final int data, final ItemStack item) {
+		GamerProfile profile = KitAPI.getPlayerManager().getProfile(p.getName());
 		if (m == QUICK_MATCHUP_ITEM) {
 			if (item == null)
 				return;
-			GamerProfile profile = KitAPI.getPlayerManager().getProfile(p.getName());
 			if (data == 8) {
 				item.setDurability((short) 10);
 				addToQueue(new MatchQueue(p, new StandardLoadout(), QueueType.QUICK));
 				ItemMeta meta = item.getItemMeta();
-				meta.setDisplayName("§c§lSearching for a match...");
+				meta.setDisplayName("§c§lSearching for a match");
 				meta.setLore(new ArrayList<String>() {
 					private static final long serialVersionUID = 1L;
 
@@ -362,9 +341,17 @@ public class MatchManager {
 			p.updateInventory();
 		}
 		if (m == RANKED_MATCHUP_ITEM) {
+			if (profile.getJSON().containsField("periodTask")) {
+				Bukkit.getScheduler().cancelTask(profile.getJSON().getInt("periodTask"));
+				profile.getJSON().remove("periodTask");
+			}
 			new MatchTypeInventory(p, RANKED_MATCHUP_TITLE, QueueType.RANKED).loadTypes().openInventory();
 		}
 		if (m == UNRANKED_MATCHUP_ITEM) {
+			if (profile.getJSON().containsField("periodTask")) {
+				Bukkit.getScheduler().cancelTask(profile.getJSON().getInt("periodTask"));
+				profile.getJSON().remove("periodTask");
+			}
 			new MatchTypeInventory(p, UNRANKED_MATCHUP_TITLE, QueueType.UNRANKED).loadTypes().openInventory();
 
 		}
@@ -375,24 +362,65 @@ public class MatchManager {
 		handleInteract(p, m, data, null);
 	}
 
+	public void handleRightClick(Player sender, Player reci, Loadout loadout) {
+
+		if (hasInvitationTo(reci.getName(), sender.getName())) {
+			sender.sendMessage(ChatColor.RED + "You already have a request to " + reci.getDisplayName() + "§c.");
+			return;
+		}
+		if (isInMatch(reci.getName())) {
+			Match m = currentMatches.get(reci.getName());
+			if (m.isInProgress()) {
+				sender.sendMessage(String.format("§c%s is currently in a match!", reci.getName()));
+				return;
+			} else if (hasInvitationTo(sender.getName(), reci.getName())) {
+				m.accept(sender);
+				currentMatches.put(sender.getName(), m);
+				matchFound(sender, reci, m.getType(), new MatchQueue(sender, m.getType(), QueueType.UNRANKED), false);
+				m.setRanked(false);
+				m.startMatch();
+				return;
+
+			}
+		} else if (isInMatch(sender.getName())) {
+			Match m = currentMatches.get(sender.getName());
+			if (m.isInProgress()) {
+				sender.sendMessage("§cYou are currently in a match!");
+				return;
+			}
+		}
+		Match mat = new Match(sender, loadout);
+		mat.invitePlayer(reci);
+		currentMatches.put(sender.getName(), mat);
+
+	}
+
 	private class MatchListener implements Listener {
+
 		@EventHandler
 		public void onPlayerInteract(PlayerInteractEvent e) {
 			Player p = e.getPlayer();
 			if (p.getItemInHand() != null) {
 				if (p.getItemInHand().hasItemMeta()) {
 					String display = p.getItemInHand().getItemMeta().getDisplayName();
-					if (display != null && display.contains("Warp to the 1v1 Arena.")) {
-						KitPVP.get().getCommandManager().teleport(p, CommandManager.DUEL_LOCATION);
+					if (display != null && display.contains("Warp to the 1v1 Arena")) {
+						p.chat("/1v1");
 						return;
 					}
 				}
 				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
-						e.setCancelled(true);
 						int data = (int) p.getItemInHand().getDurability();
 						Material m = p.getItemInHand().getType();
-						handleInteract(p, m, data, p.getItemInHand());
+						if (getMatchItems().contains(m)) {
+							e.setCancelled(true);
+							handleInteract(p, m, data, p.getItemInHand());
+						}
+					}
+				}
+				if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) {
+					if (p.getItemInHand().getType() == SELECT_PLAYER_ITEM) {
+						// TODO:select last match
 					}
 				}
 			}
@@ -419,9 +447,45 @@ public class MatchManager {
 				final Player p = (Player) e.getRightClicked();
 				final Player clicker = e.getPlayer();
 				if (clicker.getItemInHand() != null) {
-					if (clicker.getItemInHand().getType().equals(Material.BLAZE_ROD)) {
+					if (clicker.getItemInHand().getType().equals((SELECT_PLAYER_ITEM))) {
 						e.setCancelled(true);
-						handleRightClick(clicker, p);
+
+						if (hasInvitationTo(p.getName(), clicker.getName())) {
+							clicker.sendMessage(ChatColor.RED + "You already have a request to " + p.getDisplayName() + "§c.");
+							return;
+						}
+						if (isInMatch(p.getName())) {
+							Match m = currentMatches.get(p.getName());
+							if (m.isInProgress()) {
+								clicker.sendMessage(String.format("§c%s is currently in a match!", p.getName()));
+								return;
+							} else if (hasInvitationTo(clicker.getName(), p.getName())) {
+								m.accept(clicker);
+								currentMatches.put(clicker.getName(), m);
+								matchFound(clicker, p, m.getType(), new MatchQueue(clicker, m.getType(), QueueType.UNRANKED), false);
+								m.setRanked(false);
+								m.startMatch();
+								return;
+							}
+						} else if (isInMatch(clicker.getName())) {
+							Match m = currentMatches.get(clicker.getName());
+							if (m.isInProgress()) {
+								clicker.sendMessage("§cYou are currently in a match!");
+								return;
+							}
+
+						}
+						new MatchRequest(clicker, p) {
+							@Override
+							public void onSelect(Loadout loadout) {
+								if (p.isOnline() && loadout != null) {
+									handleRightClick(clicker, p, loadout);
+								} else {
+									clicker.sendMessage(ChatColor.RED + "That player has logged off.");
+								}
+							}
+						};
+
 					}
 				}
 			}

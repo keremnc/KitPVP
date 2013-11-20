@@ -29,9 +29,15 @@ public class ServerManager {
 	private KitPVP plugin;
 	private HashSet<String> clearOnLogout = new HashSet<String>();
 	private HashSet<String> warpToMatch = new HashSet<String>();
+	private HashSet<String> ignoreTeleport = new HashSet<String>();
 
 	public ServerManager(KitPVP plugin) {
 		this.plugin = plugin;
+
+	}
+
+	public HashSet<String> getIgnoreTeleport() {
+		return ignoreTeleport;
 	}
 
 	public void addClearOnLogout(String name) {
@@ -91,7 +97,10 @@ public class ServerManager {
 		}
 		if (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())
 			return;
-		p.teleport(getSpawn());
+		if (ignoreTeleport.contains(p.getName())) {
+			ignoreTeleport.remove(p.getName());
+		} else
+			p.teleport(getSpawn());
 
 		KitAPI.getPlayerManager().getSpawnProtection().add(p.getName());
 		Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
@@ -130,7 +139,7 @@ public class ServerManager {
 		}
 		ItemStack feather = new ItemStack(Material.FEATHER);
 		ItemMeta fm = feather.getItemMeta();
-		fm.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Warp to the 1v1 Arena.");
+		fm.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Warp to the 1v1 Arena");
 		ArrayList<String> fl = new ArrayList<String>();
 		fl.add("§9Right click this to warp the the 1v1 Arena!");
 		fm.setLore(fl);

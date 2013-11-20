@@ -246,8 +246,8 @@ public class Match {
 			challenger.sendMessage("no arena available");
 			return;
 		}
-		a.getFirstLocation().getChunk().load(true);
 		a.getFirstLocation().getChunk().load();
+		a.getFirstLocation().getChunk().load(true);
 		a.getSecondLocation().getChunk().load();
 		a.getSecondLocation().getChunk().load(true);
 		KitAPI.getMatchManager().getMatches().remove(challenger.getName());

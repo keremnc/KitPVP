@@ -9,16 +9,26 @@ package net.frozenorb.KitPVP.StatSystem;
 public enum StatObjective {
 	KILLS("kills", false, "Kills"), DEATHS("deaths", false, "Deaths"), DUEL_WINS("1v1wins", false, "1v1 Wins"), DUEL_LOSSES("1v1losses", false, "1v1 Losses"), HIGHEST_KILLSTREAK(
 			"highestKillstreak", false, "Highest Killstreak"), KD_RATIO("kd", false, "KD"), KILLSTREAK("LOCAL", true, "Killstreak"), ELO("elo", true, "Rating"), KIT_DATA(
-			"kitData", true, "kitData");
+			"kitData", true, "kitData", false);
 	private String name;
 	private boolean local;
 	private String friendlyName;
+	private boolean display;
 
-	private StatObjective(String name, boolean local, String friendlyName) {
+	private StatObjective(String name, boolean local, String friendlyName, boolean display) {
 		this.name = name;
 		this.friendlyName = friendlyName;
 		this.local = local;
+		this.display = display;
 
+	}
+
+	private StatObjective(String name, boolean local, String friendlyName) {
+		this(name, local, friendlyName, true);
+	}
+
+	public boolean isDisplay() {
+		return display;
 	}
 
 	public String getFriendlyName() {

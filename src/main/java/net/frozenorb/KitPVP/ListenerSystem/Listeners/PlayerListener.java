@@ -74,7 +74,10 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent e) {
-		if (!e.getPlayer().hasPermission("kit.build")) {
+		GamerProfile profile = KitAPI.getPlayerManager().getProfile(e.getPlayer().getName());
+		if (profile.isObject("build")) {
+			e.setCancelled(false);
+		} else {
 			e.setCancelled(true);
 			e.getPlayer().updateInventory();
 		}
@@ -110,7 +113,10 @@ public class PlayerListener extends ListenerBase {
 				e.setCancelled(true);
 			}
 		}
-		if (!e.getPlayer().hasPermission("kit.build")) {
+		GamerProfile profile = KitAPI.getPlayerManager().getProfile(e.getPlayer().getName());
+		if (profile.isObject("build")) {
+			e.setCancelled(false);
+		} else {
 			e.setCancelled(true);
 		}
 	}
@@ -307,7 +313,7 @@ public class PlayerListener extends ListenerBase {
 			e.setCancelled(true);
 			return;
 		}
-		if (item.getType() == Material.ENCHANTED_BOOK || item.getType() == Material.WATCH || item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
+		if (item.getType() == Material.ENCHANTED_BOOK || item.getType() == Material.FEATHER || item.getType() == Material.WATCH || item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
 			p.sendMessage(ChatColor.RED + "You can only drop this by using /drop.");
 			e.setCancelled(true);
 		} else {
@@ -477,9 +483,7 @@ public class PlayerListener extends ListenerBase {
 	public void onEntityDamageByEntityMonitor(EntityDamageByEntityEvent e) {
 		if (((e.getEntity() instanceof Player)) && ((e.getDamager() instanceof Player))) {
 			final Player p = (Player) e.getEntity();
-			Player dmg = (Player) e.getDamager();
 			if (!this.combatLog.containsKey(p.getName())) {
-				p.sendMessage(ChatColor.RED + "You have been combat-tagged by " + dmg.getName() + "!");
 				this.combatLog.put(((Player) e.getEntity()).getName(), ((Player) e.getDamager()).getName());
 				CombatLogRunnable c = new CombatLogRunnable(p, COMBAT_LOG_TIME) {
 
