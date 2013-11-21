@@ -4,6 +4,7 @@ import java.io.File;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.DataSystem.WarpDataManager;
+import net.frozenorb.KitPVP.ItemSystem.ToggleableItemManager;
 import net.frozenorb.KitPVP.KitSystem.KitManager;
 import net.frozenorb.KitPVP.MatchSystem.MatchManager;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.ArenaManager;
@@ -35,6 +36,7 @@ public class KitAPI {
 	private static ArenaManager arenaManager = null;
 	private static ServerManager serverManager = null;
 	private static EloManager eloManager = null;
+	private static ToggleableItemManager itemManager = null;
 
 	public static KitPVP getKitPVP() {
 		return kitpvp;
@@ -98,6 +100,12 @@ public class KitAPI {
 		if (serverManager == null)
 			serverManager = new ServerManager(kitpvp);
 		return serverManager;
+	}
+
+	public static ToggleableItemManager getItemManager() {
+		if (itemManager == null)
+			itemManager = new ToggleableItemManager();
+		return itemManager;
 	}
 
 	public static void init(KitPVP kitpvp) {

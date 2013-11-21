@@ -117,6 +117,17 @@ public class ServerManager {
 		}, 5L);
 	}
 
+	public void freezePlayer(Player p) {
+		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
+		prof.getJSON().put("cancelMove", true);
+	}
+
+	public void unfreezePlayer(Player p) {
+		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
+		prof.getJSON().put("cancelMove", false);
+
+	}
+
 	public void addSpawnItems(Player p) {
 		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
 		ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);

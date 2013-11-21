@@ -409,25 +409,27 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent e) {
-		if (KitAPI.getRegionChecker().getRegion(e.getTo()) != null)
-			KitAPI.getRegionChecker().getRegion(e.getTo()).getMeta().onWarp(e.getPlayer());
-		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo())) {
-			KitAPI.getMatchManager().getCurrentMatches().remove(e.getPlayer().getName());
-		}
-		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
-			Core.get().clearPlayer(e.getPlayer());
-			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
-		}
-		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
-			Core.get().clearPlayer(e.getPlayer());
-			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
-		}
-		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && !KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getTo())) {
-			KitAPI.getMatchManager().getMatches().remove(e.getPlayer().getName());
-		}
-		if (KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo()) && !KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getFrom())) {
-			if (!KitAPI.getPlayerManager().getSpawnProtection().contains(e.getPlayer().getName())) {
-				KitAPI.getPlayerManager().getSpawnProtection().add(e.getPlayer().getName());
+		if (e.getTo().distance(e.getFrom()) > 3) {
+			if (KitAPI.getRegionChecker().getRegion(e.getTo()) != null)
+				KitAPI.getRegionChecker().getRegion(e.getTo()).getMeta().onWarp(e.getPlayer());
+			if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo())) {
+				KitAPI.getMatchManager().getCurrentMatches().remove(e.getPlayer().getName());
+			}
+			if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
+				Core.get().clearPlayer(e.getPlayer());
+				KitAPI.getServerManager().addSpawnItems(e.getPlayer());
+			}
+			if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && KitAPI.getRegionChecker().getRegion(e.getTo()) != null && KitAPI.getRegionChecker().getRegion(e.getTo()) == Region.SPAWN) {
+				Core.get().clearPlayer(e.getPlayer());
+				KitAPI.getServerManager().addSpawnItems(e.getPlayer());
+			}
+			if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getFrom()) && !KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getTo())) {
+				KitAPI.getMatchManager().getMatches().remove(e.getPlayer().getName());
+			}
+			if (KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo()) && !KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getFrom())) {
+				if (!KitAPI.getPlayerManager().getSpawnProtection().contains(e.getPlayer().getName())) {
+					KitAPI.getPlayerManager().getSpawnProtection().add(e.getPlayer().getName());
+				}
 			}
 		}
 	}

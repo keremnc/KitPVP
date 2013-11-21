@@ -71,6 +71,12 @@ public class PlayerManager {
 		}
 	}
 
+	public void fillSoupCompletely(PlayerInventory inv) {
+		for (int i = 0; i < 39; i += 1) {
+			inv.addItem(new ItemStack(Material.MUSHROOM_SOUP));
+		}
+	}
+
 	public void registerProfile(String name, GamerProfile profile) {
 		gamerProfiles.put(name.toLowerCase(), profile);
 	}

@@ -1,6 +1,7 @@
 package net.frozenorb.KitPVP.MatchSystem;
 
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class Match {
 	private Player challenger, victim;
@@ -253,8 +255,6 @@ public class Match {
 		KitAPI.getMatchManager().getMatches().remove(challenger.getName());
 		KitAPI.getMatchManager().getMatches().remove(victim.getName());
 		arena = a;
-		victim.showPlayer(challenger);
-		challenger.showPlayer(victim);
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 			@Override
@@ -271,6 +271,8 @@ public class Match {
 				challenger.setHealth(((Damageable) challenger).getMaxHealth());
 				getType().applyInventory(victim.getInventory());
 				getType().applyInventory(challenger.getInventory());
+				victim.getInventory().setHeldItemSlot(0);
+				challenger.getInventory().setHeldItemSlot(0);
 				for (PotionEffect pot : getType().getPotionEffects()) {
 					victim.addPotionEffect(pot);
 					challenger.addPotionEffect(pot);
@@ -289,6 +291,30 @@ public class Match {
 			victim.addPotionEffect(pot);
 			challenger.addPotionEffect(pot);
 		}
+		KitAPI.getServerManager().freezePlayer(challenger);
+		KitAPI.getServerManager().freezePlayer(victim);
+
+		final AtomicInteger current = new AtomicInteger(0);
+		new BukkitRunnable() {
+
+			@Override
+			public void run() {
+				if (current.get() > 2) {
+					victim.showPlayer(challenger);
+					challenger.showPlayer(victim);
+					KitAPI.getServerManager().unfreezePlayer(challenger);
+					KitAPI.getServerManager().unfreezePlayer(victim);
+					challenger.sendMessage(ChatColor.GREEN + "GO!");
+					victim.sendMessage(ChatColor.GREEN + "GO!");
+					cancel();
+				} else {
+					challenger.sendMessage(ChatColor.RED + "" + (3 - current.get()) + "...");
+					victim.sendMessage(ChatColor.RED + "" + (3 - current.get()) + "...");
+					current.set(current.get() + 1);
+				}
+
+			}
+		}.runTaskTimer(KitPVP.get(), 0L, 20L);
 		victim.showPlayer(challenger);
 		challenger.showPlayer(victim);
 	}

@@ -105,6 +105,10 @@ public class MatchManager {
 		return currentMatches.containsKey(str);
 	}
 
+	public HashMap<String, Match> getCurrentMatches() {
+		return currentMatches;
+	}
+
 	public boolean isQueued(String name) {
 		for (MatchQueue queue : matches) {
 			if (queue.getPlayer().getName().equalsIgnoreCase(name))
@@ -119,10 +123,6 @@ public class MatchManager {
 				return queue;
 		}
 		return null;
-	}
-
-	public HashMap<String, Match> getCurrentMatches() {
-		return currentMatches;
 	}
 
 	public String getOpponent(String str) {
@@ -144,6 +144,17 @@ public class MatchManager {
 				m.setInvitedPlayer(null);
 			}
 		}
+	}
+
+	public Match getInvitation(String name) {
+
+		for (Match m : currentMatches.values()) {
+			if (m.getInvitedPlayer() != null && m.getInvitedPlayer().equalsIgnoreCase(name)) {
+				return m;
+			}
+		}
+		return null;
+
 	}
 
 	public boolean hasInvitationTo(String name, String challenger) {
@@ -420,7 +431,17 @@ public class MatchManager {
 				}
 				if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) {
 					if (p.getItemInHand().getType() == SELECT_PLAYER_ITEM) {
-						// TODO:select last match
+						if (getInvitation(p.getName()) != null) {
+							Match match = getInvitation(p.getName());
+							match.accept(p);
+							currentMatches.put(p.getName(), match);
+							matchFound(p, match.getChallenger(), match.getType(), new MatchQueue(p, match.getType(), QueueType.UNRANKED), false);
+							match.setRanked(false);
+							match.startMatch();
+							return;
+						} else {
+							p.sendMessage(ChatColor.RED + "There are no match requests that are still acceptable.");
+						}
 					}
 				}
 			}

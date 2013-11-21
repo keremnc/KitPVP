@@ -93,6 +93,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		}
 		KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(this).incrementUses(1);
 		KitAPI.getKitManager().getKitsOnPlayers().put(p.getName(), this);
+		p.getInventory().setHeldItemSlot(0);
 	}
 
 	/*
