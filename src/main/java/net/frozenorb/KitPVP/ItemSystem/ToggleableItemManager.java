@@ -28,11 +28,23 @@ public class ToggleableItemManager {
 		toggleables.remove(player.getName());
 	}
 
-	public void toggle(ItemStack item, Player player) {
+	public void handleLeftClick(ItemStack item, int slot, Player player) {
 		if (toggleables.containsKey(player.getName()))
 			for (ToggleableItem tItem : toggleables.get(player.getName())) {
 				if (tItem.isThis(item)) {
-					tItem.next(item);
+					tItem.next(item, slot, player);
+				}
+			}
+	}
+
+	public void handleRightClick(ItemStack item, int slot, Player player) {
+		if (toggleables.containsKey(player.getName()))
+			for (ToggleableItem tItem : toggleables.get(player.getName())) {
+				if (tItem.isThis(item)) {
+					if (tItem.isSecondary())
+						tItem.nextSecondary(item, slot, player);
+					else
+						tItem.next(item, slot, player);
 				}
 			}
 	}

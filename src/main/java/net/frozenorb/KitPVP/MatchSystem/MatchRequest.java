@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -64,16 +65,6 @@ public abstract class MatchRequest implements Listener {
 				put("§a§lSpeed II", Material.POTION);
 				put("§a§lSpeed and Strength II", Material.POTION);
 			}
-		}).setData(new ArrayList<Integer>() {
-			private static final long serialVersionUID = 1L;
-
-			{
-				add(0);
-				add(8233);
-				add(8226);
-				add(16425);
-
-			}
 		});
 		sword = new ToggleableItem("§bSword", "§9Click to switch swords.", new LinkedHashMap<String, Material>() {
 			private static final long serialVersionUID = 1L;
@@ -84,7 +75,15 @@ public abstract class MatchRequest implements Listener {
 				put("§a§lStone", Material.STONE_SWORD);
 
 			}
-		});
+		}).setSecondary("Enchantments", new ArrayList<Integer>() {
+			private static final long serialVersionUID = 1L;
+
+			{
+				for (int i = 0; i < 6; i++) {
+					add(i);
+				}
+			}
+		}, "Sharpness", Enchantment.DAMAGE_ALL);
 		armor = new ToggleableItem("§bArmor", "§9Click to switch armor types.", new LinkedHashMap<String, Material>() {
 			private static final long serialVersionUID = 1L;
 
@@ -95,7 +94,15 @@ public abstract class MatchRequest implements Listener {
 				put("§a§lNone", Material.CAULDRON);
 
 			}
-		});
+		}).setSecondary("Enchantments", new ArrayList<Integer>() {
+			private static final long serialVersionUID = 1L;
+
+			{
+				for (int i = 0; i < 5; i++) {
+					add(i);
+				}
+			}
+		}, "Protection", Enchantment.PROTECTION_ENVIRONMENTAL);
 		this.sender = sender;
 		this.recipientName = recipient.getName();
 		sender.closeInventory();
@@ -105,6 +112,7 @@ public abstract class MatchRequest implements Listener {
 		sender.openInventory(inv);
 		Bukkit.getPluginManager().registerEvents(this, KitPVP.get());
 		KitAPI.getItemManager().registerItem(soup, sender);
+		KitAPI.getItemManager().registerItem(sword, sender);
 		KitAPI.getItemManager().registerItem(armor, sender);
 		KitAPI.getItemManager().registerItem(potions, sender);
 
@@ -221,6 +229,7 @@ public abstract class MatchRequest implements Listener {
 		soup = null;
 		potions = null;
 		armor = null;
+		sword = null;
 		HandlerList.unregisterAll(this);
 	}
 
@@ -233,18 +242,22 @@ public abstract class MatchRequest implements Listener {
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
 					if (item.getType() == Material.WOOL) {
-						onSelect(createLoadout());
+						onSelect(createLoadout(armor.getCurrentPrimaryValue(), potions.getCurrentPrimaryValue(), soup.getCurrentPrimaryValue(), sword.getCurrentPrimaryValue(), armor.getCurrentSecondaryValue(), sword.getCurrentSecondaryValue()));
 						finish(who);
 						return;
 					}
-					KitAPI.getItemManager().toggle(item, who);
+
 					if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null) {
+						if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT)
+							KitAPI.getItemManager().handleRightClick(item, e.getRawSlot(), who);
+						else
+							KitAPI.getItemManager().handleLeftClick(item, e.getRawSlot(), who);
 						String name = ChatColor.stripColor(item.getItemMeta().getDisplayName());
 						Loadout l = Loadout.getByName(name);
 						if (l != null) {
 							onSelect(l);
-							e.getWhoClicked().closeInventory();
 							finish(who);
+							e.getWhoClicked().closeInventory();
 						}
 						if (item.getType() == Material.ANVIL) {
 							Inventory inv = e.getInventory();
@@ -261,8 +274,8 @@ public abstract class MatchRequest implements Listener {
 	 * 
 	 * @return loadout
 	 */
-	public Loadout createLoadout() {
-		Loadout l = new Loadout() {
+	public Loadout createLoadout(final String armor, final String potion, final String soup, final String sword, final int armorlevel, final int swordlevel) {
+		final Loadout l = new Loadout() {
 
 			@Override
 			public int getWeight() {
@@ -271,15 +284,15 @@ public abstract class MatchRequest implements Listener {
 
 			@Override
 			public PotionEffect[] getPotionEffects() {
-				if (potions.getCurrentValue().equals("Strength II")) {
+				if (potion.equals("Strength II")) {
 					return new PotionEffect[] { new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1) };
 
 				}
-				if (potions.getCurrentValue().equals("Speed II")) {
+				if (potion.equals("Speed II")) {
 					return new PotionEffect[] { new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1) };
 
 				}
-				if (potions.getCurrentValue().equals("Speed and Strength II")) {
+				if (potion.equals("Speed and Strength II")) {
 					return new PotionEffect[] { new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1), new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1) };
 
 				}
@@ -288,27 +301,34 @@ public abstract class MatchRequest implements Listener {
 
 			@Override
 			public String getName() {
-				return sender.getName() + "'s custom Loadout";
+				return "Custom";
 			}
 
 			@Override
 			public String getDescription() {
-				return new BasicDBObject("refills", soup.getCurrentValue().equalsIgnoreCase("enabled")).append("sword", armor.getCurrentValue()).append("armor", armor.getCurrentValue()).append("potions", potions.getCurrentValue()).toString();
+				return new BasicDBObject("refills", soup.equalsIgnoreCase("enabled")).append("sword", sword).append("armor", armor).append("potions", potion).toString();
 			}
 
 			@Override
 			public PlayerInventory applyInventory(PlayerInventory inventory) {
 				KitAPI.getPlayerManager().clearInventory(inventory);
-				if (!armor.getCurrentValue().equalsIgnoreCase("none"))
-					inventory.setArmorContents(Utilities.getFullSet(Material.valueOf(armor.getCurrentValue().toUpperCase() + "_CHESTPLATE")));
-				inventory.setItem(0, Utilities.generateItem(Material.getMaterial(sword.getCurrentValue().toUpperCase() + "_SWORD"), Enchantment.DAMAGE_ALL, 1));
-				if (soup.getCurrentValue().equalsIgnoreCase("enabled")) {
-					KitAPI.getPlayerManager().fillSoupCompletely(inventory);
+				if (!(armor.equalsIgnoreCase("none"))) {
+					if (armorlevel > 0)
 
-				} else {
-					KitAPI.getPlayerManager().fillSoup(inventory);
+						inventory.setArmorContents(Utilities.getFullSet(Material.valueOf(armor.toUpperCase() + "_CHESTPLATE"), Enchantment.PROTECTION_ENVIRONMENTAL, armorlevel));
+					else
+						inventory.setArmorContents(Utilities.getFullSet(Material.valueOf(armor.toUpperCase() + "_CHESTPLATE")));
 
 				}
+				if (swordlevel > 0)
+					inventory.setItem(0, Utilities.generateItem(Material.getMaterial(sword.toUpperCase() + "_SWORD"), Enchantment.DAMAGE_ALL, swordlevel));
+				else
+					inventory.setItem(0, Utilities.generateItem(Material.getMaterial(sword.toUpperCase() + "_SWORD")));
+				if (soup.equalsIgnoreCase("enabled"))
+					KitAPI.getPlayerManager().fillSoupCompletely(inventory);
+				else
+					KitAPI.getPlayerManager().fillSoup(inventory);
+
 				return inventory;
 			}
 		};

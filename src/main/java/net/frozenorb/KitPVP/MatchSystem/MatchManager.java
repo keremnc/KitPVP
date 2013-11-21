@@ -49,6 +49,7 @@ public class MatchManager {
 	private static ItemStack UNRANKED_ITEM, RANKED_ITEM, QUICK_ITEM, SELECT_ITEM;
 	private HashMap<String, Match> currentMatches = new HashMap<String, Match>();
 	private MatchList matches = new MatchList();
+	private HashMap<String, String> matchRequestsInProgress = new HashMap<String, String>();
 
 	public MatchManager() {
 		Bukkit.getPluginManager().registerEvents(new MatchListener(), KitAPI.getKitPVP());
@@ -501,12 +502,15 @@ public class MatchManager {
 							public void onSelect(Loadout loadout) {
 								if (p.isOnline() && loadout != null) {
 									handleRightClick(clicker, p, loadout);
+									matchRequestsInProgress.remove(clicker.getName());
 								} else {
+									matchRequestsInProgress.remove(clicker.getName());
 									clicker.sendMessage(ChatColor.RED + "That player has logged off.");
+									clicker.closeInventory();
 								}
 							}
 						};
-
+						matchRequestsInProgress.put(clicker.getName(), p.getName());
 					}
 				}
 			}
@@ -553,6 +557,29 @@ public class MatchManager {
 			}
 		}
 
+		@EventHandler
+		public void onPlayerQuit(PlayerQuitEvent e) {
+			Player p = e.getPlayer();
+			for (Entry<String, String> entry : matchRequestsInProgress.entrySet()) {
+				if (entry.getValue().equals(p.getName())) {
+					Player clicker = Bukkit.getPlayerExact(entry.getKey());
+					if (p != null) {
+						clicker.sendMessage(ChatColor.RED + "That player has logged off.");
+						clicker.closeInventory();
+						matchRequestsInProgress.remove(clicker.getName());
+					}
+				}
+			}
+			p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
+			matches.remove(p.getName());
+			if (isInMatch(p.getName())) {
+				Match m = currentMatches.get(p.getName());
+				if (m.isInProgress()) {
+					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
+				}
+			}
+		}
+
 		@EventHandler(priority = EventPriority.LOWEST)
 		public void onPlayerDeath(PlayerDeathEvent e) {
 			final Player p = e.getEntity();
@@ -574,16 +601,5 @@ public class MatchManager {
 			}
 		}
 
-		@EventHandler
-		public void onPlayerQuit(PlayerQuitEvent e) {
-			Player p = e.getPlayer();
-			matches.remove(p.getName());
-			if (isInMatch(p.getName())) {
-				Match m = currentMatches.get(p.getName());
-				if (m.isInProgress()) {
-					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
-				}
-			}
-		}
 	}
 }

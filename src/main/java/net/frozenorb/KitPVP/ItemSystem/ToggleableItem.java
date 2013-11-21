@@ -1,26 +1,30 @@
 package net.frozenorb.KitPVP.ItemSystem;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import net.frozenorb.Utilities.Types.Attributes;
-import net.minecraft.server.v1_6_R3.NBTTagCompound;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ToggleableItem {
-	private static final String SPACE = "       ";
 	private ArrayList<Material> materials;
 	private ArrayList<String> types;
 	private int currentSelection = 0;
+	private int currentSelectionSecondary = 0;
 	private String displayName;
 	private String lore;
+	private ArrayList<Integer> secondaries = new ArrayList<Integer>();
+	private String secondaryName;
+	private String secondaryItemName;
+	private Enchantment enchant;
+	private boolean secondary = false;
+	private boolean ignoreFirst = true;
 	private ArrayList<Integer> data = new ArrayList<Integer>() {
 		private static final long serialVersionUID = 1L;
 
@@ -43,6 +47,7 @@ public class ToggleableItem {
 	 */
 	public ToggleableItem(String displayName, String lore, ArrayList<Material> materials, ArrayList<String> types) {
 		currentSelection = 0;
+		currentSelectionSecondary = 0;
 		this.materials = materials;
 		this.displayName = displayName;
 		this.types = types;
@@ -62,6 +67,7 @@ public class ToggleableItem {
 	public ToggleableItem(String displayName, String lore, LinkedHashMap<String, Material> map) {
 		this.displayName = displayName;
 		currentSelection = 0;
+		currentSelectionSecondary = 0;
 		this.materials = new ArrayList<Material>(map.values());
 		this.types = new ArrayList<String>(map.keySet());
 		this.lore = lore;
@@ -84,6 +90,7 @@ public class ToggleableItem {
 	public ToggleableItem(String displayName, String lore, final Material first, final Material second, final boolean defaultOn) {
 		this.displayName = displayName;
 		currentSelection = 0;
+		currentSelectionSecondary = 0;
 		this.materials = new ArrayList<Material>() {
 			private static final long serialVersionUID = 1L;
 
@@ -109,44 +116,54 @@ public class ToggleableItem {
 		this.lore = lore;
 	}
 
+	public ToggleableItem setSecondary(String name, ArrayList<Integer> secondaries, String secondaryItemName, Enchantment e) {
+		this.enchant = e;
+		this.secondaryName = name;
+		this.secondaryItemName = secondaryItemName;
+		this.secondaries = secondaries;
+		this.secondary = true;
+		return this;
+	}
+
+	public void setIgnoreFirst(boolean ignoreFirst) {
+		this.ignoreFirst = ignoreFirst;
+	}
+
+	public boolean isIgnoreFirst() {
+		return ignoreFirst;
+	}
+
 	public ToggleableItem setData(ArrayList<Integer> data) {
 		this.data = data;
 		return this;
 	}
 
-	public String getCurrentValue() {
-		if (currentSelection == 0)
-			return ChatColor.stripColor(types.get(types.size() - 1)).trim();
-		return ChatColor.stripColor(types.get(currentSelection - 1)).trim();
+	public String getCurrentPrimaryValue() {
+		return ChatColor.stripColor(types.get(currentSelection)).trim();
+
+	}
+
+	public int getCurrentSecondaryValue() {
+		return secondaries.get(currentSelectionSecondary);
 
 	}
 
 	public ItemStack initialize() {
-		try {
-			ItemStack item = new ItemStack(materials.get(0));
-			ItemMeta meta = item.getItemMeta();
-			meta.setLore(wrap(lore));
-			meta.setDisplayName(displayName + SPACE + types.get(0));
-			item.setItemMeta(meta);
-			item.setDurability((short) (int) data.get(currentSelection));
-			currentSelection += 1;
-			if (currentSelection == materials.size())
-				currentSelection = 0;
-			Attributes attr = new Attributes(item);
-			attr.clear();
-			CraftItemStack cis = (CraftItemStack) item;
-			Field f = cis.getClass().getDeclaredField("handle");
-			f.setAccessible(true);
-			net.minecraft.server.v1_6_R3.ItemStack is = (net.minecraft.server.v1_6_R3.ItemStack) f.get(cis);
-			NBTTagCompound comp = is.getTag();
-			comp.remove("CustomPotionEffects");
-			is.setTag(comp);
-			item = CraftItemStack.asBukkitCopy(is);
-			return item;
-		} catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
+		ItemStack item = new ItemStack(materials.get(0));
+		ItemMeta meta = item.getItemMeta();
+		meta.setLore(getLore());
+		meta.setDisplayName(displayName);
+		item.setItemMeta(meta);
+		item.setDurability((short) (int) data.get(currentSelection));
+		if (enchant != null && secondary) {
+			if (!(currentSelectionSecondary == 0 && ignoreFirst))
+				item.addUnsafeEnchantment(enchant, currentSelectionSecondary + (ignoreFirst ? 0 : 1));
+			else
+				item.removeEnchantment(enchant);
 		}
-		return null;
+		Attributes attr = new Attributes(item);
+		attr.clear();
+		return attr.getStack();
 
 	}
 
@@ -159,49 +176,83 @@ public class ToggleableItem {
 		return false;
 	}
 
-	public void next(ItemStack item) {
+	public boolean isSecondary() {
+		return secondary;
+	}
+
+	public ArrayList<String> getLore() {
+		ArrayList<String> str = new ArrayList<String>();
+		str.add(lore);
+		str.add("");
+		str.add("§6§lLeft-Click");
+		str.add("§9  " + displayName + ":");
+		for (int i = 0; i < types.size(); i += 1) {
+
+			if (currentSelection == i) {
+				str.add("§a  ► " + ChatColor.stripColor(types.get(i)).trim());
+			} else
+				str.add("§c    " + ChatColor.stripColor(types.get(i)).trim());
+		}
+		if (secondary) {
+			str.add("");
+			str.add("§6§lRight-Click");
+			str.add("§b  " + secondaryName + ":");
+			for (int i = 0; i < secondaries.size(); i += 1) {
+				if (currentSelectionSecondary == i) {
+					String secondary = "";
+					if (secondaries.get(i) == 0)
+						secondary = "No " + secondaryItemName;
+					else
+						secondary = secondaryItemName + " " + secondaries.get(i);
+					str.add("§a  ► " + secondary);
+				} else if (secondaries.get(i) == 0)
+					str.add("§c    " + "No " + secondaryItemName);
+
+				else
+					str.add("§c    " + secondaryItemName + " " + secondaries.get(i));
+			}
+		}
+		return str;
+	}
+
+	public void next(ItemStack item, int slot, Player who) {
 		if (item.hasItemMeta()) {
-			try {
-				ItemMeta meta = item.getItemMeta();
-				meta.setLore(wrap(lore));
-				item.setDurability((short) (int) data.get((currentSelection >= data.size() ? data.size() - 1 : currentSelection)));
-				item.setType(materials.get(currentSelection));
-				meta.setDisplayName(displayName + SPACE + types.get(currentSelection));
-				item.setItemMeta(meta);
+			currentSelection += 1;
+			if (currentSelection == types.size())
+				currentSelection = 0;
+			item.setDurability((short) (int) data.get((currentSelection >= data.size() ? data.size() - 1 : currentSelection)));
+			item.setType(materials.get(currentSelection));
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName(displayName);
+			meta.setLore(getLore());
+			item.setItemMeta(meta);
+			if (item.getType() != Material.GLASS_BOTTLE) {
 				Attributes attr = new Attributes(item);
 				attr.clear();
-				CraftItemStack cis = (CraftItemStack) item;
-				Field f = cis.getClass().getDeclaredField("handle");
-				f.setAccessible(true);
-				net.minecraft.server.v1_6_R3.ItemStack is = (net.minecraft.server.v1_6_R3.ItemStack) f.get(cis);
-				NBTTagCompound comp = is.getTag();
-				comp.remove("CustomPotionEffects");
-				is.setTag(comp);
-				item = CraftItemStack.asBukkitCopy(is);
-				currentSelection += 1;
-				if (currentSelection == materials.size())
-					currentSelection = 0;
-			} catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
+				ItemStack stack = attr.getStack();
+				who.getOpenInventory().setItem(slot, stack);
+
+			} else {
+				who.getOpenInventory().setItem(slot, item);
+
 			}
 		}
 	}
 
-	private List<String> wrap(String string) {
-		String[] split = string.split(" ");
-		string = "";
-		ChatColor color = ChatColor.BLUE;
-		ArrayList<String> newString = new ArrayList<String>();
-		for (int i = 0; i < split.length; i++) {
-			if (string.length() > 26 || string.endsWith(".") || string.endsWith("!")) {
-				newString.add(color + string);
-				if (string.endsWith(".") || string.endsWith("!"))
-					newString.add("");
-				string = "";
-			}
-			string += (string.length() == 0 ? "" : " ") + split[i];
-		}
-		newString.add(color + string);
-		return newString;
+	public void nextSecondary(ItemStack item, int slot, Player who) {
+		ItemMeta meta = item.getItemMeta();
+		currentSelectionSecondary += 1;
+		if (currentSelectionSecondary == secondaries.size())
+			currentSelectionSecondary = 0;
+		meta.setLore(getLore());
+		item.setItemMeta(meta);
+		if (enchant != null)
+			if (!(currentSelectionSecondary == 0 && ignoreFirst))
+				item.addUnsafeEnchantment(enchant, currentSelectionSecondary + (ignoreFirst ? 0 : 1));
+			else
+				item.removeEnchantment(enchant);
+		Attributes attr = new Attributes(item);
+		attr.clear();
+		who.getOpenInventory().setItem(slot, attr.getStack());
 	}
 }
