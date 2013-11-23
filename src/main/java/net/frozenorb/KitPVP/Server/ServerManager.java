@@ -180,6 +180,18 @@ public class ServerManager {
 				}
 			}
 		}
+		if (soups == 0) {
+			for (int i = 0; i < 9; i += 1) {
+				ItemStack item = p.getInventory().getItem(i);
+				if (item != null) {
+					if (item.getType() != null) {
+						if (item.getType().equals(Material.POTION)) {
+							soups += 1;
+						}
+					}
+				}
+			}
+		}
 		return soups;
 	}
 
@@ -201,7 +213,7 @@ public class ServerManager {
 			p.getInventory().setItem(i, new ItemStack(Material.MUSHROOM_SOUP));
 		}
 		p.getInventory().setItem(0, Utilities.generateItem(Material.STONE_SWORD, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
-		KitAPI.getPlayerManager().fillSoup(p.getInventory());
+		KitAPI.getPlayerManager().fillSoup(p.getInventory(), Material.MUSHROOM_SOUP);
 		for (int i = 9; i < 36; i += 1) {
 			if (p.getInventory().getItem(i) == null)
 				p.getInventory().setItem(i, Utilities.generateItem(Material.PISTON_EXTENSION, "§c§lUnusable Slot"));

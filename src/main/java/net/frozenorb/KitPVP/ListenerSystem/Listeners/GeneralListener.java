@@ -53,7 +53,10 @@ public class GeneralListener extends ListenerBase {
 
 	@EventHandler
 	public void onEntityRegainHealth(EntityRegainHealthEvent e) {
-		if (e.getRegainReason() != RegainReason.MAGIC && e.getRegainReason() != RegainReason.MAGIC_REGEN && e.getRegainReason() != RegainReason.REGEN)
+		if (
+				e.getRegainReason() != RegainReason.MAGIC 
+				&& e.getRegainReason() != RegainReason.MAGIC_REGEN 
+				&& e.getRegainReason() != RegainReason.REGEN)
 			e.setCancelled(true);
 	}
 

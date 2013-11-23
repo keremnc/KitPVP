@@ -65,15 +65,31 @@ public class PlayerManager {
 		inv.setArmorContents(null);
 	}
 
-	public void fillSoup(PlayerInventory inv) {
+	public void fillSoup(PlayerInventory inv, Material m) {
 		for (int i = 0; i < 8; i += 1) {
-			inv.addItem(new ItemStack(Material.MUSHROOM_SOUP));
+			if (m == Material.MUSHROOM_SOUP)
+				inv.addItem(new ItemStack(m));
+			else if (m == Material.POTION)
+				inv.addItem(new ItemStack(m) {
+					{
+						setDurability((short) 16421);
+					}
+				});
+
 		}
 	}
 
-	public void fillSoupCompletely(PlayerInventory inv) {
+	public void fillSoupCompletely(PlayerInventory inv, Material m) {
 		for (int i = 0; i < 39; i += 1) {
-			inv.addItem(new ItemStack(Material.MUSHROOM_SOUP));
+			if (m == Material.MUSHROOM_SOUP)
+				inv.addItem(new ItemStack(m));
+			else if (m == Material.POTION)
+				inv.addItem(new ItemStack(m) {
+					{
+						setDurability((short) 16421);
+					}
+				});
+
 		}
 	}
 

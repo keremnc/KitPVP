@@ -1,5 +1,7 @@
 package net.frozenorb.KitPVP.MatchSystem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -7,7 +9,10 @@ import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.Arena;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
+import net.frozenorb.KitPVP.Pagination.RequestInventory;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
+import net.frozenorb.KitPVP.StatSystem.Stat;
+import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
 
 import org.bukkit.Bukkit;
@@ -24,6 +29,8 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.mongodb.BasicDBObject;
+
 public class Match {
 	private Player challenger, victim;
 	private Loadout type;
@@ -31,8 +38,12 @@ public class Match {
 	private boolean inProgress;
 	private boolean ranked = false;
 	private Arena arena;
+	private int firstTo = 1;
+	private int matchesDone = 0;
+	private HashMap<String, Integer> wins = new HashMap<String, Integer>();
 
 	public Match(Player challenger, Player victim, Loadout type) {
+		firstTo = type.getFirstTo();
 		this.challenger = challenger;
 		this.victim = victim;
 		this.type = type;
@@ -41,12 +52,32 @@ public class Match {
 
 	}
 
+	public HashMap<String, Integer> getWins() {
+		if (getFirstTo() > 1)
+			return wins;
+		return null;
+	}
+
+	public Match(Player challenger, Loadout type) {
+		firstTo = type.getFirstTo();
+		this.challenger = challenger;
+		this.type = type;
+	}
+
 	public void setArena(Arena arena) {
 		this.arena = arena;
 	}
 
 	public Arena getArena() {
 		return arena;
+	}
+
+	public int getFirstTo() {
+		return firstTo;
+	}
+
+	public void setFirstTo(int firstTo) {
+		this.firstTo = firstTo;
 	}
 
 	public Player getChallenger() {
@@ -64,11 +95,6 @@ public class Match {
 
 	public Player getVictim() {
 		return victim;
-	}
-
-	public Match(Player challenger, Loadout type) {
-		this.challenger = challenger;
-		this.type = type;
 	}
 
 	public void setInProgress(boolean inProgress) {
@@ -147,9 +173,16 @@ public class Match {
 
 	}
 
-	public void finish(final Player loser, final String loserName, MatchFinishReason reason) {
+	public void finish(final Player loser, final String loserName, final MatchFinishReason reason) {
 		final Player winner = getOpponent(loserName);
 		loser.setHealth(20D);
+		wins.put(winner.getName(), wins.get(winner.getName()) + 1);
+		if (getFirstTo() > 0) {
+			KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
+			KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
+		}
+		if (getFirstTo() == 1 || hasFinished())
+			setInProgress(false);
 		setInProgress(false);
 		KitAPI.getServerManager().setVisible(loser, false);
 		loser.teleport(loser.getLocation().clone().add(0, 3, 0));
@@ -157,22 +190,44 @@ public class Match {
 		loser.setFlying(true);
 		if (reason == MatchFinishReason.PLAYER_DEATH) {
 			loser.sendMessage(ChatColor.GOLD + "You have lost the §a" + getType().getName() + "§6 match to " + winner.getDisplayName() + "§6. ");
-			loser.sendMessage(winner.getDisplayName() + " §6had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6soups and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
-			winner.sendMessage(ChatColor.GOLD + "You have killed §e" + loser.getDisplayName() + "§6 in a match. You had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6soups and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
-			winner.sendMessage(loser.getDisplayName() + "§6 had§c " + KitAPI.getServerManager().getSoupsInHotbar(loser) + "§6 soups left.");
+			loser.sendMessage(winner.getDisplayName() + " §6had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
+			winner.sendMessage(ChatColor.GOLD + "You have killed §e" + loser.getDisplayName() + "§6 in a match. You had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
+			winner.sendMessage(loser.getDisplayName() + "§6 had§c " + KitAPI.getServerManager().getSoupsInHotbar(loser) + "§6 " + getType().getHealType() + "s left.");
 		} else if (reason == MatchFinishReason.PLAYER_LOGOUT) {
 			winner.sendMessage(ChatColor.GOLD + "§c" + loserName + "§6 has logged out, so you have won the match.");
 		}
 
 		if (isRanked()) {
-			int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
-			int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-			int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo);
-			KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
-			KitAPI.getEloManager().setElo(loserName, finalElo[1]);
-			winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
-			loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
-
+			if (getFirstTo() == 1) {
+				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
+				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
+				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo);
+				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
+				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
+				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
+				loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
+			} else if (hasFinished() && getFirstTo() > 1) {
+				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
+				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
+				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo);
+				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
+				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
+				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
+				loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
+			}
+		}
+		if (getFirstTo() > 1) {
+			String msg = "§6Match §e" + matchesDone + "§6 has ended.";
+			String first = wins.get(victim.getName()) > wins.get(challenger.getName()) ? victim.getDisplayName() : loser.getDisplayName();
+			String winsMsg = "§6Stats: §f" + first + "§e(" + wins.get(ChatColor.stripColor(first)) + ")§f - " + getOpponent(ChatColor.stripColor(first)).getDisplayName() + "§e(" + wins.get(getOpponent(ChatColor.stripColor(first)).getName()) + ")";
+			challenger.sendMessage(new String[] { msg, winsMsg });
+			victim.sendMessage(new String[] { msg, winsMsg });
+		}
+		if (getFirstTo() > 1 && hasFinished()) {
+			String first = wins.get(victim.getName()) > wins.get(challenger.getName()) ? victim.getDisplayName() : challenger.getDisplayName();
+			String msg = first + "§6 has won the§e first to " + getFirstTo() + "§6!";
+			challenger.sendMessage(new String[] { msg });
+			victim.sendMessage(new String[] { msg });
 		}
 		getType().onDefeat(winner, loser);
 		for (int i = 0; i < 7; i += 1) {
@@ -208,14 +263,47 @@ public class Match {
 				KitAPI.getServerManager().setVisible(loser, true);
 				loser.setAllowFlight(false);
 				loser.setFlying(false);
-				KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
-				KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-				KitAPI.getArenaManager().unregisterArena(arena);
 				Core.get().clearPlayer(winner);
-				KitAPI.getKitPVP().getCommandManager().teleport(loser, CommandManager.DUEL_LOCATION);
-				KitAPI.getKitPVP().getCommandManager().teleport(winner, CommandManager.DUEL_LOCATION);
+				if (!hasFinished() && getFirstTo() > 1 && reason != MatchFinishReason.PLAYER_LOGOUT) {
+					startMatch();
+				} else {
+					KitAPI.getBossBarManager().unregisterPlayer(victim);
+					KitAPI.getBossBarManager().unregisterPlayer(challenger);
+					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
+					KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
+					KitAPI.getKitPVP().getCommandManager().teleport(loser, CommandManager.DUEL_LOCATION);
+					KitAPI.getKitPVP().getCommandManager().teleport(winner, CommandManager.DUEL_LOCATION);
+					KitAPI.getArenaManager().unregisterArena(arena);
+				}
 			}
 		}, 60L);
+
+	}
+
+	public ArrayList<String> getMetadata(boolean acceptName) {
+		ArrayList<String> meta = new ArrayList<>();
+		Stat s = KitAPI.getStatManager().getStat(challenger.getName());
+		meta.add("§6Kills/Deaths: §f" + s.get(StatObjective.KILLS) + "/" + s.get(StatObjective.DEATHS));
+		meta.add("§61v1 Wins/Losses: §f" + s.get(StatObjective.DUEL_WINS) + "/" + s.get(StatObjective.DUEL_LOSSES));
+		meta.add(" ");
+		meta.add("§6Match Type:§f " + type.getName());
+		if (type.isCustom()) {
+			meta.add("§6Refilling:§f " + type.getInfo().getString("Refilling"));
+			meta.add("§6Sword:§f " + ((BasicDBObject) type.getInfo().get("Sword")).getString("name") + " " + ((BasicDBObject) type.getInfo().get("Sword")).getString("data"));
+			meta.add("§6Armor:§f " + ((BasicDBObject) type.getInfo().get("Armor")).getString("name") + " " + ((BasicDBObject) type.getInfo().get("Armor")).getString("data"));
+			meta.add("§6Healing Type:§f " + type.getInfo().getString("Healing Type"));
+			meta.add("§6Potions:§f " + type.getInfo().getString("Potions"));
+		}
+		if (type.getFirstTo() > 1) {
+			meta.add("§6Match Count: §f" + type.getFirstTo());
+		}
+		if (acceptName) {
+			meta.add(" ");
+			meta.add(" ");
+			meta.add("§6§lLEFT-CLICK: §aAccept");
+			meta.add("§6§lRIGHT-CLICK: §cDecline");
+		}
+		return meta;
 
 	}
 
@@ -225,48 +313,83 @@ public class Match {
 	 * @param p
 	 *            the player to invite
 	 */
-	public void invitePlayer(Player p) {
+	public void invitePlayer(final Player p) {
 		invitedPlayer = p.getName();
 		challenger.sendMessage(ChatColor.GOLD + "You have challenged " + ChatColor.RED + "" + p.getName() + ChatColor.GOLD + " to a 1v1. Type: " + getType().getName());
 		p.sendMessage(ChatColor.GOLD + challenger.getName() + ChatColor.GOLD + " has challenged you to a 1v1! Right click them to accept. Type: " + getType().getName());
+		if (RequestInventory.invs.containsKey(p.getName()))
+			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+				@Override
+				public void run() {
+					RequestInventory.invs.get(p.getName()).update();
+
+				}
+			}, 1L);
 	}
 
 	public void accept(Player invitee) {
 		victim = invitee;
 	}
 
+	public boolean hasFinished() {
+		return (wins.get(victim.getName()) == getFirstTo() || wins.get(challenger.getName()) == getFirstTo());
+	}
+
 	/**
 	 * Starts the match
 	 */
 	public void startMatch() {
+		KitAPI.getMatchManager().getCurrentMatches().put(victim.getName(), this);
+		KitAPI.getMatchManager().getCurrentMatches().put(challenger.getName(), this);
+		matchesDone++;
+		if (!wins.containsKey(victim.getName())) {
+			wins.put(victim.getName(), 0);
+		}
+		if (!wins.containsKey(challenger.getName())) {
+			wins.put(challenger.getName(), 0);
+		}
+
 		if (victim == null) {
 			return;
 		}
-		final Arena a = KitAPI.getArenaManager().requestArena();
-		if (a == null) {
-			victim.sendMessage("no arena available");
-			challenger.sendMessage("no arena available");
-			return;
+		if (arena == null) {
+			final Arena a = KitAPI.getArenaManager().requestArena();
+			if (a == null) {
+				victim.sendMessage("no arena available");
+				challenger.sendMessage("no arena available");
+				return;
+			}
+			arena = a;
 		}
-		a.getFirstLocation().getChunk().load();
-		a.getFirstLocation().getChunk().load(true);
-		a.getSecondLocation().getChunk().load();
-		a.getSecondLocation().getChunk().load(true);
+		arena.getFirstLocation().getChunk().load();
+		arena.getFirstLocation().getChunk().load(true);
+		arena.getSecondLocation().getChunk().load();
+		arena.getSecondLocation().getChunk().load(true);
 		KitAPI.getMatchManager().getMatches().remove(challenger.getName());
 		KitAPI.getMatchManager().getMatches().remove(victim.getName());
-		arena = a;
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 			@Override
 			public void run() {
-				victim.teleport(a.getFirstLocation());
+				victim.teleport(arena.getFirstLocation());
 			}
 		}, 4L);
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 			@Override
 			public void run() {
-				challenger.teleport(a.getSecondLocation());
+				challenger.teleport(arena.getSecondLocation());
+				if (getFirstTo() > 1) {
+					KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
+					KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
+				}
+			}
+		}, 5L);
+		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+			@Override
+			public void run() {
 				victim.setHealth(((Damageable) victim).getMaxHealth());
 				challenger.setHealth(((Damageable) challenger).getMaxHealth());
 				getType().applyInventory(victim.getInventory());
@@ -279,8 +402,13 @@ public class Match {
 				}
 				victim.showPlayer(challenger);
 				challenger.showPlayer(victim);
+
 			}
 		}, 6L);
+		if (getFirstTo() > 1) {
+			victim.sendMessage(ChatColor.GOLD + "§7===§6Match §e§l" + matchesDone + "§r§6 is starting!§7===");
+			challenger.sendMessage(ChatColor.GOLD + "§7===§6Match §e§l" + matchesDone + "§r§6 is starting!§7===");
+		}
 		invitedPlayer = null;
 		setInProgress(true);
 		victim.setHealth(((Damageable) victim).getMaxHealth());
@@ -293,7 +421,6 @@ public class Match {
 		}
 		KitAPI.getServerManager().freezePlayer(challenger);
 		KitAPI.getServerManager().freezePlayer(victim);
-
 		final AtomicInteger current = new AtomicInteger(0);
 		new BukkitRunnable() {
 

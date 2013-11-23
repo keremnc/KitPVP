@@ -3,7 +3,9 @@ package net.frozenorb.KitPVP.ItemSystem;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import net.frozenorb.KitPVP.MatchSystem.MatchRequest;
 import net.frozenorb.Utilities.Types.Attributes;
+import net.frozenorb.mBasic.shop.RomanNumeral;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -25,6 +27,8 @@ public class ToggleableItem {
 	private Enchantment enchant;
 	private boolean secondary = false;
 	private boolean ignoreFirst = true;
+	private boolean potionHeal = false;
+	private boolean soupItem = false;
 	private ArrayList<Integer> data = new ArrayList<Integer>() {
 		private static final long serialVersionUID = 1L;
 
@@ -32,27 +36,6 @@ public class ToggleableItem {
 			add(0);
 		}
 	};
-
-	/**
-	 * Creates a ToggleableItem
-	 * 
-	 * @param displayName
-	 *            name of the item
-	 * @param lore
-	 *            lore of the item
-	 * @param materials
-	 *            the materials to switch between
-	 * @param types
-	 *            names to switch between
-	 */
-	public ToggleableItem(String displayName, String lore, ArrayList<Material> materials, ArrayList<String> types) {
-		currentSelection = 0;
-		currentSelectionSecondary = 0;
-		this.materials = materials;
-		this.displayName = displayName;
-		this.types = types;
-		this.lore = lore;
-	}
 
 	/**
 	 * Creates a ToggleableItem using a map
@@ -125,6 +108,15 @@ public class ToggleableItem {
 		return this;
 	}
 
+	public ToggleableItem setPotionHeal(boolean rf) {
+		potionHeal = rf;
+		return this;
+	}
+
+	public boolean isPotionHeal() {
+		return potionHeal;
+	}
+
 	public void setIgnoreFirst(boolean ignoreFirst) {
 		this.ignoreFirst = ignoreFirst;
 	}
@@ -140,7 +132,6 @@ public class ToggleableItem {
 
 	public String getCurrentPrimaryValue() {
 		return ChatColor.stripColor(types.get(currentSelection)).trim();
-
 	}
 
 	public int getCurrentSecondaryValue() {
@@ -149,7 +140,7 @@ public class ToggleableItem {
 	}
 
 	public ItemStack initialize() {
-		ItemStack item = new ItemStack(materials.get(0));
+		ItemStack item = new ItemStack(getMaterials().get(0));
 		ItemMeta meta = item.getItemMeta();
 		meta.setLore(getLore());
 		meta.setDisplayName(displayName);
@@ -180,6 +171,19 @@ public class ToggleableItem {
 		return secondary;
 	}
 
+	public Material getCurrentMaterial() {
+		return materials.get(currentSelection);
+	}
+
+	public ToggleableItem setSoupItem(boolean soupItem) {
+		this.soupItem = soupItem;
+		return this;
+	}
+
+	public boolean isSoupItem() {
+		return soupItem;
+	}
+
 	public ArrayList<String> getLore() {
 		ArrayList<String> str = new ArrayList<String>();
 		str.add(lore);
@@ -203,25 +207,67 @@ public class ToggleableItem {
 					if (secondaries.get(i) == 0)
 						secondary = "No " + secondaryItemName;
 					else
-						secondary = secondaryItemName + " " + secondaries.get(i);
+						secondary = secondaryItemName + " " + RomanNumeral.convertToRoman(secondaries.get(i));
 					str.add("§a  ► " + secondary);
 				} else if (secondaries.get(i) == 0)
 					str.add("§c    " + "No " + secondaryItemName);
 
 				else
-					str.add("§c    " + secondaryItemName + " " + secondaries.get(i));
+					str.add("§c    " + secondaryItemName + " " + RomanNumeral.convertToRoman(secondaries.get(i)));
 			}
 		}
 		return str;
 	}
 
+	public ArrayList<Material> getMaterials() {
+		return materials;
+	}
+
 	public void next(ItemStack item, int slot, Player who) {
 		if (item.hasItemMeta()) {
+			if (isSoupItem()) {
+				ItemStack soup = who.getOpenInventory().getItem(MatchRequest.HEAL_SLOT);
+
+				if (soup.getType() == Material.POTION) {
+					materials = new ArrayList<Material>() {
+						private static final long serialVersionUID = 1L;
+						{
+							add(Material.GLASS_BOTTLE);
+							add(Material.POTION);
+						}
+					};
+				} else if (soup.getType() == Material.MUSHROOM_SOUP) {
+					materials = new ArrayList<Material>() {
+						private static final long serialVersionUID = 1L;
+						{
+							add(Material.BOWL);
+							add(Material.MUSHROOM_SOUP);
+						}
+					};
+
+				}
+
+			}
 			currentSelection += 1;
 			if (currentSelection == types.size())
 				currentSelection = 0;
+			if (isPotionHeal()) {
+				ItemStack soup = who.getOpenInventory().getItem(MatchRequest.SOUP_SLOT);
+				if (getCurrentMaterial() == Material.POTION) {
+					if (soup.getType() == Material.BOWL || soup.getType() == Material.GLASS_BOTTLE) {
+						soup.setType(Material.GLASS_BOTTLE);
+					} else
+						soup.setType(Material.POTION);
+				} else if (getCurrentMaterial() == Material.MUSHROOM_SOUP) {
+					if (soup.getType() == Material.MUSHROOM_SOUP || soup.getType() == Material.POTION) {
+						soup.setType(Material.MUSHROOM_SOUP);
+					} else
+						soup.setType(Material.BOWL);
+
+				}
+			}
 			item.setDurability((short) (int) data.get((currentSelection >= data.size() ? data.size() - 1 : currentSelection)));
-			item.setType(materials.get(currentSelection));
+			item.setType(getMaterials().get(currentSelection));
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(displayName);
 			meta.setLore(getLore());

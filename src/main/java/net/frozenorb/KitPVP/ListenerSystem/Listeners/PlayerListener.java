@@ -21,6 +21,7 @@ import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.Types.CombatLogRunnable;
 import net.frozenorb.Utilities.Core;
+import net.frozenorb.mCommon.Events.SoundSendPacketEvent;
 import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
 
 import org.bukkit.Bukkit;
@@ -42,9 +43,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -144,8 +143,12 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler
+	public void onServerSendSound(SoundSendPacketEvent e){
+	}
+	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
+		KitAPI.getBossBarManager().unregisterPlayer(p);
 		if (this.combatLogRunnables.containsKey(p.getName()))
 			p.setHealth(0.0D);
 
@@ -160,12 +163,6 @@ public class PlayerListener extends ListenerBase {
 			KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).save();
 		}
 		KitAPI.getStatManager().getStat(e.getPlayer().getName()).saveStat();
-	}
-
-	@EventHandler
-	public void onEntityRegainHealth(EntityRegainHealthEvent e) {
-		if (e.getRegainReason() != RegainReason.MAGIC && e.getRegainReason() != RegainReason.MAGIC_REGEN && e.getRegainReason() != RegainReason.REGEN)
-			e.setCancelled(true);
 	}
 
 	@EventHandler
@@ -186,7 +183,6 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerDeath(final PlayerDeathEvent e) {
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
-
 		if (KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit() != null)
 			KitAPI.getStatManager().getLocalData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {

@@ -16,7 +16,6 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 public class ScoreboardManager implements Runnable {
-
 	public OfflinePlayer generateName(String str) {
 		return Bukkit.getOfflinePlayer(str);
 	}

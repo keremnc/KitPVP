@@ -2,6 +2,7 @@ package net.frozenorb.KitPVP.MatchSystem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.KitPVP;
@@ -12,6 +13,7 @@ import net.frozenorb.KitPVP.MatchSystem.Queue.MatchList;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
 import net.frozenorb.KitPVP.Pagination.MatchTypeInventory;
+import net.frozenorb.KitPVP.Pagination.RequestInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Core;
@@ -77,10 +79,10 @@ public class MatchManager {
 		});
 		SELECT_ITEM = Core.get().generateItem(SELECT_PLAYER_ITEM, 8, "§a§l1v1 Stick", new ArrayList<String>() {
 			private static final long serialVersionUID = -3830569489943814868L;
-
 			{
 				add("§9Right click a player to challenge them.");
-				add("§9Left click to accept the most recent request.");
+				add("§9Left click to open up the match inventory,");
+				add("    §9or find the most recent match.");
 			}
 		});
 	}
@@ -182,6 +184,18 @@ public class MatchManager {
 
 	}
 
+	public void decline(String name, String challenger) {
+		Iterator<Match> iter = currentMatches.values().iterator();
+		while (iter.hasNext()) {
+			Match m = iter.next();
+			if (m.getChallenger().getName().equalsIgnoreCase(challenger))
+				if (m.getInvitedPlayer() != null && m.getInvitedPlayer().equalsIgnoreCase(name)) {
+					iter.remove();
+				}
+		}
+
+	}
+
 	public void addToQueue(MatchQueue queue) {
 		String requester = queue.getPlayer().getName();
 		if (queue.getQueueType() == QueueType.QUICK) {
@@ -241,6 +255,8 @@ public class MatchManager {
 			new Match(p1, p2, loadout) {
 				{
 					setRanked(type.getQueueType() == QueueType.RANKED);
+					if (isRanked())
+						setFirstTo(3);
 					startMatch();
 				}
 			};
@@ -385,14 +401,6 @@ public class MatchManager {
 			if (m.isInProgress()) {
 				sender.sendMessage(String.format("§c%s is currently in a match!", reci.getName()));
 				return;
-			} else if (hasInvitationTo(sender.getName(), reci.getName())) {
-				m.accept(sender);
-				currentMatches.put(sender.getName(), m);
-				matchFound(sender, reci, m.getType(), new MatchQueue(sender, m.getType(), QueueType.UNRANKED), false);
-				m.setRanked(false);
-				m.startMatch();
-				return;
-
 			}
 		} else if (isInMatch(sender.getName())) {
 			Match m = currentMatches.get(sender.getName());
@@ -404,14 +412,50 @@ public class MatchManager {
 		Match mat = new Match(sender, loadout);
 		mat.invitePlayer(reci);
 		currentMatches.put(sender.getName(), mat);
+	}
 
+	public void openMatchAcceptScreen(final Match match, final Player who) {
+		matches.remove(who.getName());
+		new MatchAcceptScreen(who, match) {
+
+			@Override
+			public void onDecline(Match match) {
+				decline(who.getName(), match.getOpponent(who).getName());
+				matches.remove(who.getName());
+				who.sendMessage(ChatColor.RED + "You have declined " + match.getOpponent(who.getName()).getName() + "'s match request.");
+				match.getOpponent(who.getName()).sendMessage(ChatColor.RED + "" + who.getName() + " has declined your match request.");
+			}
+
+			@Override
+			public void onAccept(Match match) {
+				match.accept(who);
+				matches.remove(who.getName());
+				currentMatches.put(who.getName(), match);
+				matchFound(who, match.getChallenger(), match.getType(), new MatchQueue(who, match.getType(), QueueType.UNRANKED), false);
+				match.setRanked(false);
+				match.startMatch();
+			}
+		};
+
+	}
+
+	public ArrayList<Match> getMatchRequestsTo(String name) {
+		ArrayList<Match> matches = new ArrayList<Match>();
+		for (Match m : currentMatches.values()) {
+			if (m.getInvitedPlayer() != null && m.getInvitedPlayer().equalsIgnoreCase(name)) {
+				if (!m.isInProgress()) {
+					matches.add(m);
+				}
+			}
+		}
+		return matches;
 	}
 
 	private class MatchListener implements Listener {
 
 		@EventHandler
 		public void onPlayerInteract(PlayerInteractEvent e) {
-			Player p = e.getPlayer();
+			final Player p = e.getPlayer();
 			if (p.getItemInHand() != null) {
 				if (p.getItemInHand().hasItemMeta()) {
 					String display = p.getItemInHand().getItemMeta().getDisplayName();
@@ -432,13 +476,32 @@ public class MatchManager {
 				}
 				if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) {
 					if (p.getItemInHand().getType() == SELECT_PLAYER_ITEM) {
-						if (getInvitation(p.getName()) != null) {
-							Match match = getInvitation(p.getName());
-							match.accept(p);
-							currentMatches.put(p.getName(), match);
-							matchFound(p, match.getChallenger(), match.getType(), new MatchQueue(p, match.getType(), QueueType.UNRANKED), false);
-							match.setRanked(false);
-							match.startMatch();
+						if (getMatchRequestsTo(p.getName()).size() > 0) {
+							if (getMatchRequestsTo(p.getName()).size() == 1) {
+								Match match = getInvitation(p.getName());
+								openMatchAcceptScreen(match, p);
+							} else {
+								new RequestInventory(p) {
+									@Override
+									public void onDecline(Match match) {
+										decline(p.getName(), match.getOpponent(p).getName());
+										matches.remove(p.getName());
+										p.sendMessage(ChatColor.RED + "You have declined " + match.getOpponent(p.getName()).getName() + "'s match request.");
+										match.getOpponent(p.getName()).sendMessage(ChatColor.RED + "" + p.getName() + " has declined your match request.");
+										update();
+									}
+
+									@Override
+									public void onAccept(Match match) {
+										match.accept(p);
+										matches.remove(p.getName());
+										currentMatches.put(p.getName(), match);
+										matchFound(p, match.getChallenger(), match.getType(), new MatchQueue(p, match.getType(), QueueType.UNRANKED), false);
+										match.setRanked(false);
+										match.startMatch();
+									}
+								}.loadTypes().openInventory();
+							}
 							return;
 						} else {
 							p.sendMessage(ChatColor.RED + "There are no match requests that are still acceptable.");
@@ -472,21 +535,13 @@ public class MatchManager {
 					if (clicker.getItemInHand().getType().equals((SELECT_PLAYER_ITEM))) {
 						e.setCancelled(true);
 
-						if (hasInvitationTo(p.getName(), clicker.getName())) {
-							clicker.sendMessage(ChatColor.RED + "You already have a request to " + p.getDisplayName() + "§c.");
-							return;
-						}
 						if (isInMatch(p.getName())) {
 							Match m = currentMatches.get(p.getName());
 							if (m.isInProgress()) {
 								clicker.sendMessage(String.format("§c%s is currently in a match!", p.getName()));
 								return;
 							} else if (hasInvitationTo(clicker.getName(), p.getName())) {
-								m.accept(clicker);
-								currentMatches.put(clicker.getName(), m);
-								matchFound(clicker, p, m.getType(), new MatchQueue(clicker, m.getType(), QueueType.UNRANKED), false);
-								m.setRanked(false);
-								m.startMatch();
+								openMatchAcceptScreen(m, clicker);
 								return;
 							}
 						} else if (isInMatch(clicker.getName())) {
@@ -495,7 +550,10 @@ public class MatchManager {
 								clicker.sendMessage("§cYou are currently in a match!");
 								return;
 							}
-
+						}
+						if (hasInvitationTo(p.getName(), clicker.getName())) {
+							clicker.sendMessage(ChatColor.RED + "You already have a request to " + p.getDisplayName() + "§c.");
+							return;
 						}
 						new MatchRequest(clicker, p) {
 							@Override

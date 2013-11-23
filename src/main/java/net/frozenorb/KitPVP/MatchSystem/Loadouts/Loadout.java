@@ -15,6 +15,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 
+import com.mongodb.BasicDBObject;
+
 public abstract class Loadout {
 	private static ArrayList<Loadout> matches = new ArrayList<Loadout>();
 
@@ -115,6 +117,43 @@ public abstract class Loadout {
 	 *            the loser
 	 */
 	public void onDefeat(Player winner, Player loser) {
+	}
+
+	/**
+	 * Gets the data associated with the 1v1
+	 * 
+	 * @return data
+	 */
+	public BasicDBObject getInfo() {
+		return null;
+	}
+
+	/**
+	 * Gets if the Match is a custom match or not
+	 * 
+	 * @return custom
+	 */
+	public boolean isCustom() {
+
+		return false;
+	}
+
+	/**
+	 * Gets the amount of matches to do
+	 * 
+	 * @return first to
+	 */
+	public int getFirstTo() {
+		return 1;
+	}
+
+	/**
+	 * Gets the name of the heal type, either soup, or potion
+	 * 
+	 * @return type
+	 */
+	public String getHealType() {
+		return "soup";
 	}
 
 	/**

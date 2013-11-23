@@ -31,7 +31,7 @@ public class BuffedSpeedLoadout extends Loadout {
 		KitAPI.getPlayerManager().clearInventory(inventory);
 		inventory.setArmorContents(Utilities.getFullSet(Material.IRON_HELMET));
 		inventory.setItem(0, Utilities.generateItem(Material.DIAMOND_SWORD, Enchantment.DAMAGE_ALL, 1));
-		KitAPI.getPlayerManager().fillSoup(inventory);
+		KitAPI.getPlayerManager().fillSoup(inventory, Material.MUSHROOM_SOUP);
 		return inventory;
 	}
 

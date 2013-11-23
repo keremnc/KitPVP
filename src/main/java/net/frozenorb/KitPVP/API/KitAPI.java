@@ -14,6 +14,7 @@ import net.frozenorb.KitPVP.ScoreboardSystem.ScoreboardManager;
 import net.frozenorb.KitPVP.Server.ServerManager;
 import net.frozenorb.KitPVP.StatSystem.StatManager;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
+import net.frozenorb.KitPVP.VisualSystem.BossBarManager;
 
 /**
  * API class used to access managers and instances
@@ -37,6 +38,7 @@ public class KitAPI {
 	private static ServerManager serverManager = null;
 	private static EloManager eloManager = null;
 	private static ToggleableItemManager itemManager = null;
+	private static BossBarManager bossBarManager = null;;
 
 	public static KitPVP getKitPVP() {
 		return kitpvp;
@@ -76,6 +78,12 @@ public class KitAPI {
 		if (scoreboardManager == null)
 			scoreboardManager = new ScoreboardManager();
 		return scoreboardManager;
+	}
+
+	public static BossBarManager getBossBarManager() {
+		if (bossBarManager == null)
+			bossBarManager = new BossBarManager();
+		return bossBarManager;
 	}
 
 	public static StatManager getStatManager() {

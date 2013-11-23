@@ -102,6 +102,8 @@ public class KitPVP extends JavaPlugin {
 			e.printStackTrace();
 		}
 		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getScoreboardManager(), 20L, 20L);
+		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getBossBarManager(), 20L, 120L);
+
 		/*
 		 * We do the following to fix the server after a restart
 		 */
@@ -121,7 +123,7 @@ public class KitPVP extends JavaPlugin {
 	}
 
 	/**
-	 * called when plugin is disabled
+	 * Called when plugin is disabled
 	 */
 	@Override
 	public void onDisable() {

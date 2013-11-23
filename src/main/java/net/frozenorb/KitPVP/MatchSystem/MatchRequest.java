@@ -12,6 +12,7 @@ import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 import net.frozenorb.Utilities.Core;
+import net.frozenorb.mBasic.shop.RomanNumeral;
 import net.frozenorb.mBasic.util.Attributes;
 
 import org.bukkit.Bukkit;
@@ -37,10 +38,12 @@ import com.mongodb.BasicDBObject;
 
 public abstract class MatchRequest implements Listener {
 	/* Slot fields */
-	private final static int POTION_SLOT = 16;
-	private final static int SOUP_SLOT = 14;
-	private final static int CHESTPLATE_SLOT = 12;
-	private final static int SWORD_SLOT = 10;
+	public final static int POTION_SLOT = 16;
+	public final static int SOUP_SLOT = 14;
+	public final static int CHESTPLATE_SLOT = 12;
+	public final static int SWORD_SLOT = 10;
+	public final static int FIRST_TO_SLOT = 28;
+	public final static int HEAL_SLOT = 34;
 
 	/* Player and recipient fields */
 	private Player sender;
@@ -53,10 +56,55 @@ public abstract class MatchRequest implements Listener {
 	private ToggleableItem armor = null;
 	private ToggleableItem sword = null;
 	private ToggleableItem potions = null;
+	private ToggleableItem healType = null;
+	private ToggleableItem firstTo = null;
 
 	public MatchRequest(Player sender, Player recipient) {
-		soup = new ToggleableItem("§bRefilling", "§9Click to toggle refilling.", Material.BOWL, Material.MUSHROOM_SOUP, false);
-		potions = new ToggleableItem("§bPotions", "§9Click to toggle potions.", new LinkedHashMap<String, Material>() {
+		registerItems();
+		this.sender = sender;
+		this.recipientName = recipient.getName();
+		sender.closeInventory();
+		String title = "Challenging: " + recipient.getName();
+		Inventory inv = Bukkit.createInventory(sender, 45, title);
+		createBaseInventory(inv);
+		sender.openInventory(inv);
+		Bukkit.getPluginManager().registerEvents(this, KitPVP.get());
+		KitAPI.getItemManager().registerItem(soup, sender);
+		KitAPI.getItemManager().registerItem(sword, sender);
+		KitAPI.getItemManager().registerItem(healType, sender);
+		KitAPI.getItemManager().registerItem(armor, sender);
+		KitAPI.getItemManager().registerItem(potions, sender);
+		KitAPI.getItemManager().registerItem(firstTo, sender);
+
+	}
+
+	public void registerItems() {
+		firstTo = new ToggleableItem("§bFirst To", "§9Choose the amount of matches to run.", new LinkedHashMap<String, Material>() {
+			private static final long serialVersionUID = 1L;
+
+			{
+				put("Single Match", Material.ITEM_FRAME);
+				put("First to 3", Material.ITEM_FRAME);
+				put("First to 5", Material.ITEM_FRAME);
+
+			}
+		});
+		soup = new ToggleableItem("§bRefilling", "§9Toggle refilling.", Material.BOWL, Material.MUSHROOM_SOUP, false).setSoupItem(true);
+		healType = new ToggleableItem("§bHealing Type", "§9Switch healing types.", new LinkedHashMap<String, Material>() {
+			private static final long serialVersionUID = 1L;
+			{
+				put("§a§lSoup", Material.MUSHROOM_SOUP);
+				put("§a§lPotions", Material.POTION);
+			}
+		}).setData(new ArrayList<Integer>() {
+			private static final long serialVersionUID = 1L;
+
+			{
+				add(0);
+				add(16421);
+			}
+		}).setPotionHeal(true);
+		potions = new ToggleableItem("§bPotions", "§9Toggle potions.", new LinkedHashMap<String, Material>() {
 			private static final long serialVersionUID = 1L;
 
 			{
@@ -66,7 +114,7 @@ public abstract class MatchRequest implements Listener {
 				put("§a§lSpeed and Strength II", Material.POTION);
 			}
 		});
-		sword = new ToggleableItem("§bSword", "§9Click to switch swords.", new LinkedHashMap<String, Material>() {
+		sword = new ToggleableItem("§bSword", "§9Switch swords.", new LinkedHashMap<String, Material>() {
 			private static final long serialVersionUID = 1L;
 
 			{
@@ -84,7 +132,7 @@ public abstract class MatchRequest implements Listener {
 				}
 			}
 		}, "Sharpness", Enchantment.DAMAGE_ALL);
-		armor = new ToggleableItem("§bArmor", "§9Click to switch armor types.", new LinkedHashMap<String, Material>() {
+		armor = new ToggleableItem("§bArmor", "§9Switch armor types.", new LinkedHashMap<String, Material>() {
 			private static final long serialVersionUID = 1L;
 
 			{
@@ -103,19 +151,6 @@ public abstract class MatchRequest implements Listener {
 				}
 			}
 		}, "Protection", Enchantment.PROTECTION_ENVIRONMENTAL);
-		this.sender = sender;
-		this.recipientName = recipient.getName();
-		sender.closeInventory();
-		String title = "Challenging: " + recipient.getName();
-		Inventory inv = Bukkit.createInventory(sender, 45, title);
-		createBaseInventory(inv);
-		sender.openInventory(inv);
-		Bukkit.getPluginManager().registerEvents(this, KitPVP.get());
-		KitAPI.getItemManager().registerItem(soup, sender);
-		KitAPI.getItemManager().registerItem(sword, sender);
-		KitAPI.getItemManager().registerItem(armor, sender);
-		KitAPI.getItemManager().registerItem(potions, sender);
-
 	}
 
 	public void createBaseInventory(Inventory inv) {
@@ -165,11 +200,13 @@ public abstract class MatchRequest implements Listener {
 		for (int i = 0; i < 45; i += 1) {
 			inv.setItem(i, Utilities.generateItem(Material.PISTON_EXTENSION, " "));
 		}
-
+		inv.setItem(36, Core.get().generateItem(Material.CARPET, 14, "§c§lBack", new String[] { "§9Click to go back to the Loadout selection." }));
 		inv.setItem(SWORD_SLOT, sword.initialize());
 		inv.setItem(CHESTPLATE_SLOT, armor.initialize());
 		inv.setItem(SOUP_SLOT, soup.initialize());
 		inv.setItem(POTION_SLOT, potions.initialize());
+		inv.setItem(FIRST_TO_SLOT, firstTo.initialize());
+		inv.setItem(HEAL_SLOT, healType.initialize());
 		ItemStack head = new ItemStack(Material.SKULL_ITEM);
 		head.setDurability((short) 3);
 		SkullMeta meta = (SkullMeta) head.getItemMeta();
@@ -230,6 +267,7 @@ public abstract class MatchRequest implements Listener {
 		potions = null;
 		armor = null;
 		sword = null;
+		healType = null;
 		HandlerList.unregisterAll(this);
 	}
 
@@ -241,12 +279,16 @@ public abstract class MatchRequest implements Listener {
 				e.setCancelled(true);
 				if (e.getCurrentItem() != null) {
 					ItemStack item = e.getCurrentItem();
-					if (item.getType() == Material.WOOL) {
-						onSelect(createLoadout(armor.getCurrentPrimaryValue(), potions.getCurrentPrimaryValue(), soup.getCurrentPrimaryValue(), sword.getCurrentPrimaryValue(), armor.getCurrentSecondaryValue(), sword.getCurrentSecondaryValue()));
-						finish(who);
+					if (item.getType() == Material.CARPET) {
+						createBaseInventory(who.getOpenInventory().getTopInventory());
 						return;
 					}
-
+					if (item.getType() == Material.WOOL) {
+						onSelect(createLoadout(healType.getCurrentMaterial(), armor.getCurrentPrimaryValue(), potions.getCurrentPrimaryValue(), soup.getCurrentPrimaryValue(), sword.getCurrentPrimaryValue(), armor.getCurrentSecondaryValue(), sword.getCurrentSecondaryValue(), firstTo.getCurrentPrimaryValue()));
+						finish(who);
+						e.getWhoClicked().closeInventory();
+						return;
+					}
 					if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null) {
 						if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT)
 							KitAPI.getItemManager().handleRightClick(item, e.getRawSlot(), who);
@@ -256,8 +298,8 @@ public abstract class MatchRequest implements Listener {
 						Loadout l = Loadout.getByName(name);
 						if (l != null) {
 							onSelect(l);
-							finish(who);
 							e.getWhoClicked().closeInventory();
+							finish(who);
 						}
 						if (item.getType() == Material.ANVIL) {
 							Inventory inv = e.getInventory();
@@ -274,7 +316,7 @@ public abstract class MatchRequest implements Listener {
 	 * 
 	 * @return loadout
 	 */
-	public Loadout createLoadout(final String armor, final String potion, final String soup, final String sword, final int armorlevel, final int swordlevel) {
+	public Loadout createLoadout(final Material healType, final String armor, final String potion, final String soup, final String sword, final int armorlevel, final int swordlevel, final String firstTo) {
 		final Loadout l = new Loadout() {
 
 			@Override
@@ -294,9 +336,22 @@ public abstract class MatchRequest implements Listener {
 				}
 				if (potion.equals("Speed and Strength II")) {
 					return new PotionEffect[] { new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, 1), new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1) };
-
 				}
 				return new PotionEffect[] {};
+			}
+
+			@Override
+			public boolean isCustom() {
+				return true;
+			}
+
+			@Override
+			public int getFirstTo() {
+				if (firstTo.toLowerCase().contains("single"))
+					return 1;
+				if (firstTo.toLowerCase().contains("3"))
+					return 3;
+				return 5;
 			}
 
 			@Override
@@ -305,8 +360,21 @@ public abstract class MatchRequest implements Listener {
 			}
 
 			@Override
+			public BasicDBObject getInfo() {
+				return new BasicDBObject("Refilling", soup).append("Healing Type", healType == Material.MUSHROOM_SOUP ? "Soup" : "Potions").append("Sword", new BasicDBObject("name", sword + "- ").append("data", swordlevel == 0 ? "" : "Sharpness " + RomanNumeral.convertToRoman(swordlevel))).append("Armor", new BasicDBObject("name", armor + "- ").append("data", armorlevel == 0 ? "" : "Protection " + RomanNumeral.convertToRoman(armorlevel))).append("Potions", potion);
+			}
+
+			@Override
 			public String getDescription() {
-				return new BasicDBObject("refills", soup.equalsIgnoreCase("enabled")).append("sword", sword).append("armor", armor).append("potions", potion).toString();
+				return new BasicDBObject("Refilling", soup).append("Healing Type", healType == Material.MUSHROOM_SOUP ? "Soup" : "Potions").append("Sword", new BasicDBObject("name", sword + "- ").append("data", swordlevel == 0 ? "" : "Sharpness " + RomanNumeral.convertToRoman(swordlevel))).append("Armor", new BasicDBObject("name", armor + "- ").append("data", armorlevel == 0 ? "" : "Protection " + RomanNumeral.convertToRoman(armorlevel))).append("Potions", potion).toString();
+			}
+
+			@Override
+			public String getHealType() {
+				if (healType == Material.MUSHROOM_SOUP) {
+					return "soup";
+				}
+				return "potion";
 			}
 
 			@Override
@@ -325,9 +393,9 @@ public abstract class MatchRequest implements Listener {
 				else
 					inventory.setItem(0, Utilities.generateItem(Material.getMaterial(sword.toUpperCase() + "_SWORD")));
 				if (soup.equalsIgnoreCase("enabled"))
-					KitAPI.getPlayerManager().fillSoupCompletely(inventory);
+					KitAPI.getPlayerManager().fillSoupCompletely(inventory, healType);
 				else
-					KitAPI.getPlayerManager().fillSoup(inventory);
+					KitAPI.getPlayerManager().fillSoup(inventory, healType);
 
 				return inventory;
 			}
