@@ -628,7 +628,8 @@ public class MatchManager {
 					}
 				}
 			}
-			p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
+			if (p.getInventory().first(Material.INK_SACK) != -1)
+				p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
 			matches.remove(p.getName());
 			if (isInMatch(p.getName())) {
 				Match m = currentMatches.get(p.getName());

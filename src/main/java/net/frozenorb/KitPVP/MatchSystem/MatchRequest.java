@@ -361,12 +361,12 @@ public abstract class MatchRequest implements Listener {
 
 			@Override
 			public BasicDBObject getInfo() {
-				return new BasicDBObject("Refilling", soup).append("Healing Type", healType == Material.MUSHROOM_SOUP ? "Soup" : "Potions").append("Sword", new BasicDBObject("name", sword + "- ").append("data", swordlevel == 0 ? "" : "Sharpness " + RomanNumeral.convertToRoman(swordlevel))).append("Armor", new BasicDBObject("name", armor + "- ").append("data", armorlevel == 0 ? "" : "Protection " + RomanNumeral.convertToRoman(armorlevel))).append("Potions", potion);
+				return new BasicDBObject("Refilling", soup).append("Healing Type", healType == Material.MUSHROOM_SOUP ? "Soup" : "Potions").append("Sword", new BasicDBObject("name", sword + "").append("data", swordlevel == 0 ? "" : "- Sharpness " + RomanNumeral.convertToRoman(swordlevel))).append("Armor", new BasicDBObject("name", armor + "").append("data", armorlevel == 0 ? "" : "- Protection " + RomanNumeral.convertToRoman(armorlevel))).append("Potions", potion);
 			}
 
 			@Override
 			public String getDescription() {
-				return new BasicDBObject("Refilling", soup).append("Healing Type", healType == Material.MUSHROOM_SOUP ? "Soup" : "Potions").append("Sword", new BasicDBObject("name", sword + "- ").append("data", swordlevel == 0 ? "" : "Sharpness " + RomanNumeral.convertToRoman(swordlevel))).append("Armor", new BasicDBObject("name", armor + "- ").append("data", armorlevel == 0 ? "" : "Protection " + RomanNumeral.convertToRoman(armorlevel))).append("Potions", potion).toString();
+				return new BasicDBObject("Refilling", soup).append("Healing Type", healType == Material.MUSHROOM_SOUP ? "Soup" : "Potions").append("Sword", new BasicDBObject("name", sword + "").append("data", swordlevel == 0 ? "" : "- Sharpness " + RomanNumeral.convertToRoman(swordlevel))).append("Armor", new BasicDBObject("name", armor + "").append("data", armorlevel == 0 ? "" : "- Protection " + RomanNumeral.convertToRoman(armorlevel))).append("Potions", potion).toString();
 			}
 
 			@Override
