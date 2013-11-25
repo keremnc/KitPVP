@@ -21,7 +21,6 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import com.mongodb.BasicDBObject;
 
@@ -31,8 +30,8 @@ public class CommandManager {
 
 	public CommandManager() {
 
-		loadCommands(KitPVP.get(), "net.frozenorb.KitPVP.Commands");
-		loadCommands(KitPVP.get(), "net.frozenorb.KitPVP.KitSystem.Kits");
+		loadCommands("net.frozenorb.KitPVP.Commands");
+		loadCommands("net.frozenorb.KitPVP.KitSystem.Kits");
 	}
 
 	public void loadCommandsFromJson(BasicDBObject db) {
@@ -94,7 +93,7 @@ public class CommandManager {
 		};
 	}
 
-	public void loadCommands(JavaPlugin plugin, String packageName) {
+	public void loadCommands(String packageName) {
 		for (Class<?> commandClass : KitPVP.get().getReflectionManager().getClassesInPackage(packageName)) {
 			if (CommandExecutor.class.isAssignableFrom(commandClass)) {
 				try {

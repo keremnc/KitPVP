@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.CommandSystem;
+package net.frozenorb.KitPVP.CommandSystem.Conversations;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.Arena;

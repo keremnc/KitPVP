@@ -1,5 +1,10 @@
 package net.frozenorb.KitPVP.Utilities;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +18,22 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public final class Utilities {
 	private Utilities() {
+	}
+
+	public static String readFile(File f) {
+		StringBuilder dr = new StringBuilder();
+		try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+
+			String sCurrentLine;
+
+			while ((sCurrentLine = br.readLine()) != null) {
+				dr.append(sCurrentLine);
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dr.toString();
 	}
 
 	public static ItemStack generateItem(Material m, String name) {

@@ -17,11 +17,14 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 
 import net.frozenorb.KitPVP.KitPVP;
+import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.Utilities.Core;
 
 public class KitManager {
@@ -186,6 +189,45 @@ public class KitManager {
 				return ((Integer) o1.getId()).compareTo(o2.getId());
 			}
 		});
+	}
+
+	/**
+	 * Unregisters a kit
+	 * 
+	 * @param k
+	 *            kit to unregister
+	 */
+	public void unregisterKit(final Kit k) {
+		KitPVP.getKits().remove(k);
+		KitAPI.getKitPVP().getCommandManager().unregisterCommand(k.getName().toLowerCase());
+		if (k.getListener() != null) {
+			HandlerList.unregisterAll(k.getListener());
+		}
+	}
+
+	/**
+	 * Used to register kits from an external plugin or an extension pack
+	 * <p>
+	 * Don't use this to register kits in the net.frozenorb.KitPVP.KitSystem.Kits package, that's plain retarded
+	 * 
+	 * @param k
+	 *            the kit to register
+	 */
+	public void registerExternalKit(final Kit k) {
+		KitPVP.get().registerKit(k);
+		BaseCommand cmd = new BaseCommand() {
+
+			@Override
+			public void execute() {
+				k.commandRun((Player) sender);
+
+			}
+		};
+		try {
+			KitPVP.get().getCommandManager().registerCommand(k.getName().toLowerCase(), cmd);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

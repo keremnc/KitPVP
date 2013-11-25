@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.CommandSystem.ArenaConversation;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
+import net.frozenorb.KitPVP.CommandSystem.Conversations.ArenaConversation;
 import net.frozenorb.Utilities.CommandSystem.CommandVerifier;
 
 import org.bukkit.ChatColor;

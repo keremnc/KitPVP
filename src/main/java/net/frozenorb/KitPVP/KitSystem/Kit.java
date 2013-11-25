@@ -106,4 +106,8 @@ public interface Kit {
 	 */
 	public void applyKit(Player p);
 
+	/**
+	 * Called when a player runs the kit command
+	 */
+	public void commandRun(Player p);
 }

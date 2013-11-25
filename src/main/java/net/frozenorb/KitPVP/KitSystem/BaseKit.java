@@ -149,9 +149,14 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 
 	@Override
 	public final void execute() {
-		equip((Player) sender);
-		onEquip();
+		commandRun((Player) sender);
 
+	}
+
+	@Override
+	public void commandRun(Player p) {
+		equip(p);
+		onEquip();
 	}
 
 	@Override
