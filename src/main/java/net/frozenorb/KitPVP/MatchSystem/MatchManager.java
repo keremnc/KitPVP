@@ -7,13 +7,13 @@ import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.InventorySystem.Inventories.MatchTypeInventory;
+import net.frozenorb.KitPVP.InventorySystem.Inventories.RequestInventory;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.StandardLoadout;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchList;
 import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
 import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
-import net.frozenorb.KitPVP.Pagination.MatchTypeInventory;
-import net.frozenorb.KitPVP.Pagination.RequestInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.Utilities.Core;
@@ -638,6 +638,10 @@ public class MatchManager {
 					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
 				}
 			}
+			currentMatches.remove(p.getName());
+			for (Player pl : Bukkit.getOnlinePlayers())
+				if (RequestInventory.invs.containsKey(pl.getName()))
+					RequestInventory.invs.get(pl.getName()).update();
 		}
 
 		@EventHandler
@@ -662,6 +666,11 @@ public class MatchManager {
 					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
 				}
 			}
+			currentMatches.remove(p.getName());
+			for (Player pl : Bukkit.getOnlinePlayers())
+				if (RequestInventory.invs.containsKey(pl.getName()))
+					RequestInventory.invs.get(pl.getName()).update();
+
 		}
 
 		@EventHandler(priority = EventPriority.LOWEST)

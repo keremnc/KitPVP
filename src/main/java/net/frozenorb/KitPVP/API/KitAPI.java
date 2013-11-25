@@ -10,11 +10,11 @@ import net.frozenorb.KitPVP.MatchSystem.MatchManager;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.ArenaManager;
 import net.frozenorb.KitPVP.PlayerSystem.PlayerManager;
 import net.frozenorb.KitPVP.RegionSysten.RegionChecker;
-import net.frozenorb.KitPVP.ScoreboardSystem.ScoreboardManager;
 import net.frozenorb.KitPVP.Server.ServerManager;
 import net.frozenorb.KitPVP.StatSystem.StatManager;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.VisualSystem.BossBarManager;
+import net.frozenorb.KitPVP.VisualSystem.ScoreboardManager;
 
 /**
  * API class used to access managers and instances

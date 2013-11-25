@@ -143,8 +143,9 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler
-	public void onServerSendSound(SoundSendPacketEvent e){
+	public void onServerSendSound(SoundSendPacketEvent e) {
 	}
+
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();

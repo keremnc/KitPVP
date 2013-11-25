@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.InventorySystem.Inventories.RequestInventory;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.Arena;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
-import net.frozenorb.KitPVP.Pagination.RequestInventory;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
@@ -285,12 +285,14 @@ public class Match {
 
 	}
 
-	public ArrayList<String> getMetadata(boolean acceptName) {
+	public ArrayList<String> getMetadata(boolean acceptName, boolean showStats) {
 		ArrayList<String> meta = new ArrayList<>();
 		Stat s = KitAPI.getStatManager().getStat(challenger.getName());
-		meta.add("§6Kills/Deaths: §f" + s.get(StatObjective.KILLS) + "/" + s.get(StatObjective.DEATHS));
-		meta.add("§61v1 Wins/Losses: §f" + s.get(StatObjective.DUEL_WINS) + "/" + s.get(StatObjective.DUEL_LOSSES));
-		meta.add(" ");
+		if (showStats) {
+			meta.add("§6Kills/Deaths: §f" + s.get(StatObjective.KILLS) + "/" + s.get(StatObjective.DEATHS));
+			meta.add("§61v1 Wins/Losses: §f" + s.get(StatObjective.DUEL_WINS) + "/" + s.get(StatObjective.DUEL_LOSSES));
+			meta.add(" ");
+		}
 		meta.add("§6Match Type:§f " + type.getName());
 		if (type.isCustom()) {
 			meta.add("§6Refilling:§f " + type.getInfo().getString("Refilling"));

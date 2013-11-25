@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.ScoreboardSystem;
+package net.frozenorb.KitPVP.VisualSystem;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.RegionSysten.Region;
@@ -16,10 +16,31 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 public class ScoreboardManager implements Runnable {
+
+	@Override
+	public void run() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			updateScoreboard(p);
+		}
+	}
+
+	/**
+	 * Gets an offline player with the given name
+	 * 
+	 * @param str
+	 *            the name of the offline player
+	 * @return the player
+	 */
 	public OfflinePlayer generateName(String str) {
 		return Bukkit.getOfflinePlayer(str);
 	}
 
+	/**
+	 * Updates a player's scoreboard
+	 * 
+	 * @param p
+	 *            the player to update
+	 */
 	public void updateScoreboard(Player p) {
 		Scoreboard sb = p.getScoreboard();
 		Objective nameTag = sb.getObjective("nergger");
@@ -48,13 +69,12 @@ public class ScoreboardManager implements Runnable {
 		rating.setScore(KitAPI.getEloManager().getElo(p.getName().toLowerCase()));
 	}
 
-	@Override
-	public void run() {
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			updateScoreboard(p);
-		}
-	}
-
+	/**
+	 * Loads a player's scoreboard for the first time
+	 * 
+	 * @param player
+	 *            the player to load to
+	 */
 	public void loadScoreboard(Player player) {
 		Scoreboard sb = Bukkit.getScoreboardManager().getNewScoreboard();
 		Objective nameTag = sb.registerNewObjective("nergger", "nirger");

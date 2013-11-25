@@ -1,12 +1,11 @@
-package net.frozenorb.KitPVP.Pagination;
+package net.frozenorb.KitPVP.InventorySystem.Inventories;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.InventorySystem.PageInventory;
 import net.frozenorb.KitPVP.MatchSystem.Match;
-import net.frozenorb.KitPVP.StatSystem.Stat;
-import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mBasic.util.Attributes;
 
@@ -34,7 +33,6 @@ public abstract class RequestInventory extends PageInventory {
 		item.setDurability((short) 14);
 		backAPage = Core.get().generateItem(item.getType(), item.getDurability(), "§cPrevious page", new ArrayList<String>() {
 			private static final long serialVersionUID = 1L;
-
 			{
 				add("Goes to the previous page of requests");
 			}
@@ -43,7 +41,6 @@ public abstract class RequestInventory extends PageInventory {
 		item.setDurability((short) 5);
 		forwardsAPage = Core.get().generateItem(item.getType(), item.getDurability(), "§aNext page", new ArrayList<String>() {
 			private static final long serialVersionUID = 1L;
-
 			{
 				add("Goes to the next page of requests");
 			}
@@ -70,8 +67,9 @@ public abstract class RequestInventory extends PageInventory {
 					if (item.getType() == Material.SKULL_ITEM) {
 						String title = ChatColor.stripColor(item.getItemMeta().getDisplayName().split(" ")[0]);
 						Match m = KitAPI.getMatchManager().getInvitedMatch(((Player) event.getWhoClicked()).getName(), title);
-						if (m == null) {
-							event.getWhoClicked().closeInventory();
+						boolean matchIsTaken = KitAPI.getMatchManager().isInMatch(m.getChallenger().getName()) && KitAPI.getMatchManager().getCurrentMatches().get(m.getChallenger().getName()).isInProgress();
+						if (m == null || matchIsTaken) {
+							update();
 							return;
 						}
 						if (event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.SHIFT_RIGHT)
@@ -98,7 +96,7 @@ public abstract class RequestInventory extends PageInventory {
 			ItemStack item = new ItemStack(Material.SKULL_ITEM);
 			item.setDurability((short) 3);
 			SkullMeta meta = (SkullMeta) item.getItemMeta();
-			meta.setLore(match.getMetadata(true));
+			meta.setLore(match.getMetadata(true, true));
 			meta.setDisplayName(("§a§l" + match.getChallenger().getDisplayName() + "§e (" + KitAPI.getEloManager().getElo(match.getChallenger().getName()) + ")"));
 			item.setItemMeta(meta);
 			item.setAmount(1);
@@ -106,7 +104,7 @@ public abstract class RequestInventory extends PageInventory {
 			att.clear();
 			items.add(att.getStack());
 		}
-		this.setPages(items);
+		setPages(items);
 		return this;
 	}
 
@@ -114,20 +112,12 @@ public abstract class RequestInventory extends PageInventory {
 		matches.clear();
 		matches.addAll(KitAPI.getMatchManager().getMatchRequestsTo(getPlayer().getName()));
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		for (Match kit : matches) {
+		for (Match match : matches) {
 			ItemStack item = new ItemStack(Material.SKULL_ITEM);
 			item.setDurability((short) 3);
 			SkullMeta meta = (SkullMeta) item.getItemMeta();
-			ArrayList<String> stats = new ArrayList<String>();
-			Stat s = KitAPI.getStatManager().getStat(kit.getChallenger().getName());
-			if (s != null) {
-				for (StatObjective sb : StatObjective.values()) {
-					if (sb.isDisplay())
-						stats.add("§6" + sb.getFriendlyName() + ":§f " + s.get(sb));
-				}
-			}
-			meta.setLore(stats);
-			meta.setDisplayName("§a§l" + kit.getChallenger().getName());
+			meta.setLore(match.getMetadata(true, true));
+			meta.setDisplayName(("§a§l" + match.getChallenger().getDisplayName() + "§e (" + KitAPI.getEloManager().getElo(match.getChallenger().getName()) + ")"));
 			item.setItemMeta(meta);
 			item.setAmount(1);
 			Attributes att = new Attributes(item);

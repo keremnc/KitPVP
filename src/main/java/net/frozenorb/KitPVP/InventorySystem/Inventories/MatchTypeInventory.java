@@ -1,40 +1,41 @@
-package net.frozenorb.KitPVP.Pagination;
+package net.frozenorb.KitPVP.InventorySystem.Inventories;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.KitSystem.Kit;
+import net.frozenorb.KitPVP.InventorySystem.PageInventory;
+import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
+import net.frozenorb.KitPVP.MatchSystem.Queue.MatchQueue;
+import net.frozenorb.KitPVP.MatchSystem.Queue.QueueType;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mBasic.util.Attributes;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class KitInventory extends PageInventory {
-	private ArrayList<Kit> kiterate = new ArrayList<Kit>(); // haha get it? KITerate
+public class MatchTypeInventory extends PageInventory {
+	private ArrayList<Loadout> maches = new ArrayList<Loadout>();
+	private QueueType type;
 
-	public KitInventory(Player player) {
+	public MatchTypeInventory(Player player, String title, QueueType type) {
 		super(player, true);
 		maxInvSize = 36;
-		kiterate.addAll(KitPVP.getKits());
-		title = "§9Kit Selection";
+		this.type = type;
+		maches.addAll(Loadout.getLoadouts());
+		this.title = title;
 		ItemStack item = new ItemStack(Material.CARPET);
 		item.setDurability((short) 14);
 		backAPage = Core.get().generateItem(item.getType(), item.getDurability(), "§cPrevious page", new ArrayList<String>() {
 			private static final long serialVersionUID = 1L;
 
 			{
-				add("Goes to the previous page of kits");
+				add("Goes to the previous page of match types");
 			}
 		});
 		backAPage.setAmount(0);
@@ -43,7 +44,7 @@ public class KitInventory extends PageInventory {
 			private static final long serialVersionUID = 1L;
 
 			{
-				add("Goes to the next page of kits");
+				add("Goes to the next page of match types");
 			}
 		});
 		forwardsAPage.setAmount(0);
@@ -62,49 +63,45 @@ public class KitInventory extends PageInventory {
 				} else {
 					String name = item.getItemMeta().getDisplayName();
 					name = ChatColor.stripColor(name);
-					Kit k = KitAPI.getKitManager().getByName(name);
-					if (k == null)
-						return;
-					if (k.hasKit(((Player) event.getWhoClicked()))) {
-						((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.NOTE_PLING, 20F, 20F);
-						Bukkit.dispatchCommand((CommandSender) event.getWhoClicked(), "kit " + k.getName());
+					Loadout type = Loadout.getByName(name.replace("Ranked ", ""));
+					if (type == null) {
 						event.getWhoClicked().closeInventory();
-					} else {
-						((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.ARROW_HIT, 20F, 20F);
-						((Player) event.getWhoClicked()).sendMessage(ChatColor.RED + "You do not have access to that kit!");
+						KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType(), (int) item.getDurability());
+						return;
 					}
+					MatchQueue queue = new MatchQueue((Player) event.getWhoClicked(), type, this.type);
+					KitAPI.getMatchManager().addToQueue(queue);
 				}
 			}
 		}
 	}
 
-	public void setKits() {
+	public MatchTypeInventory loadTypes() {
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		for (final Kit kit : kiterate) {
-			ItemStack item = kit.getKitIcon();
+		for (Loadout kit : maches) {
+			ItemStack item = kit.getIcon();
 			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName((kit.hasKit(user) ? "§a" : "§c") + kit.getName());
-			ArrayList<String> lore = new ArrayList<String>() {
-				private static final long serialVersionUID = 1;
-				{
-					addAll(wrap(kit.getDescription()));
-					add("");
-					add("§6Kills: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getKills());
-					add("§6Deaths: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getDeaths());
-					add("§6Uses: " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
-					if (kit.hasAbilityMeta()) {
-						add("§6" + kit.getMetaName() + ": " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getAbility());
-					}
+			meta.setDisplayName((type == QueueType.RANKED ? "§a§lRanked " : "§a") + kit.getName());
+			ArrayList<String> lores = new ArrayList<String>();
+			lores.addAll(wrap(kit.getDescription()));
+			if (type == QueueType.RANKED) {
+				if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null) {
+					lores.add("");
+					lores.add("§dThere is §e1§d player in this queue.");
 				}
-			};
-			meta.setLore(lore);
+			} else if (KitAPI.getMatchManager().getFirstUnranked(kit, getPlayer().getName()) != null) {
+				lores.add("");
+				lores.add("§dThere is §e1§d player in this queue.");
+			}
+			meta.setLore(lores);
 			item.setItemMeta(meta);
 			item.setAmount(1);
 			Attributes att = new Attributes(item);
 			att.clear();
 			items.add(att.getStack());
 		}
-		this.setPages(items);
+		setPages(items);
+		return this;
 	}
 
 	private List<String> wrap(String string) {
@@ -113,7 +110,7 @@ public class KitInventory extends PageInventory {
 		ChatColor color = ChatColor.BLUE;
 		ArrayList<String> newString = new ArrayList<String>();
 		for (int i = 0; i < split.length; i++) {
-			if (string.length() > 20 || string.endsWith(".") || string.endsWith("!")) {
+			if (string.length() > 26 || string.endsWith(".") || string.endsWith("!")) {
 				newString.add(color + string);
 				if (string.endsWith(".") || string.endsWith("!"))
 					newString.add("");

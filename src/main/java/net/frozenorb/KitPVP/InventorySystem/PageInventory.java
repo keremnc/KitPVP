@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.Pagination;
+package net.frozenorb.KitPVP.InventorySystem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -86,23 +85,6 @@ public abstract class PageInventory extends ClickInventory {
 		}
 	}
 
-	// @EventHandler
-	public void onInventoryClick(InventoryClickEvent event) {
-		if (event.getView().getTopInventory().getViewers().equals(inv.getViewers())) {
-			event.setCancelled(true);
-			ItemStack item = event.getCurrentItem();
-			if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-				if (item.equals(getBackPage())) {
-					setPage(currentPage - 1);
-				} else if (item.equals(getForwardsPage())) {
-					setPage(currentPage + 1);
-				} else {
-					// Do whatever
-				}
-			}
-		}
-	}
-
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		if (event.getPlayer() == user) {
@@ -166,7 +148,6 @@ public abstract class PageInventory extends ClickInventory {
 				});
 			} else
 				inv.setContents(pageItems);
-			// TODO Potentially display title for page no
 		}
 	}
 
