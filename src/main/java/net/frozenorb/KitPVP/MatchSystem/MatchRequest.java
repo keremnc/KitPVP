@@ -38,10 +38,10 @@ import com.mongodb.BasicDBObject;
 
 public abstract class MatchRequest implements Listener {
 	/* Slot fields */
-	public final static int POTION_SLOT = 16;
-	public final static int SOUP_SLOT = 14;
-	public final static int CHESTPLATE_SLOT = 12;
 	public final static int SWORD_SLOT = 10;
+	public final static int CHESTPLATE_SLOT = 12;
+	public final static int SOUP_SLOT = 14;
+	public final static int POTION_SLOT = 16;
 	public final static int FIRST_TO_SLOT = 28;
 	public final static int HEAL_SLOT = 34;
 

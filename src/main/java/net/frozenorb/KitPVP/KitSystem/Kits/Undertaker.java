@@ -100,7 +100,7 @@ public class Undertaker extends BaseKit {
 	}
 
 	@Override
-	public int getWeight() {
+	public int getId() {
 		return 3;
 	}
 

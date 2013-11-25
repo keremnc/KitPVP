@@ -16,11 +16,11 @@ import org.bukkit.potion.PotionEffect;
 public interface Kit {
 
 	/**
-	 * Gets the weight of the kit
+	 * Gets the id of the kit
 	 * 
-	 * @return weight
+	 * @return id
 	 */
-	public int getWeight();
+	public int getId();
 
 	/**
 	 * Gets the name of the kit
@@ -85,7 +85,7 @@ public interface Kit {
 	/**
 	 * Gets whether the kit has ability meta
 	 * <p>
-	 * Displayed in the pagination book
+	 * Displayed in the kit book, using the metaname's key
 	 * 
 	 * @return has meta
 	 */

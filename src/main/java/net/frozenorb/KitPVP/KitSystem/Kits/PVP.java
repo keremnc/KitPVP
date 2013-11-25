@@ -32,7 +32,7 @@ public class PVP extends BaseKit {
 	}
 
 	@Override
-	public int getWeight() {
+	public int getId() {
 		return 1;
 	}
 

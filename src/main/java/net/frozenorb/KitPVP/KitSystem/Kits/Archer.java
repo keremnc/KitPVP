@@ -52,7 +52,7 @@ public class Archer extends BaseKit {
 	}
 
 	@Override
-	public int getWeight() {
+	public int getId() {
 		return 2;
 	}
 

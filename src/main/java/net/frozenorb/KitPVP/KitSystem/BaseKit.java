@@ -67,11 +67,6 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	}
 
 	@Override
-	public int getWeight() {
-		return 10;
-	}
-
-	@Override
 	public String getName() {
 		return getClass().getSimpleName();
 	}

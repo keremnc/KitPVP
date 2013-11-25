@@ -202,7 +202,6 @@ public class ServerManager {
 		} else {
 			final byte b = Byte.parseByte("0000000", 2);
 			((CraftPlayer) player).getHandle().getDataWatcher().watch(0, b);
-
 		}
 
 	}
@@ -214,10 +213,6 @@ public class ServerManager {
 		}
 		p.getInventory().setItem(0, Utilities.generateItem(Material.STONE_SWORD, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
 		KitAPI.getPlayerManager().fillSoup(p.getInventory(), Material.MUSHROOM_SOUP);
-		for (int i = 9; i < 36; i += 1) {
-			if (p.getInventory().getItem(i) == null)
-				p.getInventory().setItem(i, Utilities.generateItem(Material.PISTON_EXTENSION, "§c§lUnusable Slot"));
-		}
 	}
 
 	/**

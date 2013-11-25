@@ -184,7 +184,7 @@ public class KitManager {
 		Collections.sort(KitPVP.getKits(), new Comparator<Kit>() {
 			@Override
 			public int compare(Kit o1, Kit o2) {
-				return ((Integer) o1.getWeight()).compareTo(o2.getWeight());
+				return ((Integer) o1.getId()).compareTo(o2.getId());
 			}
 		});
 	}

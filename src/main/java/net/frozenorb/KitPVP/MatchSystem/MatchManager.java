@@ -34,6 +34,7 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -617,6 +618,30 @@ public class MatchManager {
 
 		@EventHandler
 		public void onPlayerQuit(PlayerQuitEvent e) {
+			Player p = e.getPlayer();
+			for (Entry<String, String> entry : matchRequestsInProgress.entrySet()) {
+				if (entry.getValue().equals(p.getName())) {
+					Player clicker = Bukkit.getPlayerExact(entry.getKey());
+					if (p != null) {
+						clicker.sendMessage(ChatColor.RED + "That player has logged off.");
+						clicker.closeInventory();
+						matchRequestsInProgress.remove(clicker.getName());
+					}
+				}
+			}
+			if (p.getInventory().first(Material.INK_SACK) != -1)
+				p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
+			matches.remove(p.getName());
+			if (isInMatch(p.getName())) {
+				Match m = currentMatches.get(p.getName());
+				if (m.isInProgress()) {
+					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
+				}
+			}
+		}
+
+		@EventHandler
+		public void onPlayerQuit(PlayerKickEvent e) {
 			Player p = e.getPlayer();
 			for (Entry<String, String> entry : matchRequestsInProgress.entrySet()) {
 				if (entry.getValue().equals(p.getName())) {

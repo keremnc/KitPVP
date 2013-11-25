@@ -32,7 +32,6 @@ public abstract class Loadout {
 						e.printStackTrace();
 					}
 				}
-
 			}
 		}
 		Collections.sort(matches, new Comparator<Loadout>() {
@@ -125,7 +124,7 @@ public abstract class Loadout {
 	 * @return data
 	 */
 	public BasicDBObject getInfo() {
-		return null;
+		return new BasicDBObject();
 	}
 
 	/**

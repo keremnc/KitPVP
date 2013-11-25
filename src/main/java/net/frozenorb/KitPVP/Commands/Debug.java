@@ -48,7 +48,9 @@ public class Debug extends BaseCommand {
 			if (args.length > 0) {
 				String subcmd = args[0];
 				if (subcmd.equalsIgnoreCase("1v1")) {
-					sender.sendMessage(ChatColor.YELLOW + "1v1 data dump: " + KitAPI.getMatchManager().getMatches().toString());
+					sender.sendMessage(ChatColor.YELLOW + "1v1 match queue: " + KitAPI.getMatchManager().getMatches().toString());
+					sender.sendMessage(" ");
+					sender.sendMessage(ChatColor.YELLOW + "1v1 reqest dump: " + KitAPI.getMatchManager().getCurrentMatches().toString());
 				}
 			}
 		}
