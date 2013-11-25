@@ -59,7 +59,7 @@ public abstract class KitCreationConversation {
 					name = s.replace("&", "§").replace(" ", "");
 					break;
 				case DESCRIPTION:
-					description = s.replace("&", "§").replace(" ", "");
+					description = s.replace("&", "§");
 					break;
 				case PERMISSION:
 					permission = s.replace("&", "§").replace(" ", "");
