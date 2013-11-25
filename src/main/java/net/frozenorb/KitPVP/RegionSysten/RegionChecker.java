@@ -14,6 +14,15 @@ public class RegionChecker {
 		this.plugin = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
 	}
 
+	/**
+	 * Checks if the given region is applicable for the location
+	 * 
+	 * @param r
+	 *            the region to check
+	 * @param l
+	 *            the location to check
+	 * @return applicable?
+	 */
 	public boolean isRegion(Region r, Location l) {
 
 		RegionManager regionManager = plugin.getRegionManager(l.getWorld());
@@ -26,6 +35,13 @@ public class RegionChecker {
 
 	}
 
+	/**
+	 * Gets the region for the given location
+	 * 
+	 * @param l
+	 *            the location to check
+	 * @return region that is found, null if none
+	 */
 	public Region getRegion(Location l) {
 		for (Region r : Region.getRegions()) {
 			if (isRegion(r, l))

@@ -2,7 +2,7 @@ package net.frozenorb.KitPVP.ListenerSystem;
 
 import java.util.ArrayList;
 
-import net.frozenorb.KitPVP.Reflection.ClassGetter;
+import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.Utilities.Core;
 
 import org.bukkit.Bukkit;
@@ -14,7 +14,7 @@ public class ListenerBase implements Listener {
 	public void registerListeners(JavaPlugin owningPlugin, String packagename) throws InstantiationException, IllegalAccessException {
 		ArrayList<String> pk = new ArrayList<String>();
 
-		for (Class<?> c : ClassGetter.getClassesForPackage(owningPlugin, packagename)) {
+		for (Class<?> c : KitPVP.get().getReflectionManager().getClassesInPackage(packagename)) {
 			if (Listener.class.isAssignableFrom(c)) {
 				pk.add(c.getCanonicalName());
 				Listener l = (Listener) c.newInstance();

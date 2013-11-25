@@ -16,9 +16,9 @@ import org.bukkit.util.Vector;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.InventorySystem.Inventories.KitInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
-import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 import net.frozenorb.Utilities.Core;
@@ -103,7 +103,7 @@ public class ServerManager {
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, p.getLocation()))
 			return;
 		if (warpToMatch.contains(p.getName())) {
-			KitAPI.getKitPVP().getCommandManager().teleport(p, CommandManager.DUEL_LOCATION);
+			KitAPI.getPlayerManager().teleport(p, CommandManager.DUEL_LOCATION);
 			return;
 		}
 		if (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())

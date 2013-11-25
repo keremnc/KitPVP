@@ -37,6 +37,11 @@ public abstract class BaseCommand implements CommandExecutor, TabExecutor {
 	 */
 	public abstract void execute();
 
+	/**
+	 * Gets a list of tab completions for the command
+	 * 
+	 * @return tab completions
+	 */
 	public List<String> tabComplete() {
 		return null;
 	}

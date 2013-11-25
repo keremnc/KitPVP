@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.Reflection.ClassGetter;
+import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.Utilities.Core;
 
 import org.bukkit.Material;
@@ -21,7 +20,7 @@ public abstract class Loadout {
 	private static ArrayList<Loadout> matches = new ArrayList<Loadout>();
 
 	public static void init() {
-		for (Class<?> c : ClassGetter.getClassesForPackage(KitAPI.getKitPVP(), "net.frozenorb.KitPVP.MatchSystem.Loadouts")) {
+		for (Class<?> c : KitPVP.get().getReflectionManager().getClassesInPackage("net.frozenorb.KitPVP.MatchSystem.Loadouts")) {
 			if (Loadout.class.isAssignableFrom(c)) {
 				if (!Modifier.isAbstract(c.getModifiers())) {
 					try {

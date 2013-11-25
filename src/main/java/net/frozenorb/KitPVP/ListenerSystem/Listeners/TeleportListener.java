@@ -34,7 +34,7 @@ public class TeleportListener implements Listener {
 				Bukkit.getScheduler().scheduleSyncDelayedTask(KitAPI.getKitPVP(), new Runnable() {
 					@Override
 					public void run() {
-						updateEntities(getPlayersWithin(player, visibleDistance));
+						updateEntities(getPlayersWithinRange(player, visibleDistance));
 
 					}
 				}, TELEPORT_FIX_DELAY);
@@ -74,7 +74,7 @@ public class TeleportListener implements Listener {
 		return nmsPlayers;
 	}
 
-	private List<Player> getPlayersWithin(Player player, int distance) {
+	private List<Player> getPlayersWithinRange(Player player, int distance) {
 		List<Player> res = new ArrayList<Player>();
 		int d2 = distance * distance;
 

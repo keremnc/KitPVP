@@ -4,11 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.KitSystem.Kit;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
-import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
 

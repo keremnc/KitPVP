@@ -21,11 +21,11 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
  * @since 1.0.0
  * 
  */
-@SuppressWarnings("unchecked")
 public class Region {
 	private static ArrayList<Region> regions = new ArrayList<Region>();
 
 	public static Region DONOR_SHOP = new Region(DefaultFlag.EXP_DROPS);
+
 	public static Region SPAWN = new Region(DefaultFlag.PISTONS, new RegionMeta() {
 
 		@Override
@@ -45,6 +45,7 @@ public class Region {
 		}
 
 	});
+
 	public static Region DUEL_SPAWN = new Region(DefaultFlag.MUSHROOMS, new RegionMeta() {
 
 		@Override
@@ -60,9 +61,10 @@ public class Region {
 
 		@Override
 		public java.lang.Class<? super Kit>[] getUsableKits() {
-			return (Class<? super Kit>[]) new Class<?>[] {}; // block all kits
+			return RegionMeta.EMPTY_KIT_ARRAY; // block all kits
 		}
 	});
+
 	public static Region EARLY_HG = new Region(DefaultFlag.MYCELIUM_SPREAD, new RegionMeta() {
 
 		@Override
@@ -78,7 +80,7 @@ public class Region {
 
 		@Override
 		public Class<? super Kit>[] getUsableKits() {
-			return (Class<? super Kit>[]) new Class<?>[] {};
+			return RegionMeta.EMPTY_KIT_ARRAY;
 		}
 
 	});

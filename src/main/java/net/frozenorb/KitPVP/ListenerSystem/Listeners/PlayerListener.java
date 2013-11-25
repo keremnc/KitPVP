@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
-import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
 import net.frozenorb.KitPVP.StatSystem.Stat;
@@ -204,7 +204,7 @@ public class PlayerListener extends ListenerBase {
 
 				@Override
 				public void run() {
-					KitPVP.get().getCommandManager().teleport(e.getEntity(), CommandManager.EARLY_HG_LOCATION);
+					KitAPI.getPlayerManager().teleport(e.getEntity(), CommandManager.EARLY_HG_LOCATION);
 				}
 			}, 5L);
 		} else {

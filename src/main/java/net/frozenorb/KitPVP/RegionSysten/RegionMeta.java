@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
  * 
  */
 public interface RegionMeta {
+	@SuppressWarnings("unchecked")
+	public static Class<? super Kit>[] EMPTY_KIT_ARRAY = (Class<? super Kit>[]) new Class<?>[] {};
+
 	/**
 	 * Called when a player warps to a region
 	 * 

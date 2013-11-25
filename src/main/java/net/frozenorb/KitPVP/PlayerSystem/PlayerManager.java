@@ -7,6 +7,7 @@ import java.util.List;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,6 +25,14 @@ public class PlayerManager {
 
 	public boolean hasSpawnProtection(Player p) {
 		return spawnProtetcion.contains(p.getName());
+	}
+
+	public void teleport(Player p, Location loc) {
+		if (KitAPI.getRegionChecker().getRegion(loc) != null) {
+			KitAPI.getRegionChecker().getRegion(loc).getMeta().onWarp(p);
+		}
+		p.teleport(loc);
+		p.closeInventory();
 	}
 
 	public void clearInventory(Player p) {

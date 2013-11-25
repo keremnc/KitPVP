@@ -13,15 +13,11 @@ public class Balance extends BaseCommand {
 
 	@Override
 	public void execute() {
-
 		if (args.length == 1) {
 			String m = args[0];
 			sender.sendMessage(ChatColor.GOLD + "Credits: " + ChatColor.WHITE + NumberFormat.getNumberInstance(Locale.US).format(Basic.get().getEconomyManager().getBalance(m)));
 			return;
 		}
-
 		sender.sendMessage(ChatColor.GOLD + "Credits: " + ChatColor.WHITE + NumberFormat.getNumberInstance(Locale.US).format(Basic.get().getEconomyManager().getBalance(sender.getName())));
-
 	}
-
 }

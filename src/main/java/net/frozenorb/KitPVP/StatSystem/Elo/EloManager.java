@@ -65,10 +65,8 @@ public class EloManager {
 		ests = getEstimations(winner, loser);
 		int newRankA = (int) (winner + getKeremFactor(winner) * (1 - ests[0]));
 		int newRankB = (int) (loser + getKeremFactor(loser) * -ests[1]);
-		int gain = Math.round(newRankA) - winner;
-		int loss = Math.round(newRankB) - loser;
-		ret[0] = gain > MAX_CHANGE ? winner + MAX_CHANGE : Math.round(newRankA);
-		ret[1] = loss < -MAX_CHANGE ? loser - MAX_CHANGE : Math.round(newRankB);
+		ret[0] = Math.round(newRankA) - winner > MAX_CHANGE ? winner + MAX_CHANGE : Math.round(newRankA);
+		ret[1] = Math.round(newRankB) - loser < -MAX_CHANGE ? loser - MAX_CHANGE : Math.round(newRankB);
 		return ret;
 	}
 

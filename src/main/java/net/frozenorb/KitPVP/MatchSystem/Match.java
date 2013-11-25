@@ -7,10 +7,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.InventorySystem.Inventories.RequestInventory;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.Arena;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
-import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
@@ -276,8 +276,8 @@ public class Match {
 					KitAPI.getBossBarManager().unregisterPlayer(challenger);
 					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
 					KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-					KitAPI.getKitPVP().getCommandManager().teleport(loser, CommandManager.DUEL_LOCATION);
-					KitAPI.getKitPVP().getCommandManager().teleport(winner, CommandManager.DUEL_LOCATION);
+					KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
+					KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
 					KitAPI.getArenaManager().unregisterArena(arena);
 				}
 			}

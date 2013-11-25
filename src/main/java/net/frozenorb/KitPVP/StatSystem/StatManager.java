@@ -84,21 +84,30 @@ public class StatManager {
 				return false;
 			}
 		};
+		System.out.println("Loading local stat files.");
+		long then = System.currentTimeMillis();
 		for (File playerFile : dir.listFiles(statsFilter)) {
 			String str = Core.get().readFile(playerFile);
 			if (JSON.parse(str) != null) {
-				System.out.println("Loading file " + playerFile.getName());
 				BasicDBObject db = (BasicDBObject) JSON.parse(str);
 				LocalPlayerData data = new LocalPlayerData(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), db);
 				playerData.put(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), data);
-				System.out.println("Successfully loaded " + playerFile.getName());
 			} else
 				System.out.println("ERROR LOADING PLAYER DATA FILE: " + playerFile.getName());
 
 		}
+		long time = System.currentTimeMillis() - then;
+		System.out.println("Successfully loaded data in " + time + " ms.");
 
 	}
 
+	/**
+	 * Gets a leaderboard for a certain {@link StatObjective} from the API
+	 * 
+	 * @param objective
+	 *            the {@link StatObjective} to request
+	 * @return the top 10 players
+	 */
 	public ArrayList<BasicDBObject> getLeaderboards(StatObjective objective) {
 		try {
 			if (objective.isLocal())

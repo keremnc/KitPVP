@@ -22,7 +22,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 
 import net.frozenorb.KitPVP.KitPVP;
-import net.frozenorb.KitPVP.Reflection.ClassGetter;
 import net.frozenorb.Utilities.Core;
 
 public class KitManager {
@@ -151,7 +150,7 @@ public class KitManager {
 	@SuppressWarnings({ "rawtypes" })
 	public void loadKits() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException {
 		ArrayList<String> kitClasses = new ArrayList<String>();
-		for (Class perkClass : ClassGetter.getClassesForPackage(plugin, packageName)) {
+		for (Class perkClass : KitPVP.get().getReflectionManager().getClassesInPackage(packageName)) {
 			if (Kit.class.isAssignableFrom(perkClass)) {
 				if (!Modifier.isAbstract(perkClass.getModifiers())) {
 					if ((perkClass.getCanonicalName() != null))
@@ -166,7 +165,7 @@ public class KitManager {
 		Core.get().box(packages.toArray(new String[] {}), "Loading kits from packages");
 
 		for (String pack : packages) {
-			for (Class perkClass : ClassGetter.getClassesForPackage(plugin, pack)) {
+			for (Class perkClass : KitPVP.get().getReflectionManager().getClassesInPackage(pack)) {
 				if (Kit.class.isAssignableFrom(perkClass)) {
 					if (!Modifier.isAbstract(perkClass.getModifiers())) {
 						if ((perkClass.getCanonicalName() != null))
