@@ -49,7 +49,6 @@ public class Match {
 		this.type = type;
 		KitAPI.getMatchManager().getCurrentMatches().put(challenger.getName(), this);
 		KitAPI.getMatchManager().getCurrentMatches().put(victim.getName(), this);
-
 	}
 
 	public HashMap<String, Integer> getWins() {
@@ -184,9 +183,13 @@ public class Match {
 		loser.setHealth(20D);
 		boolean logout = reason == MatchFinishReason.PLAYER_LOGOUT;
 		wins.put(winner.getName(), wins.get(winner.getName()) + 1);
-		if (getFirstTo() > 0 && !logout) {
+		if (getFirstTo() > 1 && !logout) {
 			KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
 			KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
+		}
+		if (isRanked() && ((hasFinished() && getFirstTo() > 1 && !logout) || getFirstTo() == 1)) {
+			KitAPI.getStatManager().getLocalData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
+			KitAPI.getStatManager().getLocalData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
 		}
 		setInProgress(false);
 		KitAPI.getServerManager().setVisible(loser, false);
@@ -206,7 +209,7 @@ public class Match {
 			if (getFirstTo() == 1) {
 				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
 				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo);
+				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getLocalData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getLocalData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
 				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
 				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
 				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
@@ -214,7 +217,7 @@ public class Match {
 			} else if (hasFinished() && getFirstTo() > 1 && !logout) {
 				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
 				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo);
+				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getLocalData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getLocalData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
 				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
 				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
 				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
@@ -269,9 +272,9 @@ public class Match {
 				loser.setAllowFlight(false);
 				loser.setFlying(false);
 				Core.get().clearPlayer(winner);
-				if (!hasFinished() && getFirstTo() > 1 && reason != MatchFinishReason.PLAYER_LOGOUT) {
+				if (!hasFinished() && getFirstTo() > 1 && reason != MatchFinishReason.PLAYER_LOGOUT)
 					startMatch();
-				} else {
+				else {
 					KitAPI.getBossBarManager().unregisterPlayer(victim);
 					KitAPI.getBossBarManager().unregisterPlayer(challenger);
 					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());

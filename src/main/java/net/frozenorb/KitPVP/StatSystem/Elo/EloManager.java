@@ -16,6 +16,7 @@ import net.frozenorb.KitPVP.StatSystem.StatObjective;
 public class EloManager {
 	public static int STARTING_ELO = 1500; // the starting elo for new players
 	public static int MAX_CHANGE = 20; // max gain/loss a player can get in one match
+	public static int PROVISIONAL = 21;
 
 	/**
 	 * Gets the estimation
@@ -42,12 +43,17 @@ public class EloManager {
 	 *            the elo
 	 * @return K(erem)-Factor
 	 */
-	public int getKeremFactor(int elo) {
+	public int getKeremFactor(int elo, int gamesPlayed, int opponentGamePlayed, boolean win) {
+		int kFactor = 16;
 		if (elo < 2100)
-			return 32;
-		if (elo < 2399)
-			return 24;
-		return 16;
+			kFactor = 32;
+		else if (elo < 2399)
+			kFactor = 24;
+		if (opponentGamePlayed < PROVISIONAL && gamesPlayed >= PROVISIONAL)
+			kFactor *= (opponentGamePlayed / PROVISIONAL);
+		if (gamesPlayed < PROVISIONAL && win)
+			kFactor *= 2;
+		return kFactor;
 	}
 
 	/**
@@ -59,12 +65,12 @@ public class EloManager {
 	 *            loser elo
 	 * @return array [winner, loser]
 	 */
-	public int[] getNewElo(int winner, int loser) {
+	public int[] getNewElo(int winner, int loser, int winnerPlayed, int loserPlayed) {
 		double[] ests = new double[2];
 		int[] ret = new int[2];
 		ests = getEstimations(winner, loser);
-		int newRankA = (int) (winner + getKeremFactor(winner) * (1 - ests[0]));
-		int newRankB = (int) (loser + getKeremFactor(loser) * -ests[1]);
+		int newRankA = (int) (winner + getKeremFactor(winner, winnerPlayed, loserPlayed, true) * (1 - ests[0])); // rank = oldrank+ (kFactor * estimation)
+		int newRankB = (int) (loser + getKeremFactor(loser, loserPlayed, winnerPlayed, false) * -ests[1]); // rank = oldrank - (kFactor * estimation)
 		ret[0] = Math.round(newRankA) - winner > MAX_CHANGE ? winner + MAX_CHANGE : Math.round(newRankA);
 		ret[1] = Math.round(newRankB) - loser < -MAX_CHANGE ? loser - MAX_CHANGE : Math.round(newRankB);
 		return ret;
@@ -81,6 +87,21 @@ public class EloManager {
 		if (KitAPI.getStatManager().getLocalData(name.toLowerCase()) != null)
 			return KitAPI.getStatManager().getLocalData(name.toLowerCase()).get(StatObjective.ELO);
 		return STARTING_ELO;
+	}
+
+	/**
+	 * Sets the elo of the name
+	 * 
+	 * @param name
+	 *            the name to set
+	 * @param elo
+	 *            elo to set to
+	 */
+	public void setElo(String name, int elo) {
+		if (KitAPI.getStatManager().getLocalData(name.toLowerCase()) != null)
+			KitAPI.getStatManager().getLocalData(name.toLowerCase()).set(StatObjective.ELO, elo);
+		else
+			KitAPI.getStatManager().setLocalData(name.toLowerCase(), new LocalPlayerData(name.toLowerCase(), new BasicDBObject("elo", elo)));
 	}
 
 	/**
@@ -103,20 +124,5 @@ public class EloManager {
 			return "§c";
 		}
 		return "§6";
-	}
-
-	/**
-	 * Sets the elo of the name
-	 * 
-	 * @param name
-	 *            the name to set
-	 * @param elo
-	 *            elo to set to
-	 */
-	public void setElo(String name, int elo) {
-		if (KitAPI.getStatManager().getLocalData(name.toLowerCase()) != null)
-			KitAPI.getStatManager().getLocalData(name.toLowerCase()).set(StatObjective.ELO, elo);
-		else
-			KitAPI.getStatManager().setLocalData(name.toLowerCase(), new LocalPlayerData(name.toLowerCase(), new BasicDBObject("elo", elo)));
 	}
 }
