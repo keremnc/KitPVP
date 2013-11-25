@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
-import net.frozenorb.KitPVP.Types.Attack;
+import net.frozenorb.KitPVP.Types.Kill;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mShared.Shared;
 import net.frozenorb.mShared.API.Profile.PlayerProfile;
@@ -168,7 +168,7 @@ public class StatManager {
 	public void checkCombo(Player killer) {
 		GamerProfile profile = KitAPI.getPlayerManager().getProfile(killer.getName());
 		if (profile.getCombo() != null) {
-			Attack a = profile.getCombo();
+			Kill a = profile.getCombo();
 			if (a.getAge() < 7) {
 				int killCombo = a.getKills();
 				if (killCombo == 2)
@@ -182,12 +182,12 @@ public class StatManager {
 					killer.getLocation().getWorld().playEffect(killer.getLocation(), Effect.ENDER_SIGNAL, 500);
 					killer.getWorld().playSound(killer.getLocation(), Sound.AMBIENCE_CAVE, 20F, 0.2F);
 				}
-				profile.setCombo(new Attack(a.getKills() + 1, System.currentTimeMillis()));
+				profile.setCombo(new Kill(a.getKills() + 1, System.currentTimeMillis()));
 
 			} else
-				profile.setCombo(new Attack(1, System.currentTimeMillis()));
+				profile.setCombo(new Kill(1, System.currentTimeMillis()));
 
 		} else
-			profile.setCombo(new Attack(1, System.currentTimeMillis()));
+			profile.setCombo(new Kill(1, System.currentTimeMillis()));
 	}
 }

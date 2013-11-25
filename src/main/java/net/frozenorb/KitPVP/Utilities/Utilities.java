@@ -5,7 +5,15 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class Utilities {
+/**
+ * Non initializable, final class used to quickly call static methods from around the plugin
+ * 
+ * @author Kerem Celik
+ * 
+ */
+public final class Utilities {
+	private Utilities() {
+	}
 
 	public static ItemStack generateItem(Material m, String name) {
 		ItemStack i = new ItemStack(m);

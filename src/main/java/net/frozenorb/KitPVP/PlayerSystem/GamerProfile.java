@@ -1,7 +1,7 @@
 package net.frozenorb.KitPVP.PlayerSystem;
 
 import net.frozenorb.KitPVP.KitSystem.Kit;
-import net.frozenorb.KitPVP.Types.Attack;
+import net.frozenorb.KitPVP.Types.Kill;
 
 import com.mongodb.BasicDBObject;
 
@@ -9,18 +9,18 @@ public class GamerProfile {
 	private String name;
 	private BasicDBObject JSON = new BasicDBObject();
 	private Kit lastUsedKit = null;
-	private Attack combo;
+	private Kill combo;
 
 	public GamerProfile(BasicDBObject obj, String name) {
 		this.name = name;
 		this.JSON = obj;
 	}
 
-	public Attack getCombo() {
+	public Kill getCombo() {
 		return combo;
 	}
 
-	public void setCombo(Attack combo) {
+	public void setCombo(Kill combo) {
 		this.combo = combo;
 	}
 

@@ -16,7 +16,7 @@ import org.bukkit.util.Vector;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.Pagination.KitInventory;
+import net.frozenorb.KitPVP.InventorySystem.Inventories.KitInventory;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Reflection.CommandManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
@@ -33,31 +33,36 @@ public class ServerManager {
 
 	public ServerManager(KitPVP plugin) {
 		this.plugin = plugin;
-
 	}
 
-	public HashSet<String> getIgnoreTeleport() {
-		return ignoreTeleport;
-	}
-
-	public void addClearOnLogout(String name) {
-		clearOnLogout.add(name.toLowerCase());
-	}
-
+	/**
+	 * Checks if a player's inventory is cleared on logout
+	 * 
+	 * @param name
+	 *            the player to check
+	 * @return if the player is going to be cleared on logout
+	 */
 	public boolean isClearOnLogout(String name) {
 		return clearOnLogout.contains(name.toLowerCase());
 	}
 
+	/**
+	 * Gets a list of players who are supposed to be teleported to the 1v1 arena on spawn
+	 * 
+	 * @return set
+	 */
 	public HashSet<String> getWarpToMatch() {
 		return warpToMatch;
 	}
 
+	/**
+	 * Removes a name from the clear on logout list
+	 * 
+	 * @param name
+	 *            the player to remove
+	 */
 	public void removeLogout(String name) {
 		clearOnLogout.remove(name.toLowerCase());
-	}
-
-	public KitPVP getPlugin() {
-		return plugin;
 	}
 
 	/**
@@ -83,6 +88,12 @@ public class ServerManager {
 		inv.openInventory();
 	}
 
+	/**
+	 * Respawns a player and gives them the items depending on where they are
+	 * 
+	 * @param p
+	 *            the player to give the items to
+	 */
 	public void handleRespawn(final Player p) {
 		KitAPI.getKitManager().getKitsOnPlayers().remove(p.getName());
 		p.setHealth(20D);
@@ -103,7 +114,7 @@ public class ServerManager {
 			p.teleport(getSpawn());
 
 		KitAPI.getPlayerManager().getSpawnProtection().add(p.getName());
-		Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
+		Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
 			@Override
 			public void run() {
@@ -117,17 +128,35 @@ public class ServerManager {
 		}, 5L);
 	}
 
+	/**
+	 * Sets the player to unmovable
+	 * 
+	 * @param p
+	 *            the player to set unmoveable
+	 */
 	public void freezePlayer(Player p) {
 		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
 		prof.getJSON().put("cancelMove", true);
 	}
 
+	/**
+	 * Sets the player to movable
+	 * 
+	 * @param p
+	 *            the player to set moveable
+	 */
 	public void unfreezePlayer(Player p) {
 		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
 		prof.getJSON().put("cancelMove", false);
 
 	}
 
+	/**
+	 * Gives the items given to players when they respawn
+	 * 
+	 * @param p
+	 *            the player to give items to
+	 */
 	public void addSpawnItems(Player p) {
 		GamerProfile prof = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase());
 		ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
@@ -195,6 +224,14 @@ public class ServerManager {
 		return soups;
 	}
 
+	/**
+	 * Gives a player the invisbility effect without the potion effect particles
+	 * 
+	 * @param player
+	 *            the player to set visible/invisibly
+	 * @param visible
+	 *            whether they should be invisible or not
+	 */
 	public void setVisible(Player player, boolean visible) {
 		if (!visible) {
 			final byte b = Byte.parseByte("0110000", 2);
@@ -206,13 +243,16 @@ public class ServerManager {
 
 	}
 
+	/**
+	 * Applies the HG inventory to the player
+	 * 
+	 * @param p
+	 *            the player to apply the inventory to
+	 */
 	public void applyHGInventory(Player p) {
 		Core.get().clearPlayer(p);
-		for (int i = 19; i < 26; i += 1) {
-			p.getInventory().setItem(i, new ItemStack(Material.MUSHROOM_SOUP));
-		}
 		p.getInventory().setItem(0, Utilities.generateItem(Material.STONE_SWORD, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
-		KitAPI.getPlayerManager().fillSoup(p.getInventory(), Material.MUSHROOM_SOUP);
+		KitAPI.getPlayerManager().fillSoupCompletely(p.getInventory(), Material.MUSHROOM_SOUP);
 	}
 
 	/**
