@@ -11,9 +11,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-
 /**
  * Represents a cuboid of some sort, usually used for giving special items on a warp
  * 
@@ -24,9 +21,9 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 public class Region {
 	private static ArrayList<Region> regions = new ArrayList<Region>();
 
-	public static Region DONOR_SHOP = new Region(DefaultFlag.EXP_DROPS);
+	public static Region DONOR_SHOP = new Region("donorShop");
 
-	public static Region SPAWN = new Region(DefaultFlag.PISTONS, new RegionMeta() {
+	public static Region SPAWN = new Region("spawn", new RegionMeta() {
 
 		@Override
 		public void onWarp(Player p) {
@@ -46,7 +43,7 @@ public class Region {
 
 	});
 
-	public static Region DUEL_SPAWN = new Region(DefaultFlag.MUSHROOMS, new RegionMeta() {
+	public static Region DUEL_SPAWN = new Region("1v1", new RegionMeta() {
 
 		@Override
 		public void onWarp(Player p) {
@@ -65,7 +62,7 @@ public class Region {
 		}
 	});
 
-	public static Region EARLY_HG = new Region(DefaultFlag.MYCELIUM_SPREAD, new RegionMeta() {
+	public static Region EARLY_HG = new Region("hg", new RegionMeta() {
 
 		@Override
 		public void onWarp(Player p) {
@@ -85,16 +82,16 @@ public class Region {
 
 	});
 
-	private StateFlag flag;
+	private String tag;
 	private RegionMeta meta;
 
-	private Region(StateFlag flag, RegionMeta rgMeta) {
-		this.flag = flag;
+	private Region(String tag, RegionMeta rgMeta) {
+		this.tag = tag;
 		this.meta = rgMeta;
 	}
 
-	private Region(StateFlag flag) {
-		this.flag = flag;
+	private Region(String tag) {
+		this.tag = tag;
 		this.meta = new RegionMeta() {
 
 			@Override
@@ -118,8 +115,8 @@ public class Region {
 		return meta;
 	}
 
-	public StateFlag getFlag() {
-		return flag;
+	public String getTag() {
+		return tag;
 	}
 
 	public static ArrayList<Region> getRegions() {

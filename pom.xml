@@ -17,26 +17,6 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>1.5</version>
-				<configuration>
-					<artifactSet>
-						<includes>
-							<include>net.frozenorb:mUtilities</include>
-						</includes>
-					</artifactSet>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -51,10 +31,6 @@
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
-			<id>sk89q-repo</id>
-			<url>http://maven.sk89q.com/repo</url>
-		</repository>
-		<repository>
 			<id>bukkit.org</id>
 			<url>http://repo.bukkit.org/content/repositories/snapshots</url>
 		</repository>
@@ -67,11 +43,6 @@
 			<groupId>net.frozenorb</groupId>
 			<artifactId>mShared</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sk89q</groupId>
-			<artifactId>worldguard</artifactId>
-			<version>5.8.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.frozenorb</groupId>

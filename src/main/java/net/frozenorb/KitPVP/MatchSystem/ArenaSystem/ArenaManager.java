@@ -9,8 +9,8 @@ import org.bukkit.Location;
 
 import com.mongodb.BasicDBObject;
 
+import net.frozenorb.Utilities.DataSystem.DataManager;
 import net.frozenorb.Utilities.Serialization.Serializers.LocationSerializer;
-import net.frozenorb.Utilities.Types.DataManager;
 
 public class ArenaManager extends DataManager {
 	private static HashSet<Integer> arenasInUse = new HashSet<Integer>();

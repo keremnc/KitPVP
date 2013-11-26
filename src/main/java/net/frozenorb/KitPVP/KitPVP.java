@@ -11,6 +11,7 @@ import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
+import net.frozenorb.Utilities.DataSystem.Regioning.RegionManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -119,7 +120,7 @@ public class KitPVP extends JavaPlugin {
 		}, 20L);
 		KitAPI.getKitManager().loadFromFile();
 		Loadout.init();
-
+		RegionManager.register(this);
 	}
 
 	/**

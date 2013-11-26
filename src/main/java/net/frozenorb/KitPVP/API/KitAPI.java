@@ -15,7 +15,7 @@ import net.frozenorb.KitPVP.StatSystem.StatManager;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.VisualSystem.BossBarManager;
 import net.frozenorb.KitPVP.VisualSystem.ScoreboardManager;
-import net.frozenorb.Utilities.Types.DataManager;
+import net.frozenorb.Utilities.DataSystem.DataManager;
 
 /**
  * API class used to access managers and instances

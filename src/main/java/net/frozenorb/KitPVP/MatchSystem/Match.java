@@ -287,13 +287,14 @@ public class Match {
 				else {
 					KitAPI.getArenaManager().unregisterArena(arena);
 					KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
-					constructObject(winner);
 					// TODO: send
 					KitAPI.getBossBarManager().unregisterPlayer(winner);
 					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
 					KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
 					KitAPI.getBossBarManager().unregisterPlayer(loser);
 					KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
+					constructObject(winner);
+
 				}
 			}
 		}, 60L);
@@ -318,8 +319,11 @@ public class Match {
 		ma.append("loadout", ldt);
 		ma.append("firstTo", firstTo);
 		BasicDBList stats = new BasicDBList();
-		for (Entry<String, Integer> entry : getWins().entrySet())
-			stats.add(new BasicDBObject(entry.getKey(), entry.getValue()));
+		if (getWins() != null && getFirstTo() > 1) {
+			for (Entry<String, Integer> entry : getWins().entrySet())
+				stats.add(new BasicDBObject(entry.getKey(), entry.getValue()));
+
+		}
 		if (getFirstTo() > 1)
 			ma.append("stats", stats);
 		ma.append("durationSeconds", (matchFinishTime - matchStartTime) / 1000);

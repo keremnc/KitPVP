@@ -23,6 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -303,7 +304,7 @@ public class MatchManager {
 	public void applyArenaInventory(Player p) {
 		Core.get().clearPlayer(p);
 		p.setMaxHealth(20D);
-		p.setHealth(p.getMaxHealth());
+		p.setHealth(((Damageable) p).getMaxHealth());
 		p.setFoodLevel(20);
 		p.getInventory().setItem(0, QUICK_ITEM);
 		p.getInventory().setItem(1, UNRANKED_ITEM);

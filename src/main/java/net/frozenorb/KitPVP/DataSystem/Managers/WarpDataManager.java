@@ -3,7 +3,7 @@ package net.frozenorb.KitPVP.DataSystem.Managers;
 import java.io.File;
 
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.Utilities.Types.DataManager;
+import net.frozenorb.Utilities.DataSystem.DataManager;
 
 public class WarpDataManager extends DataManager {
 

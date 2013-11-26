@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+@SuppressWarnings("deprecation")
 public class BossBarManager implements Runnable {
 	private static final int ENTITY_ID_MODIFIER = 1236912369;
 
