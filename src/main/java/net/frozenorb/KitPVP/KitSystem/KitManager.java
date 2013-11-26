@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
@@ -28,13 +29,11 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.Utilities.Core;
 
 public class KitManager {
-	private KitPVP plugin;
 	private String packageName;
 	private HashMap<String, Kit> playerKits = new HashMap<String, Kit>();
 	private HashSet<String> packages = new HashSet<String>();
 
-	public KitManager(KitPVP plugin, String packageName) {
-		this.plugin = plugin;
+	public KitManager(String packageName) {
 		this.packageName = packageName;
 	}
 
@@ -161,7 +160,7 @@ public class KitManager {
 					Constructor ctor = perkClass.getConstructors()[0];
 					ctor.setAccessible(true);
 					Kit kit = (Kit) ctor.newInstance();
-					plugin.registerKit(kit);
+					registerKit(kit);
 				}
 			}
 		}
@@ -176,7 +175,7 @@ public class KitManager {
 						Constructor ctor = perkClass.getConstructors()[0];
 						ctor.setAccessible(true);
 						Kit kit = (Kit) ctor.newInstance();
-						plugin.registerKit(kit);
+						registerKit(kit);
 					}
 				}
 
@@ -214,7 +213,7 @@ public class KitManager {
 	 *            the kit to register
 	 */
 	public void registerExternalKit(final Kit k) {
-		KitPVP.get().registerKit(k);
+		registerKit(k);
 		BaseCommand cmd = new BaseCommand() {
 
 			@Override
@@ -240,5 +239,19 @@ public class KitManager {
 		String pkg = k.getClass().getPackage().getName();
 		packages.add(pkg);
 
+	}
+
+	/**
+	 * Registers a kit
+	 * 
+	 * @param k
+	 *            the kit to register
+	 * @return whether registration was a duplicate one
+	 */
+	public boolean registerKit(Kit k) {
+		boolean done = KitPVP.getKits().add(k);
+		if (k.getListener() != null && done)
+			Bukkit.getPluginManager().registerEvents(k.getListener(), KitPVP.get());
+		return done;
 	}
 }

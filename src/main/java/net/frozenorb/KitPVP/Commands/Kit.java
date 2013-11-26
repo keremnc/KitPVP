@@ -10,7 +10,7 @@ import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.CommandSystem.Conversations.KitCreationConversation;
-import net.frozenorb.KitPVP.DataSystem.KitSerializer;
+import net.frozenorb.KitPVP.DataSystem.Serialization.KitSerializer;
 import net.frozenorb.KitPVP.KitSystem.SerializableKit;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 

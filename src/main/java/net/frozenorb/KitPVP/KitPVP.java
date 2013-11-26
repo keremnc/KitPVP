@@ -141,17 +141,5 @@ public class KitPVP extends JavaPlugin {
 	/*
 	 * ------------KIT REGISTRATION----------
 	 */
-	/**
-	 * Registers a kit
-	 * 
-	 * @param k
-	 *            the kit to register
-	 * @return whether registration was a duplicate one
-	 */
-	public boolean registerKit(Kit k) {
-		boolean done = kits.add(k);
-		if (k.getListener() != null && done)
-			Bukkit.getPluginManager().registerEvents(k.getListener(), this);
-		return done;
-	}
+
 }

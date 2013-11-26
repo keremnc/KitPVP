@@ -1,8 +1,9 @@
-package net.frozenorb.KitPVP.DataSystem;
+package net.frozenorb.KitPVP.DataSystem.Managers;
 
 import java.io.File;
 
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.Utilities.Types.DataManager;
 
 public class WarpDataManager extends DataManager {
 
@@ -13,7 +14,6 @@ public class WarpDataManager extends DataManager {
 	@Override
 	public void onLoad() {
 		KitAPI.getKitPVP().getCommandManager().loadCommandsFromJson(getData());
-
 	}
 
 }

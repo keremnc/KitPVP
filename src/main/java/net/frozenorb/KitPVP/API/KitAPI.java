@@ -3,7 +3,7 @@ package net.frozenorb.KitPVP.API;
 import java.io.File;
 
 import net.frozenorb.KitPVP.KitPVP;
-import net.frozenorb.KitPVP.DataSystem.WarpDataManager;
+import net.frozenorb.KitPVP.DataSystem.Managers.WarpDataManager;
 import net.frozenorb.KitPVP.ItemSystem.ToggleableItemManager;
 import net.frozenorb.KitPVP.KitSystem.KitManager;
 import net.frozenorb.KitPVP.MatchSystem.MatchManager;
@@ -15,11 +15,13 @@ import net.frozenorb.KitPVP.StatSystem.StatManager;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.VisualSystem.BossBarManager;
 import net.frozenorb.KitPVP.VisualSystem.ScoreboardManager;
+import net.frozenorb.Utilities.Types.DataManager;
 
 /**
  * API class used to access managers and instances
  * <p>
  * Do <b>NOT</b> instantiate any new managers, access from here instead
+ * 
  * 
  * @author Kerem
  * @since 10/20/2013
@@ -46,7 +48,7 @@ public class KitAPI {
 
 	public static KitManager getKitManager() {
 		if (kitManager == null)
-			kitManager = new KitManager(kitpvp, "net.frozenorb.KitPVP.KitSystem.Kits");
+			kitManager = new KitManager("net.frozenorb.KitPVP.KitSystem.Kits");
 		return kitManager;
 	}
 
@@ -94,13 +96,13 @@ public class KitAPI {
 
 	public static WarpDataManager getWarpDataManager() {
 		if (warpDataManager == null)
-			warpDataManager = new WarpDataManager(new File(kitpvp.getDataFolder() + File.separator + "warps.json"));
+			warpDataManager = new WarpDataManager(new File(DataManager.DATA_FOLDER + File.separator + "warps.json"));
 		return warpDataManager;
 	}
 
 	public static ArenaManager getArenaManager() {
 		if (arenaManager == null)
-			arenaManager = new ArenaManager(new File(kitpvp.getDataFolder() + File.separator + "arenas.json"));
+			arenaManager = new ArenaManager(new File(DataManager.DATA_FOLDER + File.separator + "arenas.json"));
 		return arenaManager;
 	}
 
@@ -118,8 +120,8 @@ public class KitAPI {
 
 	public static void init(KitPVP kitpvp) {
 		KitAPI.kitpvp = kitpvp;
-		warpDataManager = new WarpDataManager(new File(kitpvp.getDataFolder() + File.separator + "warps.json"));
-		arenaManager = new ArenaManager(new File(kitpvp.getDataFolder() + File.separator + "arenas.json"));
+		warpDataManager = new WarpDataManager(new File(DataManager.DATA_FOLDER + File.separator + "warps.json"));
+		arenaManager = new ArenaManager(new File(DataManager.DATA_FOLDER + File.separator + "arenas.json"));
 	}
 
 }

@@ -3,6 +3,7 @@ package net.frozenorb.KitPVP.MatchSystem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.KitPVP.KitPVP;
@@ -29,6 +30,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 public class Match {
@@ -40,6 +42,9 @@ public class Match {
 	private Arena arena;
 	private int firstTo = 1;
 	private int matchesDone = 0;
+	private long matchStartTime;
+	private long matchFinishTime;
+
 	private HashMap<String, Integer> wins = new HashMap<String, Integer>();
 
 	public Match(Player challenger, Player victim, Loadout type) {
@@ -187,9 +192,12 @@ public class Match {
 			KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
 			KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
 		}
-		if (isRanked() && ((hasFinished() && getFirstTo() > 1 && !logout) || getFirstTo() == 1)) {
-			KitAPI.getStatManager().getLocalData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
-			KitAPI.getStatManager().getLocalData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
+		if (((hasFinished() && getFirstTo() > 1 && !logout) || getFirstTo() == 1)) {
+			matchFinishTime = System.currentTimeMillis();
+			if (isRanked()) {
+				KitAPI.getStatManager().getLocalData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
+				KitAPI.getStatManager().getLocalData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
+			}
 		}
 		setInProgress(false);
 		KitAPI.getServerManager().setVisible(loser, false);
@@ -268,23 +276,54 @@ public class Match {
 
 			@Override
 			public void run() {
-				KitAPI.getServerManager().setVisible(loser, true);
-				loser.setAllowFlight(false);
-				loser.setFlying(false);
+				if (loser != null && loser.isOnline()) {
+					KitAPI.getServerManager().setVisible(loser, true);
+					loser.setAllowFlight(false);
+					loser.setFlying(false);
+				}
 				Core.get().clearPlayer(winner);
 				if (!hasFinished() && getFirstTo() > 1 && reason != MatchFinishReason.PLAYER_LOGOUT)
 					startMatch();
 				else {
-					KitAPI.getBossBarManager().unregisterPlayer(victim);
-					KitAPI.getBossBarManager().unregisterPlayer(challenger);
-					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
-					KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-					KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
-					KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
 					KitAPI.getArenaManager().unregisterArena(arena);
+					KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
+					constructObject(winner);
+					// TODO: send
+					KitAPI.getBossBarManager().unregisterPlayer(winner);
+					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
+					KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
+					KitAPI.getBossBarManager().unregisterPlayer(loser);
+					KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
 				}
 			}
 		}, 60L);
+
+	}
+
+	/**
+	 * Gets the matches result, in JSON
+	 * <p>
+	 * Should <b>ONLY</b> be called when the match has completed.
+	 * 
+	 * @return JSON output of the match
+	 */
+	public BasicDBObject constructObject(Player winner) {
+		BasicDBObject ma = new BasicDBObject();
+		ma.append("challenger", challenger.getName()).append("victim", victim.getName()).append("arenaID", arena.getId());
+		ma.append("winner", winner.getName());
+		BasicDBObject ldt = new BasicDBObject("loadout", type.getName());
+		if (type.isCustom()) {
+			ldt.append("data", type.getInfo());
+		}
+		ma.append("loadout", ldt);
+		ma.append("firstTo", firstTo);
+		BasicDBList stats = new BasicDBList();
+		for (Entry<String, Integer> entry : getWins().entrySet())
+			stats.add(new BasicDBObject(entry.getKey(), entry.getValue()));
+		if (getFirstTo() > 1)
+			ma.append("stats", stats);
+		ma.append("durationSeconds", (matchFinishTime - matchStartTime) / 1000);
+		return ma;
 
 	}
 
@@ -354,10 +393,9 @@ public class Match {
 		KitAPI.getMatchManager().getCurrentMatches().put(challenger.getName(), this);
 		matchesDone++;
 		if (!wins.containsKey(victim.getName())) {
-			wins.put(victim.getName(), 0);
-		}
-		if (!wins.containsKey(challenger.getName())) {
+			matchStartTime = System.currentTimeMillis();
 			wins.put(challenger.getName(), 0);
+			wins.put(victim.getName(), 0);
 		}
 
 		if (victim == null) {

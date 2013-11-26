@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.DataSystem.KitSerializer;
+import net.frozenorb.KitPVP.DataSystem.Serialization.KitSerializer;
 import net.frozenorb.KitPVP.KitSystem.KitFactory;
 import net.frozenorb.KitPVP.KitSystem.SerializableKit;
 import net.frozenorb.Utilities.Core;

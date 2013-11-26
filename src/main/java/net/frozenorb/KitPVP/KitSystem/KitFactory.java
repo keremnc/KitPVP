@@ -20,7 +20,7 @@ public final class KitFactory {
 	}
 
 	public static SerializableKit createKit(final String name, final String permission, final String description, final ItemStack[] armor, final ItemStack[] items, final PotionEffect[] pots, final Material mat) {
-		return new SerializableKit() {
+		final SerializableKit skit = new SerializableKit() {
 
 			@Override
 			public PlayerInventory transformInventory(PlayerInventory inv) {
@@ -148,5 +148,6 @@ public final class KitFactory {
 			}
 
 		};
+		return skit;
 	}
 }

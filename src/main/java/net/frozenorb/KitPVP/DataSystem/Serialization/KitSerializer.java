@@ -1,4 +1,4 @@
-package net.frozenorb.KitPVP.DataSystem;
+package net.frozenorb.KitPVP.DataSystem.Serialization;
 
 import java.util.ArrayList;
 
