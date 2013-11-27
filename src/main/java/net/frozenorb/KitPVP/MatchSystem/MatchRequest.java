@@ -257,6 +257,7 @@ public abstract class MatchRequest implements Listener {
 		Player who = (Player) e.getPlayer();
 		if (who.getName().equalsIgnoreCase(sender.getName())) {
 			finish(who);
+			KitAPI.getMatchManager().getMatchRequestsInProgress().remove(e.getPlayer().getName());
 
 		}
 	}
@@ -393,9 +394,9 @@ public abstract class MatchRequest implements Listener {
 				else
 					inventory.setItem(0, Utilities.generateItem(Material.getMaterial(sword.toUpperCase() + "_SWORD")));
 				if (soup.equalsIgnoreCase("enabled"))
-					KitAPI.getPlayerManager().fillSoupCompletely(inventory, healType);
+					KitAPI.getPlayerManager().fillInventory(inventory, healType);
 				else
-					KitAPI.getPlayerManager().fillSoup(inventory, healType);
+					KitAPI.getPlayerManager().fillHotbar(inventory, healType);
 
 				return inventory;
 			}

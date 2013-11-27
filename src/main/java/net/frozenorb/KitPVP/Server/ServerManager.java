@@ -113,7 +113,7 @@ public class ServerManager {
 		} else
 			p.teleport(getSpawn());
 
-		KitAPI.getPlayerManager().getSpawnProtection().add(p.getName());
+		KitAPI.getPlayerManager().giveSpawnProtection(p);
 		Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
 			@Override
@@ -252,7 +252,7 @@ public class ServerManager {
 	public void applyHGInventory(Player p) {
 		Core.get().clearPlayer(p);
 		p.getInventory().setItem(0, Utilities.generateItem(Material.STONE_SWORD, org.bukkit.enchantments.Enchantment.DURABILITY, 10));
-		KitAPI.getPlayerManager().fillSoupCompletely(p.getInventory(), Material.MUSHROOM_SOUP);
+		KitAPI.getPlayerManager().fillInventory(p.getInventory(), Material.MUSHROOM_SOUP);
 	}
 
 	/**

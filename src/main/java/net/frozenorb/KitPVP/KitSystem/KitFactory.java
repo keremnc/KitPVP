@@ -101,7 +101,7 @@ public final class KitFactory {
 
 			@Override
 			public void commandRun(Player p) {
-				if (KitAPI.getKitManager().hasKitOn(p.getName()) && !KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
+				if (KitAPI.getKitManager().hasKitOn(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
 					p.sendMessage(ChatColor.RED + "You may only use one kit per life!");
 					return;
 				}

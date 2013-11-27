@@ -61,7 +61,7 @@ public class Undertaker extends BaseKit {
 				if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(e.getPlayer().getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(e.getPlayer().getName()).getName().equals(getName()))
 					if (!KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getPlayer().getLocation()) && e.getRightClicked() instanceof Player && e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.EMERALD) {
 						final Player p = (Player) e.getRightClicked();
-						if (KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
+						if (KitAPI.getPlayerManager().hasSpawnProtection(p)) {
 							e.setCancelled(true);
 							e.getPlayer().sendMessage(ChatColor.RED + "That player has spawn protection.");
 							return;

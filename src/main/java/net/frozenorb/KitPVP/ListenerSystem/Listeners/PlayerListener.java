@@ -134,6 +134,9 @@ public class PlayerListener extends ListenerBase {
 		}
 		KitAPI.getStatManager().loadStats(e.getPlayer().getName());
 		KitAPI.getScoreboardManager().loadScoreboard(e.getPlayer());
+		if (KitAPI.getPlayerManager().isInventoryEmpty(e.getPlayer())) {
+			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
+		}
 
 	}
 
@@ -324,11 +327,11 @@ public class PlayerListener extends ListenerBase {
 		if (e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
 			if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, p.getLocation())) {
-				KitAPI.getPlayerManager().getSpawnProtection().remove(p.getName());
+				KitAPI.getPlayerManager().removeSpawnProtection(p);
 			}
 			((CraftPlayer) p).getHandle().getDataWatcher().watch(9, (byte) 0);
 
-			if (KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
+			if (KitAPI.getPlayerManager().hasSpawnProtection(p)) {
 				e.setCancelled(true);
 				if (e instanceof EntityDamageByEntityEvent) {
 					if (((EntityDamageByEntityEvent) e).getDamager().getType() == EntityType.SNOWBALL) {
@@ -347,23 +350,23 @@ public class PlayerListener extends ListenerBase {
 				if (((EntityDamageByEntityEvent) e).getDamager().getType() == EntityType.SNOWBALL) {
 					if (((Snowball) ((EntityDamageByEntityEvent) e).getDamager()).getShooter() instanceof Player) {
 						Player damager = (Player) ((Snowball) ((EntityDamageByEntityEvent) e).getDamager()).getShooter();
-						if (KitAPI.getPlayerManager().getSpawnProtection().contains(damager.getName()) && !KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
-							KitAPI.getPlayerManager().getSpawnProtection().remove(damager.getName());
+						if (KitAPI.getPlayerManager().hasSpawnProtection(damager) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
+							KitAPI.getPlayerManager().removeSpawnProtection(damager);
 							damager.sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
 						}
 					}
 				}
 				if (((EntityDamageByEntityEvent) e).getDamager() instanceof Player) {
 					Player da = (Player) ((EntityDamageByEntityEvent) e).getDamager();
-					if (KitAPI.getPlayerManager().getSpawnProtection().contains(da.getName()) && !KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
-						KitAPI.getPlayerManager().getSpawnProtection().remove(da.getName());
+					if (KitAPI.getPlayerManager().hasSpawnProtection(da) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
+						KitAPI.getPlayerManager().removeSpawnProtection(da);
 						da.sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
 					}
 				}
 				if (((EntityDamageByEntityEvent) e).getDamager() instanceof Arrow && ((Arrow) ((EntityDamageByEntityEvent) e).getDamager()).getShooter() instanceof Player) {
 					Player da = (Player) ((Arrow) ((EntityDamageByEntityEvent) e).getDamager()).getShooter();
-					if (KitAPI.getPlayerManager().getSpawnProtection().contains(da.getName()) && !KitAPI.getPlayerManager().getSpawnProtection().contains(p.getName())) {
-						KitAPI.getPlayerManager().getSpawnProtection().remove(da.getName());
+					if (KitAPI.getPlayerManager().hasSpawnProtection(da) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
+						KitAPI.getPlayerManager().removeSpawnProtection(da);
 						da.sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
 					}
 				}
@@ -388,10 +391,10 @@ public class PlayerListener extends ListenerBase {
 			}
 			if (!(KitAPI.getRegionChecker().isRegion(Region.SPAWN, to)) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, from)) {
 
-				if (KitAPI.getPlayerManager().getSpawnProtection().contains(e.getPlayer().getName())) {
+				if (KitAPI.getPlayerManager().hasSpawnProtection(e.getPlayer())) {
 					e.getPlayer().sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
 				}
-				KitAPI.getPlayerManager().getSpawnProtection().remove(e.getPlayer().getName());
+				KitAPI.getPlayerManager().removeSpawnProtection(e.getPlayer());
 
 			}
 		}
@@ -424,8 +427,8 @@ public class PlayerListener extends ListenerBase {
 				KitAPI.getMatchManager().getMatches().remove(e.getPlayer().getName());
 			}
 			if (KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getTo()) && !KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getFrom())) {
-				if (!KitAPI.getPlayerManager().getSpawnProtection().contains(e.getPlayer().getName())) {
-					KitAPI.getPlayerManager().getSpawnProtection().add(e.getPlayer().getName());
+				if (!KitAPI.getPlayerManager().hasSpawnProtection(e.getPlayer())) {
+					KitAPI.getPlayerManager().giveSpawnProtection(e.getPlayer());
 				}
 			}
 		}
@@ -510,8 +513,9 @@ public class PlayerListener extends ListenerBase {
 			Player damager = (Player) e.getDamager();
 			Player p = (Player) e.getEntity();
 			if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, loc)) {
-				KitAPI.getPlayerManager().getSpawnProtection().remove(p.getName());
-				KitAPI.getPlayerManager().getSpawnProtection().remove(damager.getName());
+				KitAPI.getPlayerManager().removeSpawnProtection(p);
+				KitAPI.getPlayerManager().removeSpawnProtection(damager);
+
 			}
 		}
 		if (e.getEntity() instanceof Player && e.getDamager() instanceof Arrow && ((Arrow) e.getDamager()).getShooter() instanceof Player) {
@@ -519,11 +523,11 @@ public class PlayerListener extends ListenerBase {
 			Player damager = (Player) ((Arrow) e.getDamager()).getShooter();
 			Player p = (Player) e.getEntity();
 			if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, loc)) {
-				if (KitAPI.getPlayerManager().getSpawnProtection().contains(damager.getName())) {
+				if (KitAPI.getPlayerManager().hasSpawnProtection(damager)) {
 					damager.sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
 				}
-				KitAPI.getPlayerManager().getSpawnProtection().remove(p.getName());
-				KitAPI.getPlayerManager().getSpawnProtection().remove(damager.getName());
+				KitAPI.getPlayerManager().removeSpawnProtection(p);
+				KitAPI.getPlayerManager().removeSpawnProtection(damager);
 			}
 		}
 		if (!KitAPI.getRegionChecker().isRegion(Region.SPAWN, e.getEntity().getLocation())) {

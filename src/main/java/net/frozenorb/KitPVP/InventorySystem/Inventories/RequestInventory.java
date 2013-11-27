@@ -84,7 +84,10 @@ public abstract class RequestInventory extends PageInventory {
 
 	public void update() {
 		invs.put(getPlayer().getName(), this);
-		inv.setContents(getItems().toArray(new ItemStack[] {}));
+		if (getItems().size() == 0)
+			getPlayer().closeInventory();
+		else
+			inv.setContents(getItems().toArray(new ItemStack[] {}));
 	}
 
 	public RequestInventory loadTypes() {

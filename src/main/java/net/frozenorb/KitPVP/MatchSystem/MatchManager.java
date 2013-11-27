@@ -89,6 +89,10 @@ public class MatchManager {
 		});
 	}
 
+	public HashMap<String, String> getMatchRequestsInProgress() {
+		return matchRequestsInProgress;
+	}
+
 	public ArrayList<Material> getMatchItems() {
 		return new ArrayList<Material>() {
 			private static final long serialVersionUID = 1L;
@@ -593,8 +597,8 @@ public class MatchManager {
 
 				}
 				if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, loc)) {
-					KitAPI.getPlayerManager().getSpawnProtection().remove(((Player) e.getEntity()).getName());
-					KitAPI.getPlayerManager().getSpawnProtection().remove(((Player) e.getDamager()).getName());
+					KitAPI.getPlayerManager().removeSpawnProtection((Player) e.getEntity());
+					KitAPI.getPlayerManager().removeSpawnProtection((Player) e.getDamager());
 				}
 				if (isInMatch(p.getName())) {
 					if (isInMatch(damager.getName())) {
