@@ -31,7 +31,7 @@ public interface RegionMeta {
 	 * Return an empty array to allow none, example: <br>
 	 * 
 	 * <pre>
-	 * {@code(Class<? super Kit>[]) new Class<?>[] { };}
+	 * {@code (Class<? super Kit>[]) new Class<?>[] { };}
 	 * </pre>
 	 * 
 	 * @return allowed kits
@@ -44,7 +44,7 @@ public interface RegionMeta {
 	 * For example: To block the 'PVP' Kit, return: <br>
 	 * 
 	 * <pre>
-	 * {@code(Class<? super Kit>[]) new Class<?>[] { PVP.class };}
+	 * {@code (Class<? super Kit>[]) new Class<?>[] { PVP.class };}
 	 * </pre>
 	 * 
 	 * @return blocked kits

@@ -18,6 +18,7 @@ import org.bukkit.potion.PotionEffect;
 public class PlayerManager {
 	private HashMap<String, GamerProfile> gamerProfiles = new HashMap<String, GamerProfile>();
 	private HashSet<String> spawnProtetcion = new HashSet<String>();
+	public static Material UNUSABLE_SLOT = Material.THIN_GLASS;
 
 	/**
 	 * Whether the player has spawn protection or not

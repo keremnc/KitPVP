@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.Kit;
+import net.frozenorb.Utilities.DataSystem.Regioning.CuboidRegion;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -111,14 +112,29 @@ public class Region {
 		};
 	}
 
+	/**
+	 * Gets the RegionMeta instance attached to the Region
+	 * 
+	 * @return meta
+	 */
 	public RegionMeta getMeta() {
 		return meta;
 	}
 
+	/**
+	 * The tag that defnes a {@link CuboidRegion} to a {@link Region}
+	 * 
+	 * @return tag
+	 */
 	public String getTag() {
 		return tag;
 	}
 
+	/**
+	 * Gets a list of all regions that are loaded
+	 * 
+	 * @return region
+	 */
 	public static ArrayList<Region> getRegions() {
 		return regions;
 	}

@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -51,29 +52,36 @@ public class MatchTypeInventory extends PageInventory {
 	}
 
 	@EventHandler
-	public void onInventoryClick(InventoryClickEvent event) {
+	public void onInventoryClick(final InventoryClickEvent event) {
 		if (event.getView().getTopInventory().getViewers().equals(inv.getViewers())) {
 			event.setCancelled(true);
-			ItemStack item = event.getCurrentItem();
-			if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-				if (item.equals(getBackPage())) {
-					setPage(currentPage - 1);
-				} else if (item.equals(getForwardsPage())) {
-					setPage(currentPage + 1);
-				} else {
-					String name = item.getItemMeta().getDisplayName();
-					name = ChatColor.stripColor(name);
-					Loadout type = Loadout.getByName(name.replace("Ranked ", ""));
-					if (type == null) {
-						event.getWhoClicked().closeInventory();
-						KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType(), (int) item.getDurability());
-						return;
+			final ItemStack item = event.getCurrentItem();
+			if (item != null) {
+
+				final Inventory v = event.getInventory();
+				event.getWhoClicked().closeInventory();
+				event.getWhoClicked().openInventory(v);
+				if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+					if (item.equals(getBackPage())) {
+						setPage(currentPage - 1);
+					} else if (item.equals(getForwardsPage())) {
+						setPage(currentPage + 1);
+					} else {
+						String name = item.getItemMeta().getDisplayName();
+						name = ChatColor.stripColor(name);
+						Loadout type = Loadout.getByName(name.replace("Ranked ", ""));
+						if (type == null) {
+							event.getWhoClicked().closeInventory();
+							KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType(), (int) item.getDurability());
+							return;
+						}
+						MatchQueue queue = new MatchQueue((Player) event.getWhoClicked(), type, this.type);
+						KitAPI.getMatchManager().addToQueue(queue);
 					}
-					MatchQueue queue = new MatchQueue((Player) event.getWhoClicked(), type, this.type);
-					KitAPI.getMatchManager().addToQueue(queue);
 				}
 			}
-		}
+		} else
+			end();
 	}
 
 	public MatchTypeInventory loadTypes() {

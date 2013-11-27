@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -51,32 +52,40 @@ public class KitInventory extends PageInventory {
 	}
 
 	@EventHandler
-	public void onInventoryClick(InventoryClickEvent event) {
+	public void onInventoryClick(final InventoryClickEvent event) {
 		if (event.getView().getTopInventory().getViewers().equals(inv.getViewers())) {
-			event.setCancelled(true);
-			ItemStack item = event.getCurrentItem();
-			if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-				if (item.equals(getBackPage())) {
-					setPage(currentPage - 1);
-				} else if (item.equals(getForwardsPage())) {
-					setPage(currentPage + 1);
-				} else {
-					String name = item.getItemMeta().getDisplayName();
-					name = ChatColor.stripColor(name);
-					Kit k = KitAPI.getKitManager().getByName(name);
-					if (k == null)
-						return;
-					if (k.hasKit(((Player) event.getWhoClicked()))) {
-						((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.NOTE_PLING, 20F, 20F);
-						Bukkit.dispatchCommand((CommandSender) event.getWhoClicked(), "kit " + k.getName());
-						event.getWhoClicked().closeInventory();
+			final ItemStack item = event.getCurrentItem();
+			if (item != null) {
+				event.setCancelled(true);
+				final Inventory v = event.getInventory();
+				event.getWhoClicked().closeInventory();
+				event.getWhoClicked().openInventory(v);
+				if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+					if (item.equals(getBackPage())) {
+						setPage(currentPage - 1);
+					} else if (item.equals(getForwardsPage())) {
+						setPage(currentPage + 1);
 					} else {
-						((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.ARROW_HIT, 20F, 20F);
-						((Player) event.getWhoClicked()).sendMessage(ChatColor.RED + "You do not have access to that kit!");
+						String name = item.getItemMeta().getDisplayName();
+						name = ChatColor.stripColor(name);
+						Kit k = KitAPI.getKitManager().getByName(name);
+						if (k == null)
+							return;
+						if (k.hasKit(((Player) event.getWhoClicked()))) {
+							((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.NOTE_PLING, 20F, 20F);
+							Bukkit.dispatchCommand((CommandSender) event.getWhoClicked(), "kit " + k.getName());
+							event.getWhoClicked().closeInventory();
+							end();
+						} else {
+							((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.ARROW_HIT, 20F, 20F);
+							((Player) event.getWhoClicked()).sendMessage(ChatColor.RED + "You do not have access to that kit!");
+						}
 					}
 				}
 			}
-		}
+		} else
+			end();
+
 	}
 
 	public void setKits() {

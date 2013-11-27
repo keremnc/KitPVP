@@ -14,6 +14,7 @@ import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
+import net.frozenorb.KitPVP.PlayerSystem.PlayerManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
 import net.frozenorb.KitPVP.StatSystem.Stat;
@@ -23,11 +24,14 @@ import net.frozenorb.KitPVP.Types.CombatLogRunnable;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mCommon.Events.SoundSendPacketEvent;
 import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
+import net.minecraft.server.v1_6_R3.EntityLiving;
+import net.minecraft.server.v1_6_R3.Packet62NamedSoundEffect;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Damageable;
@@ -84,8 +88,11 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		if (e.getCurrentItem() != null && e.getCurrentItem().getType() == Material.PISTON_EXTENSION) {
+		((Player) e.getWhoClicked()).updateInventory();
+		if (e.getCurrentItem() != null && e.getCurrentItem().getType() == PlayerManager.UNUSABLE_SLOT) {
 			e.setCancelled(true);
+			e.getWhoClicked().closeInventory();
+			e.getWhoClicked().openInventory(e.getView());
 			((Player) e.getWhoClicked()).updateInventory();
 		}
 	}
@@ -153,7 +160,7 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		KitAPI.getBossBarManager().unregisterPlayer(p);
-		if (this.combatLogRunnables.containsKey(p.getName()))
+		if (this.combatLogRunnables.containsKey(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p))
 			p.setHealth(0.0D);
 
 		e.setQuitMessage(null);
@@ -309,7 +316,7 @@ public class PlayerListener extends ListenerBase {
 			}, 40L);
 			return;
 		}
-		if (KitAPI.getMatchManager().getMatchItems().contains(item.getType()) || item.getType() == Material.PISTON_EXTENSION) {
+		if (KitAPI.getMatchManager().getMatchItems().contains(item.getType()) || item.getType() == PlayerManager.UNUSABLE_SLOT) {
 			e.setCancelled(true);
 			return;
 		}
@@ -506,6 +513,17 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
+		EntityLiving l = (EntityLiving) ((CraftEntity) e.getEntity()).getHandle();
+		if ((float) l.noDamageTicks > (float) l.maxNoDamageTicks / 2.0F) {
+			if (e.getDamage() <= l.lastDamage) {
+				return;
+			}
+		}
+		Packet62NamedSoundEffect pac = new Packet62NamedSoundEffect("game.player.hurt", l.locX, l.locY, l.locZ, 63, 1);
+		if (e.getDamager() instanceof Player) {
+			((CraftPlayer) e.getDamager()).getHandle().playerConnection.sendPacket(pac);
+		}
+
 		if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
 			Location loc = e.getEntity().getLocation();
 			if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, loc))
