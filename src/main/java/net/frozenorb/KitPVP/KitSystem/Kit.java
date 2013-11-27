@@ -16,7 +16,9 @@ import org.bukkit.potion.PotionEffect;
 public interface Kit {
 
 	/**
-	 * Gets the id of the kit
+	 * Gets the ID of the kit
+	 * <p>
+	 * The Kit's ID is also used for ordering kits in the kit menu
 	 * 
 	 * @return id
 	 */
@@ -107,7 +109,23 @@ public interface Kit {
 	public void applyKit(Player p);
 
 	/**
-	 * Called when a player runs the kit command
+	 * Called when the player executes the kit's command
+	 * <p>
+	 * 
+	 * 
+	 * Depending on the implementation, the permission/location checking <b>MAY</b> already have been done, or may have been done in a custom way. <br>
+	 * Kits registered using
+	 * 
+	 * <pre>
+	 * {@code
+	 * KitAPI.getKitManager().registerExternalKit()
+	 * }
+	 * </pre>
+	 * 
+	 * will <b>NOT</b> have any checking done on them.
+	 * 
+	 * @param p
+	 *            the player who ran the command
 	 */
 	public void commandRun(Player p);
 }

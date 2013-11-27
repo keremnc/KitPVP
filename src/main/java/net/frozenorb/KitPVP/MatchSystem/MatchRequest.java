@@ -404,6 +404,14 @@ public abstract class MatchRequest implements Listener {
 		return l;
 	}
 
+	/**
+	 * Called when the loadout is created
+	 * <p>
+	 * Nothing is called if the player closes the inventory, don't rely on this to clean up after you.
+	 * 
+	 * @param loadout
+	 *            the loadout that is made
+	 */
 	public abstract void onSelect(Loadout loadout);
 
 }

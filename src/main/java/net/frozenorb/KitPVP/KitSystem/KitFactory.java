@@ -15,10 +15,38 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 
+/**
+ * KitFactory class to be used to create new custom kits
+ * <p>
+ * Should really only be used at runtime, or implemented into a command, pretty stripped down, and bare...
+ * 
+ * @author Kerem Celik
+ * @since 11/24/2013
+ * 
+ */
 public final class KitFactory {
 	KitFactory() {
 	}
 
+	/**
+	 * Creates a new Kit
+	 * 
+	 * @param name
+	 *            the name of the kit
+	 * @param permission
+	 *            the permission to use the kit
+	 * @param description
+	 *            the description of the kit
+	 * @param armor
+	 *            the armor to give
+	 * @param items
+	 *            the item to set in the inventory
+	 * @param pots
+	 *            the potions the kit gets
+	 * @param mat
+	 *            the icon that is shown in the kit screen
+	 * @return created serializable kit
+	 */
 	public static SerializableKit createKit(final String name, final String permission, final String description, final ItemStack[] armor, final ItemStack[] items, final PotionEffect[] pots, final Material mat) {
 		final SerializableKit skit = new SerializableKit() {
 

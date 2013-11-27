@@ -32,6 +32,7 @@ public class KitManager {
 	private String packageName;
 	private HashMap<String, Kit> playerKits = new HashMap<String, Kit>();
 	private HashSet<String> packages = new HashSet<String>();
+	private HashMap<Kit, HashMap<String, Long>> cooldowns = new HashMap<Kit, HashMap<String, Long>>();
 
 	public KitManager(String packageName) {
 		this.packageName = packageName;
@@ -109,8 +110,6 @@ public class KitManager {
 	public boolean hasKitOn(String str) {
 		return playerKits.containsKey(str);
 	}
-
-	private HashMap<Kit, HashMap<String, Long>> cooldowns = new HashMap<Kit, HashMap<String, Long>>();
 
 	public boolean canUseAbility(Player p, Kit k) {
 		if (cooldowns.containsKey(k)) {
