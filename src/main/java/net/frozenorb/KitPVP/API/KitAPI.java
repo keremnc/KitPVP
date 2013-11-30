@@ -21,6 +21,8 @@ import net.frozenorb.Utilities.DataSystem.DataManager;
  * API class used to access managers and instances
  * <p>
  * Do <b>NOT</b> instantiate any new managers, access from here instead
+ * <p>
+ * General summary of most methods: if not exists, assign var to new, return var
  * 
  * 
  * @author Kerem
@@ -29,18 +31,18 @@ import net.frozenorb.Utilities.DataSystem.DataManager;
  */
 public class KitAPI {
 	private static KitPVP kitpvp;
-	private static PlayerManager playerManager = null;
-	private static MatchManager matchManager = null;
-	private static RegionChecker regionChecker = null;
-	private static ScoreboardManager scoreboardManager = null;
-	private static KitManager kitManager = null;
-	private static StatManager statManager = null;
-	private static WarpDataManager warpDataManager = null;
-	private static ArenaManager arenaManager = null;
-	private static ServerManager serverManager = null;
-	private static EloManager eloManager = null;
-	private static ToggleableItemManager itemManager = null;
-	private static BossBarManager bossBarManager = null;;
+	private static PlayerManager playerManager;
+	private static MatchManager matchManager;
+	private static RegionChecker regionChecker;
+	private static ScoreboardManager scoreboardManager;
+	private static KitManager kitManager;
+	private static StatManager statManager;
+	private static WarpDataManager warpDataManager;
+	private static ArenaManager arenaManager;
+	private static ServerManager serverManager;
+	private static EloManager eloManager;
+	private static ToggleableItemManager itemManager;
+	private static BossBarManager bossBarManager;
 
 	public static KitPVP getKitPVP() {
 		return kitpvp;
