@@ -7,7 +7,7 @@ import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.InventorySystem.PageInventory;
 import net.frozenorb.KitPVP.MatchSystem.Match;
 import net.frozenorb.Utilities.Core;
-import net.frozenorb.mBasic.util.Attributes;
+import net.frozenorb.mBasic.Utilities.Attributes;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -49,46 +49,37 @@ public abstract class RequestInventory extends PageInventory {
 	}
 
 	@EventHandler
-	public void onInventoryClick(final InventoryClickEvent event) {
-		if (event.getView().getTopInventory().getTitle() != null && event.getView().getTopInventory().getTitle().contains("requests")) {
-			if (event.getView().getTopInventory().getViewers().equals(inv.getViewers())) {
-				event.setCancelled(true);
-				final ItemStack item = event.getCurrentItem();
-				if (item != null) {
-					final Inventory v = event.getInventory();
-					event.getWhoClicked().closeInventory();
-					event.getWhoClicked().openInventory(v);
-					if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-						if (item.equals(getBackPage())) {
-							setPage(currentPage - 1);
-						} else if (item.equals(getForwardsPage())) {
-							setPage(currentPage + 1);
-						} else {
-							if (item.getType() == Material.SKULL_ITEM) {
-								String title = ChatColor.stripColor(item.getItemMeta().getDisplayName().split(" ")[0]);
-								Match m = KitAPI.getMatchManager().getInvitedMatch(((Player) event.getWhoClicked()).getName(), title);
-								boolean matchIsTaken = KitAPI.getMatchManager().isInMatch(m.getChallenger().getName()) && KitAPI.getMatchManager().getCurrentMatches().get(m.getChallenger().getName()).isInProgress();
-								if (m == null || matchIsTaken) {
-									update();
-									return;
-								}
-								if (event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.SHIFT_RIGHT) {
-									end();
-									onDecline(m);
-								} else {
-									end();
-									onAccept(m);
-								}
-							}
+	public void onClose(InventoryCloseEvent e) {
+		invs.remove(e.getPlayer().getName());
+	}
+
+	@EventHandler
+	public void onInventoryClick(InventoryClickEvent event) {
+		if (event.getView().getTopInventory().getViewers().equals(inv.getViewers())) {
+			event.setCancelled(true);
+			ItemStack item = event.getCurrentItem();
+			if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+				if (item.equals(getBackPage())) {
+					setPage(currentPage - 1);
+				} else if (item.equals(getForwardsPage())) {
+					setPage(currentPage + 1);
+				} else {
+					if (item.getType() == Material.SKULL_ITEM) {
+						String title = ChatColor.stripColor(item.getItemMeta().getDisplayName().split(" ")[0]);
+						Match m = KitAPI.getMatchManager().getInvitedMatch(((Player) event.getWhoClicked()).getName(), title);
+						boolean matchIsTaken = KitAPI.getMatchManager().isInMatch(m.getChallenger().getName()) && KitAPI.getMatchManager().getCurrentMatches().get(m.getChallenger().getName()).isInProgress();
+						if (m == null || matchIsTaken) {
+							update();
+							return;
 						}
+						if (event.getClick() == ClickType.RIGHT || event.getClick() == ClickType.SHIFT_RIGHT)
+							onDecline(m);
+						else
+							onAccept(m);
 					}
 				}
 			}
-		} else {
-			end();
-			invs.remove(event.getWhoClicked().getName());
 		}
-
 	}
 
 	public void update() {

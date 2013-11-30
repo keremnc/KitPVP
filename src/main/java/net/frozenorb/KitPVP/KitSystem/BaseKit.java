@@ -5,7 +5,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.RegionSysten.RegionMeta;
 import net.frozenorb.Utilities.Core;
-import net.frozenorb.mBasic.util.Attributes;
+import net.frozenorb.mBasic.Utilities.Attributes;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

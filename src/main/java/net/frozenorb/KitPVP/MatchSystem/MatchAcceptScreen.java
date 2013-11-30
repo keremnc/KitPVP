@@ -19,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -92,36 +93,34 @@ public abstract class MatchAcceptScreen implements Listener {
 	}
 
 	@EventHandler
+	public void onClose(InventoryCloseEvent e) {
+		Player who = (Player) e.getPlayer();
+		if (who.getName().equalsIgnoreCase(clicker.getName())) {
+			HandlerList.unregisterAll(this);
+
+		}
+	}
+
+	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player who = (Player) e.getWhoClicked();
 
-		if (who.getName().equalsIgnoreCase(clicker.getName()) && e.getInventory().getTitle() != null && e.getInventory().getTitle().contains("Match")) {
+		if (who.getName().equalsIgnoreCase(clicker.getName())) {
 			e.setCancelled(true);
-			final ItemStack item = e.getCurrentItem();
-			if (item != null) {
-				final Inventory v = e.getInventory();
-				e.getWhoClicked().closeInventory();
-				e.getWhoClicked().openInventory(v);
-				if (item != null && item.getType() == Material.WOOL) {
-					if (item.getDurability() == 14) {
-						if (isValid(match)) {
-							onDecline(match);
-							who.playSound(who.getLocation(), Sound.ARROW_HIT, 20F, 20F);
-						}
-						who.closeInventory();
-						HandlerList.unregisterAll(this);
-					} else if (item.getDurability() == 5) {
-						if (isValid(match)) {
-							onAccept(match);
-							who.playSound(who.getLocation(), Sound.NOTE_PLING, 20F, 20F);
-
-						}
-						who.closeInventory();
-						HandlerList.unregisterAll(this);
-						who.playSound(who.getLocation(), Sound.NOTE_PLING, 20F, 20F);
-					}
-					HandlerList.unregisterAll(this);
+			if (e.getCurrentItem() != null && e.getCurrentItem().getType() == Material.WOOL) {
+				ItemStack item = e.getCurrentItem();
+				if (item.getDurability() == 14) {
+					if (isValid(match))
+						onDecline(match);
+					who.closeInventory();
+					who.playSound(who.getLocation(), Sound.ARROW_HIT, 20F, 20F);
+				} else if (item.getDurability() == 5) {
+					if (isValid(match))
+						onAccept(match);
+					who.closeInventory();
+					who.playSound(who.getLocation(), Sound.NOTE_PLING, 20F, 20F);
 				}
+				HandlerList.unregisterAll(this);
 			}
 		}
 	}

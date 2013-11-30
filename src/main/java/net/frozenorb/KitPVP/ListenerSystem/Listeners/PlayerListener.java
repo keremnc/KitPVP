@@ -25,6 +25,8 @@ import net.frozenorb.Utilities.Core;
 import net.frozenorb.mCommon.Events.SoundSendPacketEvent;
 import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
 import net.minecraft.server.v1_6_R3.EntityLiving;
+import net.minecraft.server.v1_6_R3.EntityPlayer;
+import net.minecraft.server.v1_6_R3.Packet103SetSlot;
 import net.minecraft.server.v1_6_R3.Packet62NamedSoundEffect;
 
 import org.bukkit.Bukkit;
@@ -88,12 +90,15 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		((Player) e.getWhoClicked()).updateInventory();
 		if (e.getCurrentItem() != null && e.getCurrentItem().getType() == PlayerManager.UNUSABLE_SLOT) {
 			e.setCancelled(true);
-			e.getWhoClicked().closeInventory();
-			e.getWhoClicked().openInventory(e.getView());
+			EntityPlayer player = ((CraftPlayer) e.getWhoClicked()).getHandle();
+			net.minecraft.server.v1_6_R3.ItemStack is = player.activeContainer.getSlot(e.getSlot()).getItem();
+			for (int si = 0; si < 45; si += 1) {
+				player.playerConnection.sendPacket(new Packet103SetSlot(-999, -999, is));
+			}
 			((Player) e.getWhoClicked()).updateInventory();
+
 		}
 	}
 

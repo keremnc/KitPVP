@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -75,10 +76,13 @@ public abstract class PageInventory extends ClickInventory {
 		return user;
 	}
 
-	public void end() {
-		HandlerList.unregisterAll(this);
-		if (user.hasMetadata(getClass().getSimpleName()) && user.getMetadata(getClass().getSimpleName()).get(0).value() == this)
-			user.removeMetadata(getClass().getSimpleName(), KitPVP.get());
+	@EventHandler
+	public void onClose(InventoryCloseEvent event) {
+		if (listenForClose && event.getPlayer() == user) {
+			HandlerList.unregisterAll(this);
+			if (user.hasMetadata(getClass().getSimpleName()) && user.getMetadata(getClass().getSimpleName()).get(0).value() == this)
+				user.removeMetadata(getClass().getSimpleName(), KitPVP.get());
+		}
 	}
 
 	@EventHandler

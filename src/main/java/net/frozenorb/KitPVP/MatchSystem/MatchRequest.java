@@ -13,8 +13,8 @@ import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 import net.frozenorb.Utilities.Core;
-import net.frozenorb.mBasic.shop.RomanNumeral;
-import net.frozenorb.mBasic.util.Attributes;
+import net.frozenorb.mBasic.SignShop.RomanNumeral;
+import net.frozenorb.mBasic.Utilities.Attributes;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,6 +26,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -252,6 +253,16 @@ public abstract class MatchRequest implements Listener {
 		return newString;
 	}
 
+	@EventHandler
+	public void onClose(InventoryCloseEvent e) {
+		Player who = (Player) e.getPlayer();
+		if (who.getName().equalsIgnoreCase(sender.getName())) {
+			finish(who);
+			KitAPI.getMatchManager().getMatchRequestsInProgress().remove(e.getPlayer().getName());
+
+		}
+	}
+
 	private void finish(Player who) {
 		KitAPI.getItemManager().unregisterPlayer(who);
 		soup = null;
@@ -263,54 +274,43 @@ public abstract class MatchRequest implements Listener {
 	}
 
 	@EventHandler
-	public void onClick(final InventoryClickEvent e) {
+	public void onClick(InventoryClickEvent e) {
 		Player who = (Player) e.getWhoClicked();
-		if (e.getInventory() != null && e.getInventory().getTitle().startsWith("Challenging")) {
+		if (e.getInventory() != null && e.getInventory().getTitle().startsWith("Challenging"))
 			if (who.getName().equalsIgnoreCase(sender.getName())) {
-				e.setCancelled(true);
 				final ItemStack item = e.getCurrentItem();
-				if (item != null) {
-					final Inventory v = e.getInventory();
-					e.getWhoClicked().closeInventory();
-					e.getWhoClicked().openInventory(v);
-					if (item != null) {
-						if (item.getType() == Material.CARPET) {
-							createBaseInventory(who.getOpenInventory().getTopInventory());
-							return;
-						}
-						if (item.getType() == Material.WOOL) {
-							onSelect(createLoadout(healType.getCurrentMaterial(), armor.getCurrentPrimaryValue(), potions.getCurrentPrimaryValue(), soup.getCurrentPrimaryValue(), sword.getCurrentPrimaryValue(), armor.getCurrentSecondaryValue(), sword.getCurrentSecondaryValue(), firstTo.getCurrentPrimaryValue()));
-							finish(who);
+				e.setCancelled(true);
+				if (e.getCurrentItem() != null) {
+					if (item.getType() == Material.CARPET) {
+						createBaseInventory(who.getOpenInventory().getTopInventory());
+						return;
+					}
+					if (item.getType() == Material.WOOL) {
+						onSelect(createLoadout(healType.getCurrentMaterial(), armor.getCurrentPrimaryValue(), potions.getCurrentPrimaryValue(), soup.getCurrentPrimaryValue(), sword.getCurrentPrimaryValue(), armor.getCurrentSecondaryValue(), sword.getCurrentSecondaryValue(), firstTo.getCurrentPrimaryValue()));
+						finish(who);
+						e.getWhoClicked().closeInventory();
+						return;
+					}
+					if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null) {
+						if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT)
+							KitAPI.getItemManager().handleRightClick(item, e.getRawSlot(), who);
+						else
+							KitAPI.getItemManager().handleLeftClick(item, e.getRawSlot(), who);
+						String name = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+						Loadout l = Loadout.getByName(name);
+						if (l != null) {
+							onSelect(l);
 							e.getWhoClicked().closeInventory();
-							return;
+							finish(who);
 						}
-						if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null) {
-							if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT)
-								KitAPI.getItemManager().handleRightClick(item, e.getRawSlot(), who);
-							else
-								KitAPI.getItemManager().handleLeftClick(item, e.getRawSlot(), who);
-							String name = ChatColor.stripColor(item.getItemMeta().getDisplayName());
-							Loadout l = Loadout.getByName(name);
-							if (l != null) {
-								onSelect(l);
-								e.getWhoClicked().closeInventory();
-								finish(who);
-							}
-							if (item.getType() == Material.ANVIL) {
-								Inventory inv = e.getInventory();
-								createCustomInventory(inv);
-							}
+						if (item.getType() == Material.ANVIL) {
+							Inventory inv = e.getInventory();
+							createCustomInventory(inv);
+						}
 
-						}
 					}
 				}
 			}
-		} else {
-			if (who.getName().equalsIgnoreCase(sender.getName())) {
-				finish(who);
-				KitAPI.getMatchManager().getMatchRequestsInProgress().remove(who.getName());
-			}
-		}
 	}
 
 	/**
