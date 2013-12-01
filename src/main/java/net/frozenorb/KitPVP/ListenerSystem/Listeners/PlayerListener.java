@@ -21,20 +21,15 @@ import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.Types.CombatLogRunnable;
+import net.frozenorb.Network.Events.SoundSendPacketEvent;
 import net.frozenorb.Utilities.Core;
-import net.frozenorb.mCommon.Events.SoundSendPacketEvent;
 import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
-import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.EntityPlayer;
-import net.minecraft.server.v1_6_R3.Packet103SetSlot;
-import net.minecraft.server.v1_6_R3.Packet62NamedSoundEffect;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EntityType;
@@ -92,11 +87,6 @@ public class PlayerListener extends ListenerBase {
 	public void onInventoryClick(InventoryClickEvent e) {
 		if (e.getCurrentItem() != null && e.getCurrentItem().getType() == PlayerManager.UNUSABLE_SLOT) {
 			e.setCancelled(true);
-			EntityPlayer player = ((CraftPlayer) e.getWhoClicked()).getHandle();
-			net.minecraft.server.v1_6_R3.ItemStack is = player.activeContainer.getSlot(e.getSlot()).getItem();
-			for (int si = 0; si < 45; si += 1) {
-				player.playerConnection.sendPacket(new Packet103SetSlot(-999, -999, is));
-			}
 			((Player) e.getWhoClicked()).updateInventory();
 
 		}
@@ -518,16 +508,6 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
-		EntityLiving l = (EntityLiving) ((CraftEntity) e.getEntity()).getHandle();
-		if ((float) l.noDamageTicks > (float) l.maxNoDamageTicks / 2.0F) {
-			if (e.getDamage() <= l.lastDamage) {
-				return;
-			}
-		}
-		Packet62NamedSoundEffect pac = new Packet62NamedSoundEffect("game.player.hurt", l.locX, l.locY, l.locZ, 63, 1);
-		if (e.getDamager() instanceof Player) {
-			((CraftPlayer) e.getDamager()).getHandle().playerConnection.sendPacket(pac);
-		}
 
 		if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
 			Location loc = e.getEntity().getLocation();

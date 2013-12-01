@@ -3,15 +3,18 @@ package net.frozenorb.KitPVP.VisualSystem;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import net.minecraft.server.v1_6_R3.DataWatcher;
-import net.minecraft.server.v1_6_R3.EntityPlayer;
-import net.minecraft.server.v1_6_R3.Packet;
-import net.minecraft.server.v1_6_R3.Packet24MobSpawn;
-import net.minecraft.server.v1_6_R3.Packet29DestroyEntity;
+import net.minecraft.server.v1_7_R1.DataWatcher;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityEnderDragon;
+import net.minecraft.server.v1_7_R1.EntityPlayer;
+import net.minecraft.server.v1_7_R1.Packet;
+import net.minecraft.server.v1_7_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_7_R1.PacketPlayOutSpawnEntityLiving;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -56,8 +59,7 @@ public class BossBarManager implements Runnable {
 	public void registerStrings(Player player, String[] strings) {
 		messages.put(player.getName(), strings);
 		currentValue.put(player.getName(), 0);
-		Packet29DestroyEntity pac = new Packet29DestroyEntity();
-		pac.a = new int[] { player.getEntityId() + ENTITY_ID_MODIFIER };
+		PacketPlayOutEntityDestroy pac = new PacketPlayOutEntityDestroy(player.getEntityId() + ENTITY_ID_MODIFIER);
 		((CraftPlayer) player).getHandle().playerConnection.sendPacket(pac);
 		setBar(player);
 	}
@@ -70,8 +72,7 @@ public class BossBarManager implements Runnable {
 	 */
 	public void unregisterPlayer(Player player) {
 		messages.remove(player.getName());
-		Packet29DestroyEntity pac = new Packet29DestroyEntity();
-		pac.a = new int[] { player.getEntityId() + ENTITY_ID_MODIFIER };
+		PacketPlayOutEntityDestroy pac = new PacketPlayOutEntityDestroy(player.getEntityId() + ENTITY_ID_MODIFIER);
 		((CraftPlayer) player).getHandle().playerConnection.sendPacket(pac);
 	}
 
@@ -87,16 +88,44 @@ public class BossBarManager implements Runnable {
 		entityPlayer.playerConnection.sendPacket(packet);
 	}
 
-	private Packet24MobSpawn getMobPacket(Player p, String text, Location loc) {
-		Packet24MobSpawn mobPacket = new Packet24MobSpawn();
-		mobPacket.a = (int) p.getEntityId() + ENTITY_ID_MODIFIER; // Entity ID
-		mobPacket.b = (byte) EntityType.ENDER_DRAGON.getTypeId(); // Mob type (ID: 64)
-		mobPacket.c = (int) Math.floor(loc.getBlockX() * 32.0D); // X position
-		mobPacket.d = (int) Math.floor(0); // Y position
-		mobPacket.e = (int) Math.floor(loc.getBlockZ() * 32.0D); // Z position
-		DataWatcher watcher = getWatcher(text);
+	private PacketPlayOutSpawnEntityLiving getMobPacket(Player p, String text, Location loc) {
+		PacketPlayOutSpawnEntityLiving mobPacket = new PacketPlayOutSpawnEntityLiving();
+		final EntityEnderDragon dragon = new EntityEnderDragon(((CraftWorld) p.getWorld()).getHandle());
+		int x = (int) Math.floor(loc.getBlockX() * 32.0D);
+		int y = (int) Math.floor(0);
+		int z = (int) Math.floor(loc.getBlockZ() * 32.0D);
 		try {
-			Field t = Packet24MobSpawn.class.getDeclaredField("t");
+			/* id */
+			Field cID = mobPacket.getClass().getDeclaredField("a");
+			cID.setAccessible(true);
+			cID.set(mobPacket, (int) p.getEntityId() + ENTITY_ID_MODIFIER);
+			cID.setAccessible(false);
+			/* name */
+			Field cName = mobPacket.getClass().getDeclaredField("b");
+			cName.setAccessible(true);
+			cName.set(mobPacket, EntityType.ENDER_DRAGON.getTypeId());
+			cName.setAccessible(false);
+			/* x */
+			Field cF = mobPacket.getClass().getDeclaredField("c");
+			cF.setAccessible(true);
+			cF.set(mobPacket, x);
+			cF.setAccessible(false);
+			/* y */
+			Field cY = mobPacket.getClass().getDeclaredField("d");
+			cY.setAccessible(true);
+			cY.set(mobPacket, y);
+			cY.setAccessible(false);
+			/* z */
+			Field cZ = mobPacket.getClass().getDeclaredField("e");
+			cZ.setAccessible(true);
+			cZ.set(mobPacket, z);
+			cZ.setAccessible(false);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		DataWatcher watcher = getWatcher(text, dragon);
+		try {
+			Field t = PacketPlayOutSpawnEntityLiving.class.getDeclaredField("l");
 			t.setAccessible(true);
 			t.set(mobPacket, watcher);
 		} catch (Exception e) {
@@ -105,8 +134,8 @@ public class BossBarManager implements Runnable {
 		return mobPacket;
 	}
 
-	private DataWatcher getWatcher(String text) {
-		DataWatcher watcher = new DataWatcher();
+	private DataWatcher getWatcher(String text, Entity e) {
+		DataWatcher watcher = new DataWatcher(e);
 		watcher.a(0, (Byte) (byte) 0x20);
 		watcher.a(10, (String) text);
 		watcher.a(11, (Byte) (byte) 1);
@@ -114,7 +143,7 @@ public class BossBarManager implements Runnable {
 	}
 
 	private void displayTextBar(String text, final Player player) {
-		Packet24MobSpawn mobPacket = getMobPacket(player, text, player.getLocation());
+		PacketPlayOutSpawnEntityLiving mobPacket = getMobPacket(player, text, player.getLocation());
 		sendPacket(player, mobPacket);
 	}
 }

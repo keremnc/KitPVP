@@ -3,7 +3,7 @@ package net.frozenorb.KitPVP.Commands;
 import org.bukkit.ChatColor;
 
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
-import net.minecraft.server.v1_6_R3.MinecraftServer;
+import net.minecraft.server.v1_7_R1.MinecraftServer;
 
 public class MOTD extends BaseCommand {
 

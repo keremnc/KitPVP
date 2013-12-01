@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
+import net.frozenorb.Utilities.Core;
 import net.frozenorb.Utilities.Serialization.Serializers.LocationSerializer;
-import net.frozenorb.mShared.Shared;
-import net.minecraft.server.v1_6_R3.MinecraftServer;
+import net.minecraft.server.v1_7_R1.MinecraftServer;
 
 public class SetShortcutWarp extends BaseCommand {
 	public String description = "Generates and sets a BaseCommand instance at runtime to warp to the Location";
@@ -35,7 +35,8 @@ public class SetShortcutWarp extends BaseCommand {
 				String warpName = args[0];
 				Location l = ((Player) sender).getLocation();
 				KitAPI.getWarpDataManager().getData().put(warpName, new LocationSerializer().serialize(l));
-				sender.sendMessage(ChatColor.YELLOW + "Warp <" + warpName + "> has been set to  " + Shared.get().getUtilities().formatDBObject(new LocationSerializer().serialize(l)) + "");
+				sender.sendMessage(ChatColor.YELLOW + "Warp <" + warpName + "> has been set to  :");
+				Core.get().sendFormattedDBOBject(sender, new LocationSerializer().serialize(l), "§e");
 				sender.sendMessage(ChatColor.YELLOW + "Registering command /" + warpName);
 				KitAPI.getKitPVP().getCommandManager().loadCommandsFromJson(KitAPI.getWarpDataManager().getData());
 				sender.sendMessage(ChatColor.YELLOW + "Registered.");
