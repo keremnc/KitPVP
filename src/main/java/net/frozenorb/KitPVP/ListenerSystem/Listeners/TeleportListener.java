@@ -22,7 +22,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class TeleportListener implements Listener {
 
-	private final int TELEPORT_FIX_DELAY = 9; // perf number, do not fuck wid it
+	private final int TELEPORT_FIX_DELAY = 9;
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {

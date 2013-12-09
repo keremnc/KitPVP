@@ -45,8 +45,6 @@ public class ScoreboardManager implements Runnable {
 		Scoreboard sb = p.getScoreboard();
 		Objective nameTag = sb.getObjective("nergger");
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation()) || (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())) {
-			nameTag.setDisplaySlot(DisplaySlot.BELOW_NAME);
-			nameTag.setDisplayName("Rating");
 			for (Player lp : Bukkit.getOnlinePlayers()) {
 				Score elo = nameTag.getScore(lp);
 				elo.setScore(KitAPI.getEloManager().getElo(lp.getName().toLowerCase()));

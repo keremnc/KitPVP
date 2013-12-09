@@ -9,10 +9,10 @@ import org.bukkit.Location;
 
 import com.mongodb.BasicDBObject;
 
-import net.frozenorb.Utilities.DataSystem.DataManager;
+import net.frozenorb.Utilities.DataSystem.AbstractDataLoader;
 import net.frozenorb.Utilities.Serialization.Serializers.LocationSerializer;
 
-public class ArenaManager extends DataManager {
+public class ArenaManager extends AbstractDataLoader {
 	private static HashSet<Integer> arenasInUse = new HashSet<Integer>();
 	private static HashSet<Arena> arenas = new HashSet<Arena>();
 	private static int arenaAmount = 0;

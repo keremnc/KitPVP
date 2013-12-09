@@ -21,18 +21,18 @@ public class SetSpawn extends BaseCommand {
 			ConversationFactory factory = new ConversationFactory(KitAPI.getKitPVP()).withModality(true).withPrefix(new NullConversationPrefix()).withFirstPrompt(new StringPrompt() {
 
 				public String getPromptText(ConversationContext context) {
-					return "§aAre you sure you want to set spawn here? Type §b/yes§a to confirm or §c/no§a to quit.";
+					return "§aAre you sure you want to set spawn here? Type §byes§a to confirm or §cno§a to quit.";
 				}
 
 				@Override
 				public Prompt acceptInput(ConversationContext cc, String s) {
-					if (s.equalsIgnoreCase("/yes")) {
+					if (s.equalsIgnoreCase("yes")) {
 						Location l = ((Player) cc.getForWhom()).getLocation();
 						cc.getForWhom().sendRawMessage(ChatColor.GREEN + "Spawn set!");
 						((Player) cc.getForWhom()).getWorld().setSpawnLocation(l.getBlockX(), l.getBlockY(), l.getBlockZ());
 						return Prompt.END_OF_CONVERSATION;
 					}
-					if (s.equalsIgnoreCase("/no")) {
+					if (s.equalsIgnoreCase("no")) {
 						cc.getForWhom().sendRawMessage(ChatColor.GREEN + "Spawn setting cancelled.");
 						return Prompt.END_OF_CONVERSATION;
 

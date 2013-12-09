@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.Kit;
 import net.frozenorb.Utilities.DataSystem.Regioning.CuboidRegion;
+import net.frozenorb.mBasic.Basic;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffectType;
 
 /**
  * Represents a cuboid of some sort, usually used for giving special items on a warp
@@ -48,7 +48,7 @@ public class Region {
 
 		@Override
 		public void onWarp(Player p) {
-			if (!p.hasPotionEffect(PotionEffectType.WATER_BREATHING))
+			if (!Basic.get().isInAdminMode(p))
 				KitAPI.getMatchManager().applyArenaInventory(p);
 		}
 
@@ -67,7 +67,7 @@ public class Region {
 
 		@Override
 		public void onWarp(Player p) {
-			if (!p.hasPotionEffect(PotionEffectType.WATER_BREATHING))
+			if (!Basic.get().isInAdminMode(p))
 				KitAPI.getServerManager().applyHGInventory(p);
 		}
 

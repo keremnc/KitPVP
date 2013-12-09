@@ -15,6 +15,7 @@ import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
+import net.frozenorb.mShared.Shared;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -287,14 +288,13 @@ public class Match {
 				else {
 					KitAPI.getArenaManager().unregisterArena(arena);
 					KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
-					// TODO: send
 					KitAPI.getBossBarManager().unregisterPlayer(winner);
 					KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
 					KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
 					KitAPI.getBossBarManager().unregisterPlayer(loser);
 					KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-					constructObject(winner);
-
+					BasicDBObject dbObject = constructObject(winner);
+					Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
 				}
 			}
 		}, 60L);

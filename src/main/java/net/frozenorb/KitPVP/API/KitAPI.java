@@ -15,7 +15,7 @@ import net.frozenorb.KitPVP.StatSystem.StatManager;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.VisualSystem.BossBarManager;
 import net.frozenorb.KitPVP.VisualSystem.ScoreboardManager;
-import net.frozenorb.Utilities.DataSystem.DataManager;
+import net.frozenorb.Utilities.DataSystem.AbstractDataLoader;
 
 /**
  * API class used to access managers and instances
@@ -98,13 +98,13 @@ public class KitAPI {
 
 	public static WarpDataManager getWarpDataManager() {
 		if (warpDataManager == null)
-			warpDataManager = new WarpDataManager(new File(DataManager.DATA_FOLDER + File.separator + "warps.json"));
+			warpDataManager = new WarpDataManager(new File(AbstractDataLoader.DATA_FOLDER + File.separator + "warps.json"));
 		return warpDataManager;
 	}
 
 	public static ArenaManager getArenaManager() {
 		if (arenaManager == null)
-			arenaManager = new ArenaManager(new File(DataManager.DATA_FOLDER + File.separator + "arenas.json"));
+			arenaManager = new ArenaManager(new File(AbstractDataLoader.DATA_FOLDER + File.separator + "arenas.json"));
 		return arenaManager;
 	}
 
@@ -122,8 +122,8 @@ public class KitAPI {
 
 	public static void init(KitPVP kitpvp) {
 		KitAPI.kitpvp = kitpvp;
-		warpDataManager = new WarpDataManager(new File(DataManager.DATA_FOLDER + File.separator + "warps.json"));
-		arenaManager = new ArenaManager(new File(DataManager.DATA_FOLDER + File.separator + "arenas.json"));
+		warpDataManager = new WarpDataManager(new File(AbstractDataLoader.DATA_FOLDER + File.separator + "warps.json"));
+		arenaManager = new ArenaManager(new File(AbstractDataLoader.DATA_FOLDER + File.separator + "arenas.json"));
 	}
 
 }

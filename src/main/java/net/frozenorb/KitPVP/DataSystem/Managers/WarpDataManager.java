@@ -3,9 +3,9 @@ package net.frozenorb.KitPVP.DataSystem.Managers;
 import java.io.File;
 
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.Utilities.DataSystem.DataManager;
+import net.frozenorb.Utilities.DataSystem.AbstractDataLoader;
 
-public class WarpDataManager extends DataManager {
+public class WarpDataManager extends AbstractDataLoader {
 
 	public WarpDataManager(File f) {
 		super(f);

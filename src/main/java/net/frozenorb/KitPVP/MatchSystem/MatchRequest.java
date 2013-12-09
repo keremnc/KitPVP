@@ -140,7 +140,7 @@ public abstract class MatchRequest implements Listener {
 				put("§a§lIron", Material.IRON_CHESTPLATE);
 				put("§a§lDiamond", Material.DIAMOND_CHESTPLATE);
 				put("§a§lChainmail", Material.CHAINMAIL_CHESTPLATE);
-				put("§a§lNone", Material.CAULDRON);
+				put("§a§lNone", Material.GLASS);
 
 			}
 		}).setSecondary("Enchantments", new ArrayList<Integer>() {
