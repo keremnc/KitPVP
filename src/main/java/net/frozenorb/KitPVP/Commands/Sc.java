@@ -10,7 +10,7 @@ public class Sc extends BaseCommand {
 	public String[] aliases = new String[] { "ac" };
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (sender.hasPermission("kit.sc")) {
 			if (args.length > 0) {
 				StringBuilder b = new StringBuilder();

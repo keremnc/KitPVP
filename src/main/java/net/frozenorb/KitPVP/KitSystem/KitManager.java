@@ -216,7 +216,7 @@ public class KitManager {
 		BaseCommand cmd = new BaseCommand() {
 
 			@Override
-			public void execute() {
+			public void syncExecute() {
 				k.commandRun((Player) sender);
 
 			}

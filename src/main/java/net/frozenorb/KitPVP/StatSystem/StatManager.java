@@ -38,9 +38,23 @@ public class StatManager {
 	 * @return the Stat object
 	 */
 	public Stat getStat(String name) {
-		if (stats.containsKey(name.toLowerCase()))
+		if (stats.containsKey(name.toLowerCase())) {
 			return stats.get(name.toLowerCase());
+		}
 		return null;
+	}
+
+	/**
+	 * Gets whether a name has a value in the list
+	 * <p>
+	 * We do this because stats that aren't available to be loaded are set to null
+	 * 
+	 * @param name
+	 *            the name to check
+	 * @return if it exists as a key or not
+	 */
+	public boolean exists(String name) {
+		return stats.containsKey(name.toLowerCase());
 	}
 
 	/**
@@ -162,7 +176,8 @@ public class StatManager {
 					BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
 					if (db != null)
 						stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
-
+					else
+						stats.put(name.toLowerCase(), null);
 				}
 			});
 		}

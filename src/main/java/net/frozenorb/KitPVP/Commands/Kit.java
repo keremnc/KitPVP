@@ -75,7 +75,7 @@ public class Kit extends BaseCommand implements TabExecutor {
 	}
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (args.length > 0) {
 			if (args[0].equalsIgnoreCase("_create")) {
 				new KitCreationConversation((Player) sender) {

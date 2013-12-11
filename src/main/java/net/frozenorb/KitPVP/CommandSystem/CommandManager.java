@@ -66,7 +66,7 @@ public class CommandManager {
 		return new BaseCommand() {
 
 			@Override
-			public void execute() {
+			public void syncExecute() {
 				final Player p = (Player) sender;
 				BasicDBObject json = KitAPI.getPlayerManager().getProfile(sender.getName().toLowerCase()).getJSON();
 				if (KitAPI.getPlayerManager().canWarp(p)) {
@@ -123,6 +123,8 @@ public class CommandManager {
 			}
 		} catch (Exception ex) {
 		}
+		if (exc instanceof BaseCommand)
+			command.getAliases().addAll(Arrays.asList(((BaseCommand) exc).getAliases()));
 		if (command.getAliases() != null) {
 			for (String alias : command.getAliases())
 				unregisterCommand(alias);

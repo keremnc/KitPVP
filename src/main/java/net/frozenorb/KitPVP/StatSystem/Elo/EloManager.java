@@ -16,7 +16,7 @@ import net.frozenorb.KitPVP.StatSystem.StatObjective;
 public class EloManager {
 	public static int STARTING_ELO = 1500; // the starting elo for new players
 	public static int MAX_CHANGE = 20; // max gain/loss a player can get in one match
-	public static int PROVISIONAL = 21;
+	public static int PROVISIONAL = 6;
 
 	/**
 	 * Gets the estimation
@@ -49,11 +49,28 @@ public class EloManager {
 			kFactor = 32;
 		else if (elo < 2399)
 			kFactor = 24;
-		if (opponentGamePlayed < PROVISIONAL && gamesPlayed >= PROVISIONAL)
-			kFactor *= (opponentGamePlayed / PROVISIONAL);
-		if (gamesPlayed < PROVISIONAL && win)
-			kFactor *= 2;
+		if (opponentGamePlayed < PROVISIONAL && gamesPlayed >= PROVISIONAL) {
+			kFactor *= ((double) (opponentGamePlayed + 4) / PROVISIONAL);
+		}
 		return kFactor;
+	}
+
+	public static void main(String[] args) {
+		String[] data = new String[] { "1500", "2820", "7", "7" };
+		new EloManager().run(data);
+	}
+
+	public void run(String[] args) {
+		int w = Integer.parseInt(args[0]);
+		int l = Integer.parseInt(args[1]);
+		int wP = Integer.parseInt(args[2]);
+		int lP = Integer.parseInt(args[3]);
+		System.out.println("running for: " + w + ":" + l + ":" + wP + ":" + lP);
+		System.out.println("Winner kFactor: " + getKeremFactor(w, wP, lP, true));
+		System.out.println("Loser kFactor: " + getKeremFactor(l, lP, wP, false));
+		System.out.println("Winner gain: " + (getNewElo(w, l, wP, lP)[0] - w));
+		System.out.println("Loser gain: " + (getNewElo(w, l, wP, lP)[1] - l));
+
 	}
 
 	/**

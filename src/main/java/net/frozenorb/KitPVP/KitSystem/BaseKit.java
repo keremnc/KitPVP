@@ -148,7 +148,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	}
 
 	@Override
-	public final void execute() {
+	public final void syncExecute() {
 		commandRun((Player) sender);
 
 	}

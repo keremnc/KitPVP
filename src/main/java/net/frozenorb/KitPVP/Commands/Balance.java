@@ -9,10 +9,14 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.mBasic.Basic;
 
 public class Balance extends BaseCommand {
-	public String[] aliases = new String[] { "bal", "$" };
 
 	@Override
-	public void execute() {
+	public String[] getAliases() {
+		return new String[] { "bal", "$" };
+	}
+
+	@Override
+	public void syncExecute() {
 		if (args.length == 1) {
 			String m = args[0];
 			sender.sendMessage(ChatColor.GOLD + "Credits: " + ChatColor.WHITE + NumberFormat.getNumberInstance(Locale.US).format(Basic.get().getEconomyManager().getBalance(m)));

@@ -9,7 +9,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 public class Drop extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		Player pl = (Player) sender;
 		if (pl.getItemInHand() != null) {
 			pl.setItemInHand(new ItemStack(Material.AIR));

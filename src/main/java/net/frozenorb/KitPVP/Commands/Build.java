@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class Build extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (Core.get().hasPermission(((Player) sender), "kitpvp.build")) {
 			GamerProfile profile = KitAPI.getPlayerManager().getProfile(sender.getName());
 			if (profile.isObject("build")) {

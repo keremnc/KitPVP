@@ -11,7 +11,7 @@ public class Kill extends BaseCommand {
 	public String[] aliases = new String[] { "suicide", "slay" };
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (args.length > 0) {
 			Player p = Bukkit.getPlayer(args[0]);
 			if (p == null) {

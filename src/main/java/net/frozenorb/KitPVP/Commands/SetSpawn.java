@@ -16,7 +16,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 public class SetSpawn extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (sender.isOp()) {
 			ConversationFactory factory = new ConversationFactory(KitAPI.getKitPVP()).withModality(true).withPrefix(new NullConversationPrefix()).withFirstPrompt(new StringPrompt() {
 

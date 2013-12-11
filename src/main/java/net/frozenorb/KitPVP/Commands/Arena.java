@@ -1,12 +1,9 @@
 package net.frozenorb.KitPVP.Commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.API.KitAPI;
@@ -19,26 +16,13 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Arena extends BaseCommand {
-	@Override
-	public List<String> tabComplete() {
-		LinkedList<String> params = new LinkedList<String>(Arrays.asList(args));
-		LinkedList<String> results = new LinkedList<String>();
-		String action = null;
-		if (params.size() >= 1) {
-			action = params.pop().toLowerCase();
-		} else {
-			return results;
-		}
-		for (String p : new String[] { "create", "override", "here", "warp" }) {
-			if (p.toLowerCase().startsWith(action.toLowerCase())) {
-				results.add(p);
-			}
-		}
-		return results;
+
+	public Arena() {
+		setTabCompletions(new String[] { "create", "override", "here", "warp" });
 	}
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (sender.hasPermission("kitpvp.arena.modify")) {
 			if (args.length > 0) {
 				Location l = ((Player) sender).getLocation();

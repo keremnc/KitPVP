@@ -8,7 +8,7 @@ import net.minecraft.server.v1_7_R1.MinecraftServer;
 public class MOTD extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (sender.isOp() && args.length > 0) {
 			MinecraftServer.getServer().setMotd(args[0].replace("&", "§"));
 			sender.sendMessage("§dMOTD is now:§r " + args[0].replace("&", "§"));

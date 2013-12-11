@@ -15,7 +15,7 @@ public class Kits extends BaseCommand {
 	public String description = "Kit command";
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 
 		Player s = (Player) sender;
 		String kitStr = ChatColor.WHITE + "Kits: " + ChatColor.GREEN;

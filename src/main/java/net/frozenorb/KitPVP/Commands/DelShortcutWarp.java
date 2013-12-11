@@ -32,7 +32,7 @@ public class DelShortcutWarp extends BaseCommand {
 	}
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (sender.hasPermission("kitpvp.setwarp")) {
 			if (args.length > 0) {
 				if (SetShortcutWarp.getWarps().contains(args[0])) {

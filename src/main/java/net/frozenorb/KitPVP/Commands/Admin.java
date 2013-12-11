@@ -14,7 +14,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 public class Admin extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 
 		if (!(sender instanceof Player)) {
 			return;

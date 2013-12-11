@@ -328,7 +328,6 @@ public class Match {
 			ma.append("stats", stats);
 		ma.append("durationSeconds", (matchFinishTime - matchStartTime) / 1000);
 		return ma;
-
 	}
 
 	public ArrayList<String> getMetadata(boolean acceptName, boolean showStats) {

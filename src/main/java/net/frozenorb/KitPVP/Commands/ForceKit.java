@@ -49,7 +49,7 @@ public class ForceKit extends BaseCommand implements TabExecutor {
 	}
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (!sender.hasPermission("kitpvp.forcekit"))
 			return;
 		if (args.length > 1) {

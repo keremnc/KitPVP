@@ -7,7 +7,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 public class Raw extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		if (sender.isOp()) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < args.length; i += 1) {

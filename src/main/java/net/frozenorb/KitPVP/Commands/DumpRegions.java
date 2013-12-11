@@ -5,7 +5,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 public class DumpRegions extends BaseCommand {
 
 	@Override
-	public void execute() {
+	public void syncExecute() {
 		// if (sender.isOp()) {
 		// final BasicDBObject db = new BasicDBObject("rgs", new BasicDBList() {
 		// private static final long serialVersionUID = 1L;

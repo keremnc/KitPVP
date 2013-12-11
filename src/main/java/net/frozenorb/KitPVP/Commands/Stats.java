@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.frozenorb.KitPVP.KitPVP;
@@ -15,6 +16,7 @@ import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 
 public class Stats extends BaseCommand {
+	public static final String GRAY_HEADER = "§7=====================================================";
 
 	@Override
 	public List<String> tabComplete() {
@@ -53,9 +55,28 @@ public class Stats extends BaseCommand {
 		return results;
 	}
 
+	public void getStatsAsync(final CommandSender sender, final String[] args, final String name) {
+		while (KitAPI.getStatManager().getStat(name) == null)
+			if (KitAPI.getStatManager().exists(name)) {
+				sender.sendMessage(ChatColor.RED + "Player '" + name + "' not found.");
+				return;
+			}
+		Stat st = KitAPI.getStatManager().getStat(name);
+		String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);
+		String kills = String.format("§6Kills:§f %s", st.get(StatObjective.KILLS));
+		String deaths = String.format("§6Deaths:§f %s", st.get(StatObjective.DEATHS));
+		String kd = String.format("§6KD:§f %s", st.getDouble(StatObjective.KD_RATIO));
+		String cks = String.format("§6Current Killstreak:§f %s", st.get(StatObjective.KILLSTREAK));
+		String tks = String.format("§6Highest Killstreak:§f %s", st.get(StatObjective.HIGHEST_KILLSTREAK));
+		String wins = String.format("§61v1 Wins:§f %s", st.get(StatObjective.DUEL_WINS));
+		String losses = String.format("§61v1 Losses:§f %s", st.get(StatObjective.DUEL_LOSSES));
+		String elo = String.format("§6Rating:§f %s", KitAPI.getEloManager().getElo(name.toLowerCase()));
+		sender.sendMessage(new String[] { GRAY_HEADER, header, GRAY_HEADER, kills, deaths, kd, cks, tks, wins, losses, elo, GRAY_HEADER });
+
+	}
+
 	@Override
-	public void execute() {
-		final String gray = "§7=====================================================";
+	public void syncExecute() {
 		String player = sender.getName();
 		if (args.length > 0) {
 			if (args[0].equalsIgnoreCase("top")) {
@@ -85,19 +106,7 @@ public class Stats extends BaseCommand {
 		if (s == null) {
 			Bukkit.getScheduler().runTaskAsynchronously(KitPVP.get(), new Runnable() {
 				public void run() {
-					while (KitAPI.getStatManager().getStat(name) == null) {
-					}
-					Stat st = KitAPI.getStatManager().getStat(name);
-					String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);
-					String kills = String.format("§6Kills:§f %s", st.get(StatObjective.KILLS));
-					String deaths = String.format("§6Deaths:§f %s", st.get(StatObjective.DEATHS));
-					String kd = String.format("§6KD:§f %s", st.getDouble(StatObjective.KD_RATIO));
-					String cks = String.format("§6Current Killstreak:§f %s", st.get(StatObjective.KILLSTREAK));
-					String tks = String.format("§6Highest Killstreak:§f %s", st.get(StatObjective.HIGHEST_KILLSTREAK));
-					String wins = String.format("§61v1 Wins:§f %s", st.get(StatObjective.DUEL_WINS));
-					String losses = String.format("§61v1 Losses:§f %s", st.get(StatObjective.DUEL_LOSSES));
-					String elo = String.format("§6Rating:§f %s", KitAPI.getEloManager().getElo(name.toLowerCase()));
-					sender.sendMessage(new String[] { gray, header, gray, kills, deaths, kd, cks, tks, wins, losses, elo, gray });
+					getStatsAsync(sender, args, name);
 				}
 			});
 			return;
@@ -113,7 +122,7 @@ public class Stats extends BaseCommand {
 			String wins = String.format("§61v1 Wins:§f %s", s.get(StatObjective.DUEL_WINS));
 			String losses = String.format("§61v1 Losses:§f %s", s.get(StatObjective.DUEL_LOSSES));
 			String elo = String.format("§6Rating:§f %s", KitAPI.getEloManager().getElo(player.toLowerCase()));
-			sender.sendMessage(new String[] { gray, header, gray, kills, deaths, kd, cks, tks, wins, losses, elo, gray });
+			sender.sendMessage(new String[] { GRAY_HEADER, header, GRAY_HEADER, kills, deaths, kd, cks, tks, wins, losses, elo, GRAY_HEADER });
 		}
 	}
 }
