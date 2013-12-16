@@ -23,10 +23,12 @@ public class KitSerializer implements Serializer<SerializableKit> {
 	@Override
 	public SerializableKit deserialize(BasicDBObject dbObject) {
 		ArrayList<PotionEffect> pots = new ArrayList<PotionEffect>();
-		BasicDBList potionEffets = (BasicDBList) dbObject.get("potions");
-		for (Object o : potionEffets) {
-			BasicDBObject preDes = (BasicDBObject) o;
-			pots.add(new PotionEffectSerializer().deserialize(preDes));
+		if (dbObject.containsField("potions")) {
+			BasicDBList potionEffets = (BasicDBList) dbObject.get("potions");
+			for (Object o : potionEffets) {
+				BasicDBObject preDes = (BasicDBObject) o;
+				pots.add(new PotionEffectSerializer().deserialize(preDes));
+			}
 		}
 		String name = dbObject.getString("name");
 		String permission = dbObject.getString("permission");
@@ -53,7 +55,8 @@ public class KitSerializer implements Serializer<SerializableKit> {
 		for (PotionEffect pe : o.getPotionEffects()) {
 			potions.add(new PotionEffectSerializer().serialize(pe));
 		}
-		kit.append("potions", potions);
+		if (o.getPotionEffects().length > 0)
+			kit.append("potions", potions);
 		BasicDBList armor = new BasicDBList();
 		for (ItemStack i : o.getArmorContents()) {
 			armor.add(new ItemStackSerializer().serialize(i));
