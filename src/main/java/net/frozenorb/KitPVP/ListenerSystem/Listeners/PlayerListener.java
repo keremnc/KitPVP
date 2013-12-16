@@ -180,6 +180,12 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler
+	public void onPlayerTrampleCrop(PlayerInteractEvent e) {
+		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL)
+			e.setCancelled(true);
+	}
+
+	@EventHandler
 	public void onKitSelect(PlayerKitSelectEvent e) {
 		GamerProfile prof = KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase());
 		prof.setLastUsedKit(e.getKit());

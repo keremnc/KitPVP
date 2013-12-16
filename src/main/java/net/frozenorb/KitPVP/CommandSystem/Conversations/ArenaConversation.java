@@ -37,6 +37,8 @@ public abstract class ArenaConversation {
 					loc1 = ((Player) cc.getForWhom()).getLocation();
 					loc1.setPitch(0);
 					loc1.setYaw(90 * (Math.round(loc1.getYaw() / 90)));
+					loc1.setX(Math.floor(loc1.getX()) + 0.5);
+					loc1.setZ(Math.floor(loc1.getZ()) + 0.5);
 					cc.getForWhom().sendRawMessage(ChatColor.GREEN + "Loc1 Set");
 					return this;
 				}
@@ -44,6 +46,9 @@ public abstract class ArenaConversation {
 					loc2 = ((Player) cc.getForWhom()).getLocation();
 					loc2.setPitch(0);
 					loc2.setYaw(90 * (Math.round(loc2.getYaw() / 90)));
+					loc2.setX(Math.floor(loc2.getX()) + 0.5);
+					loc2.setZ(Math.floor(loc2.getZ()) + 0.5);
+
 					cc.getForWhom().sendRawMessage(ChatColor.GREEN + "Loc2 Set!");
 					return this;
 				}
@@ -85,7 +90,7 @@ public abstract class ArenaConversation {
 			public String getPromptText(ConversationContext arg0) {
 				return "§eArenaCreata>";
 			}
-			
+
 		}).withEscapeSequence("quit").withLocalEcho(false).thatExcludesNonPlayersWithMessage("Go away evil console!");
 		Conversation con = factory.buildConversation((Player) sender);
 		((Player) sender).beginConversation(con);

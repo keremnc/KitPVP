@@ -5,6 +5,8 @@ import com.mongodb.BasicDBObject;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
+import net.frozenorb.KitPVP.StatSystem.Elo.EloCalculator.Matchup;
+import net.frozenorb.KitPVP.StatSystem.Elo.EloCalculator.Result;
 
 /**
  * Elo manager class to handle rankings in ranked 1v1
@@ -17,60 +19,10 @@ public class EloManager {
 	public static int STARTING_ELO = 1500; // the starting elo for new players
 	public static int MAX_CHANGE = 20; // max gain/loss a player can get in one match
 	public static int PROVISIONAL = 6;
+	private EloCalculator eloCalculator;
 
-	/**
-	 * Gets the estimation
-	 * 
-	 * @param eloA
-	 *            the first elo
-	 * @param eloB
-	 *            the second elo
-	 * @return [eloA, eloB]
-	 */
-	public double[] getEstimations(double eloA, double eloB) {
-		double[] ret = new double[2];
-		double estA = 1.0D / (1.0D + Math.pow(10.0D, (eloB - eloA) / 400.0D));
-		double estB = 1.0D / (1.0D + Math.pow(10.0D, (eloA - eloB) / 400.0D));
-		ret[0] = estA;
-		ret[1] = estB;
-		return ret;
-	}
-
-	/**
-	 * Gets the K(erem)-Factor of the current elo
-	 * 
-	 * @param elo
-	 *            the elo
-	 * @return K(erem)-Factor
-	 */
-	public int getKeremFactor(int elo, int gamesPlayed, int opponentGamePlayed, boolean win) {
-		int kFactor = 16;
-		if (elo < 2100)
-			kFactor = 32;
-		else if (elo < 2399)
-			kFactor = 24;
-		if (opponentGamePlayed < PROVISIONAL && gamesPlayed >= PROVISIONAL) {
-			kFactor *= ((double) (opponentGamePlayed + 4) / PROVISIONAL);
-		}
-		return kFactor;
-	}
-
-	public static void main(String[] args) {
-		String[] data = new String[] { "1500", "2820", "7", "7" };
-		new EloManager().run(data);
-	}
-
-	public void run(String[] args) {
-		int w = Integer.parseInt(args[0]);
-		int l = Integer.parseInt(args[1]);
-		int wP = Integer.parseInt(args[2]);
-		int lP = Integer.parseInt(args[3]);
-		System.out.println("running for: " + w + ":" + l + ":" + wP + ":" + lP);
-		System.out.println("Winner kFactor: " + getKeremFactor(w, wP, lP, true));
-		System.out.println("Loser kFactor: " + getKeremFactor(l, lP, wP, false));
-		System.out.println("Winner gain: " + (getNewElo(w, l, wP, lP)[0] - w));
-		System.out.println("Loser gain: " + (getNewElo(w, l, wP, lP)[1] - l));
-
+	public EloManager() {
+		this.eloCalculator = new DefaultEloCalculator();
 	}
 
 	/**
@@ -83,13 +35,20 @@ public class EloManager {
 	 * @return array [winner, loser]
 	 */
 	public int[] getNewElo(int winner, int loser, int winnerPlayed, int loserPlayed) {
-		double[] ests = new double[2];
+		Matchup result = eloCalculator.calculate(Result.PLAYER_ONE, new Matchup(winner, loser));
+		int winnerGain = (int) (result.playerOne - winner);
+		int loserGain = (int) (result.playerTwo - loser);
+		if (loserGain < -MAX_CHANGE)
+			loserGain = -MAX_CHANGE;
+		if (winnerGain > MAX_CHANGE + 5)
+			winnerGain = winner + MAX_CHANGE + 5;
+		if (loserPlayed < PROVISIONAL)
+			loserGain /= 1.3;
+		if (winnerPlayed < PROVISIONAL)
+			winnerGain *= 1.3;
 		int[] ret = new int[2];
-		ests = getEstimations(winner, loser);
-		int newRankA = (int) (winner + getKeremFactor(winner, winnerPlayed, loserPlayed, true) * (1 - ests[0])); // rank = oldrank+ (kFactor * estimation)
-		int newRankB = (int) (loser + getKeremFactor(loser, loserPlayed, winnerPlayed, false) * -ests[1]); // rank = oldrank - (kFactor * estimation)
-		ret[0] = Math.round(newRankA) - winner > MAX_CHANGE ? winner + MAX_CHANGE : Math.round(newRankA);
-		ret[1] = Math.round(newRankB) - loser < -MAX_CHANGE ? loser - MAX_CHANGE : Math.round(newRankB);
+		ret[0] = winner + winnerGain;
+		ret[1] = loser + loserGain;
 		return ret;
 	}
 

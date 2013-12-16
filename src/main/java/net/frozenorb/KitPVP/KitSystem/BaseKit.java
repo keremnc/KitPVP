@@ -102,7 +102,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	 */
 	public final void equip(Player p) {
 		if (KitAPI.getKitManager().hasKitOn(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
-			sender.sendMessage(ChatColor.RED + "You may only use one kit per life!");
+			p.sendMessage(ChatColor.RED + "You may only use one kit per life!");
 			return;
 		}
 		if (KitAPI.getRegionChecker().getRegion(p.getLocation()) != null) {

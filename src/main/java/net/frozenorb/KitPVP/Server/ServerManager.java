@@ -96,13 +96,14 @@ public class ServerManager {
 	 */
 	public void handleRespawn(final Player p) {
 		KitAPI.getKitManager().getKitsOnPlayers().remove(p.getName());
-		p.setHealth(20D);
 		p.setVelocity(new Vector(0, 0, 0));
+		p.setHealth(20D);
 		p.setFireTicks(1);
 
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, p.getLocation()))
 			return;
 		if (warpToMatch.contains(p.getName())) {
+			p.setVelocity(new Vector(0, 0, 0));
 			KitAPI.getPlayerManager().teleport(p, CommandManager.DUEL_LOCATION);
 			return;
 		}
@@ -112,6 +113,7 @@ public class ServerManager {
 			ignoreTeleport.remove(p.getName());
 		} else
 			p.teleport(getSpawn());
+		p.setVelocity(new Vector(0, 0, 0));
 
 		KitAPI.getPlayerManager().giveSpawnProtection(p);
 		Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
