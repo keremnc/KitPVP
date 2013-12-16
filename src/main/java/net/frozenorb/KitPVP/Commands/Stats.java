@@ -58,8 +58,10 @@ public class Stats extends BaseCommand {
 	public void getStatsAsync(final CommandSender sender, final String[] args, final String name) {
 		while (KitAPI.getStatManager().getStat(name) == null)
 			if (KitAPI.getStatManager().exists(name)) {
-				sender.sendMessage(ChatColor.RED + "Player '" + name + "' not found.");
-				return;
+				if (KitAPI.getStatManager().getStat(name) == null) {
+					sender.sendMessage(ChatColor.RED + "Player '" + name + "' not found.");
+					return;
+				}
 			}
 		Stat st = KitAPI.getStatManager().getStat(name);
 		String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);

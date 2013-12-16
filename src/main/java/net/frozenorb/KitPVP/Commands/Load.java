@@ -13,6 +13,7 @@ import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.CommandSystem.Subcommand;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mBasic.Basic;
+import net.minecraft.util.com.google.common.io.Files;
 
 public class Load extends BaseCommand {
 
@@ -30,7 +31,8 @@ public class Load extends BaseCommand {
 				try {
 					BasicDBObject db = (BasicDBObject) JSON.parse(data);
 					for (Entry<String, Object> e : db.entrySet()) {
-						Basic.get().getEconomyManager().setBalance(e.getKey().toLowerCase(), (double) e.getValue());
+
+						Basic.get().getEconomyManager().setBalance(Files.getNameWithoutExtension(e.getKey()), (double) e.getValue());
 					}
 				} catch (JSONParseException ex) {
 					sender.sendMessage("§cError, file does not contain valid JSON!");

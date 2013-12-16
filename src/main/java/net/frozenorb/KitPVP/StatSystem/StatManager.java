@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -27,7 +28,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 
 public class StatManager {
-	private HashMap<String, Stat> stats = new HashMap<String, Stat>();
+	private ConcurrentHashMap<String, Stat> stats = new ConcurrentHashMap<String, Stat>();
 	private HashMap<String, LocalPlayerData> playerData = new HashMap<String, LocalPlayerData>();
 
 	/**
