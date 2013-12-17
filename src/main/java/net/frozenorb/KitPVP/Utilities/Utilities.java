@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 /**
  * Non initializable, final class used to quickly call static methods from around the plugin
@@ -18,6 +19,25 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public final class Utilities {
 	private Utilities() {
+	}
+
+	public static ItemStack generateLeatherArmor(Material item, org.bukkit.Color c) {
+		ItemStack sm = new ItemStack(item);
+
+		LeatherArmorMeta m = (LeatherArmorMeta) sm.getItemMeta();
+		m.setColor(c);
+		sm.setItemMeta(m);
+		return sm;
+	}
+
+	public static ItemStack generateLeatherArmor(Material item, org.bukkit.Color c, int i) {
+		ItemStack sm = new ItemStack(item);
+		LeatherArmorMeta m = (LeatherArmorMeta) sm.getItemMeta();
+		m.setColor(c);
+		sm.setItemMeta(m);
+		if (i != 0)
+			sm.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, i);
+		return sm;
 	}
 
 	public static String readFile(File f) {

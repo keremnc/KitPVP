@@ -3,12 +3,14 @@ package net.frozenorb.KitPVP;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.KitSystem.Kit;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
+import net.frozenorb.KitPVP.Minigames.KitMinigameManager;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
 import net.frozenorb.Utilities.DataSystem.Regioning.RegionManager;
@@ -85,10 +87,9 @@ public class KitPVP extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
-		for (Entity e : Bukkit.getWorlds().get(0).getEntities()) {
+		for (Entity e : Bukkit.getWorlds().get(0).getEntities())
 			if (!(e instanceof Player))
 				e.remove();
-		}
 		instance = this;
 		leaderboardUpdater = new LeaderboardUpdater();
 		leaderboardUpdater.runTaskTimerAsynchronously(this, 0L, 30 * 20L);
@@ -118,6 +119,8 @@ public class KitPVP extends JavaPlugin {
 				}
 			}
 		}, 20L);
+		if (Bukkit.getPluginManager().getPlugin("mArcade") != null)
+			ArcadeAPI.get().setMinigameManager(new KitMinigameManager());
 		KitAPI.getKitManager().loadFromFile();
 		Loadout.init();
 		RegionManager.register(this);

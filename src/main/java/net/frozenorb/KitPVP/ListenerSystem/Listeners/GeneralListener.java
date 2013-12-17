@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -31,6 +32,11 @@ public class GeneralListener extends ListenerBase {
 
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent e) {
+		e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onBlockBurn(BlockBurnEvent e) {
 		e.setCancelled(true);
 	}
 

@@ -58,7 +58,6 @@ public class SpleefMinigame extends BaseMinigame {
 			this.region = c;
 		} else
 			System.out.println("Error finding region. Didn't define the " + getName() + " cuboid? (data.json didn't have cuboid)");
-
 	}
 
 	@Override

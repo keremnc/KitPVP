@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
@@ -195,6 +196,12 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerDeath(final PlayerDeathEvent e) {
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
+		if (ArcadeAPI.get().getMinigameManager().isGameInProgress() && ArcadeAPI.get().getMinigameManager().getCurrentMinigame().getPlayers().contains(e.getEntity().getName())) {
+			e.getDrops().clear();
+			e.getEntity().setHealth(20D);
+			ArcadeAPI.get().getMinigameManager().getCurrentMinigame().handleDeath(e.getEntity());
+			return;
+		}
 		if (KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit() != null)
 			KitAPI.getStatManager().getLocalData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {
@@ -321,7 +328,7 @@ public class PlayerListener extends ListenerBase {
 			e.setCancelled(true);
 			return;
 		}
-		if (item.getType() == Material.ENCHANTED_BOOK || item.getType() == Material.FEATHER || item.getType() == Material.WATCH || item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
+		if (item.getType() == Material.ENCHANTED_BOOK || item.getType() == Material.FEATHER || item.getType() == Material.BLAZE_POWDER || item.getType() == Material.WATCH || item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
 			p.sendMessage(ChatColor.RED + "You can only drop this by using /drop.");
 			e.setCancelled(true);
 		} else {

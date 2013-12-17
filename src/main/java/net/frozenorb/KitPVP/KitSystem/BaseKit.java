@@ -147,6 +147,18 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		}
 	}
 
+	/**
+	 * Gets the String representation of the cooldown
+	 * 
+	 * @param p
+	 *            the player to get for
+	 * @return cooldown
+	 */
+	public final String getCooldown(Player p) {
+		double value = (KitAPI.getKitManager().getCooldownLeft(p, this) / 1000D);
+		return "§l" + Math.round(10.0 * value) / 10.0 + "§c";
+	}
+
 	@Override
 	public final void syncExecute() {
 		commandRun((Player) sender);
