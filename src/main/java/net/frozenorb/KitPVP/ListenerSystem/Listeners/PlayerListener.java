@@ -14,6 +14,8 @@ import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
+import net.frozenorb.KitPVP.MatchSystem.Match;
+import net.frozenorb.KitPVP.MatchSystem.MatchFinishReason;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.PlayerSystem.PlayerManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
@@ -131,6 +133,8 @@ public class PlayerListener extends ListenerBase {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		e.setJoinMessage(null);
+		KitAPI.getPlayerManager().giveSpawnProtection(e.getPlayer());
+		e.getPlayer().teleport(KitAPI.getServerManager().getSpawn());
 		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
 		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) == null) {
 			KitAPI.getStatManager().setLocalData(e.getPlayer().getName().toLowerCase(), new LocalPlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
@@ -156,8 +160,16 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		KitAPI.getBossBarManager().unregisterPlayer(p);
-		if (this.combatLogRunnables.containsKey(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p))
+		if (this.combatLogRunnables.containsKey(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
+			if (KitAPI.getMatchManager().isInMatch(p.getName())) {
+				Match m = KitAPI.getMatchManager().getCurrentMatches().get(p.getName());
+				if (m.isInProgress()) {
+					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
+				}
+			}
 			p.setHealth(0.0D);
+
+		}
 
 		e.setQuitMessage(null);
 		if (KitAPI.getServerManager().isClearOnLogout(e.getPlayer().getName())) {

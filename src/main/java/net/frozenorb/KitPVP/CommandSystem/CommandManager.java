@@ -68,7 +68,7 @@ public class CommandManager {
 			@Override
 			public void syncExecute() {
 				final Player p = (Player) sender;
-				BasicDBObject json = KitAPI.getPlayerManager().getProfile(sender.getName().toLowerCase()).getJSON();
+				BasicDBObject json = KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase()).getJSON();
 				if (KitAPI.getPlayerManager().canWarp(p)) {
 					p.sendMessage(ChatColor.GOLD + "Warped to §f" + commandName + "§6!");
 					KitAPI.getPlayerManager().teleport(p, toWarp);
@@ -80,9 +80,9 @@ public class CommandManager {
 						@Override
 						public void run() {
 							p.closeInventory();
-							if (KitAPI.getPlayerManager().getProfile(sender.getName().toLowerCase()).getJSON().containsField("warpTask")) {
+							if (KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase()).getJSON().containsField("warpTask")) {
 								p.sendMessage(ChatColor.GOLD + "Warped to §f" + commandName + "§6!");
-								KitAPI.getPlayerManager().getProfile(sender.getName().toLowerCase()).getJSON().remove("warpTask");
+								KitAPI.getPlayerManager().getProfile(p.getName().toLowerCase()).getJSON().remove("warpTask");
 								KitAPI.getPlayerManager().teleport(p, toWarp);
 							}
 						}

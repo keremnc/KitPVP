@@ -463,6 +463,8 @@ public class MatchManager {
 		public void onPlayerInteract(PlayerInteractEvent e) {
 			final Player p = e.getPlayer();
 			if (p.getItemInHand() != null) {
+				if (p.getItemInHand().getType() == Material.MUSHROOM_SOUP)
+					return;
 				if (p.getItemInHand().hasItemMeta()) {
 					String display = p.getItemInHand().getItemMeta().getDisplayName();
 					if (display != null && display.contains("Warp to the 1v1 Arena")) {
@@ -636,13 +638,13 @@ public class MatchManager {
 			}
 			if (p.getInventory().first(Material.INK_SACK) != -1)
 				p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
-			matches.remove(p.getName());
 			if (isInMatch(p.getName())) {
 				Match m = currentMatches.get(p.getName());
 				if (m.isInProgress()) {
 					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
 				}
 			}
+			matches.remove(p.getName());
 			currentMatches.remove(p.getName());
 			for (Player pl : Bukkit.getOnlinePlayers())
 				if (RequestInventory.invs.containsKey(pl.getName()))
@@ -664,13 +666,13 @@ public class MatchManager {
 			}
 			if (p.getInventory().first(Material.INK_SACK) != -1)
 				p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
-			matches.remove(p.getName());
 			if (isInMatch(p.getName())) {
 				Match m = currentMatches.get(p.getName());
 				if (m.isInProgress()) {
 					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
 				}
 			}
+			matches.remove(p.getName());
 			currentMatches.remove(p.getName());
 			for (Player pl : Bukkit.getOnlinePlayers())
 				if (RequestInventory.invs.containsKey(pl.getName()))

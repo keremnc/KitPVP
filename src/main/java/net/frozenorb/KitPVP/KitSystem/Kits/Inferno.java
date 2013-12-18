@@ -57,7 +57,7 @@ public class Inferno extends BaseKit {
 								return;
 							}
 							KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).getPlayerKitData().get(Inferno.this).incrementAbility(1);
-							KitAPI.getKitManager().useAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()), 12000);
+							KitAPI.getKitManager().useAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()), 15000);
 							int index = 1;
 							for (Location loc : Core.get().circle(e.getPlayer().getLocation(), 4, 2, false, true, 0)) {
 								final Block b = getHighestBlockWithin10Blocks(loc.getBlock());
@@ -74,7 +74,7 @@ public class Inferno extends BaseKit {
 												blockCombustors.remove(b.getLocation());
 												b.setType(Material.AIR);
 											}
-										}, (8 + modifier) * 10);
+										}, (modifier) * 1);
 									}
 								}
 

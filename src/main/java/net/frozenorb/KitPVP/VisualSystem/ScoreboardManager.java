@@ -44,6 +44,10 @@ public class ScoreboardManager implements Runnable {
 	public void updateScoreboard(Player p) {
 		Scoreboard sb = p.getScoreboard();
 		Objective nameTag = sb.getObjective("nergger");
+		if (nameTag == null) {
+			nameTag = sb.registerNewObjective("nergger", "nirger");
+			nameTag.setDisplaySlot(DisplaySlot.SIDEBAR);
+		}
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation()) || (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())) {
 			if (nameTag.getDisplaySlot() == null)
 				nameTag.setDisplaySlot(DisplaySlot.BELOW_NAME);
