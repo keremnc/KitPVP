@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -81,7 +82,16 @@ public class StatManager {
 	 */
 	public void setLocalData(String name, LocalPlayerData data) {
 		playerData.put(name.toLowerCase(), data);
-		data.save();
+		data.delegateSave();
+	}
+
+	/**
+	 * Gets all of the local data files
+	 * 
+	 * @return local data
+	 */
+	public Collection<LocalPlayerData> getAllLocalData() {
+		return playerData.values();
 	}
 
 	/**
@@ -127,7 +137,7 @@ public class StatManager {
 		try {
 			if (objective.isLocal())
 				return null;
-			URL obj = new URL(Shared.get().getConnectionManager().getApiRoot() + "/rankings?sort=" + objective.getName());
+			URL obj = new URL(Shared.get().getConnectionManager().getApiRoot() + "/rankings?sort=" + objective.getName().replace("highestKillstreak", "killstreak"));
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("GET");
 			con.setRequestProperty("User-Agent", "Mozilla/5.0");

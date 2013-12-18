@@ -49,8 +49,9 @@ public class ScoreboardManager implements Runnable {
 			nameTag.setDisplaySlot(DisplaySlot.SIDEBAR);
 		}
 		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation()) || (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())) {
-			if (nameTag.getDisplaySlot() == null)
+			if (nameTag.getDisplaySlot() == null) {
 				nameTag.setDisplaySlot(DisplaySlot.BELOW_NAME);
+			}
 			for (Player lp : Bukkit.getOnlinePlayers()) {
 				Score elo = nameTag.getScore(lp);
 				elo.setScore(KitAPI.getEloManager().getElo(lp.getName().toLowerCase()));
@@ -58,7 +59,11 @@ public class ScoreboardManager implements Runnable {
 		} else {
 			nameTag.setDisplaySlot(null);
 		}
-		Objective o = sb.getObjective(DisplaySlot.SIDEBAR);
+		Objective o = sb.getObjective("nigger");
+		if (o == null) {
+			o = sb.registerNewObjective("nigger", "nogger");
+		}
+		o.setDisplaySlot(DisplaySlot.SIDEBAR);
 		o.setDisplayName(ChatColor.RED + p.getName());
 		Stat s = KitAPI.getStatManager().getStat(p.getName());
 		Score kills = o.getScore(generateName("§6Kills"));

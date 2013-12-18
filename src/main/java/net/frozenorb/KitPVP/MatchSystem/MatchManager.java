@@ -604,7 +604,7 @@ public class MatchManager {
 				}
 				if (isInMatch(p.getName())) {
 					if (isInMatch(damager.getName())) {
-						if (currentMatches.get(p.getName()).getOpponent(p).getName().equalsIgnoreCase(damager.getName())) {
+						if (currentMatches.get(p.getName()).getOpponent(p) != null && currentMatches.get(p.getName()).getOpponent(p).getName().equalsIgnoreCase(damager.getName())) {
 							if (currentMatches.get(damager.getName()).getOpponent(damager).getName().equalsIgnoreCase(p.getName())) {
 								if (!currentMatches.get(damager.getName()).isInProgress())
 									e.setCancelled(true);

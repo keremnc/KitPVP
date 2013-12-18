@@ -30,9 +30,9 @@ public class Undertaker extends BaseKit {
 	@Override
 	public PlayerInventory transformInventory(PlayerInventory inv) {
 		inv.setArmorContents(Utilities.getFullSet(Material.CHAINMAIL_BOOTS));
-		inv.setHelmet(Utilities.generateItem(Material.DIAMOND_HELMET, Enchantment.PROTECTION_ENVIRONMENTAL, 4));
+		inv.setHelmet(Utilities.generateItem(Material.DIAMOND_HELMET, Enchantment.PROTECTION_ENVIRONMENTAL, 2));
 		inv.setBoots(Utilities.generateItem(Material.IRON_BOOTS, Enchantment.PROTECTION_ENVIRONMENTAL, 4));
-		inv.setItem(0, Utilities.generateItem(Material.IRON_SWORD, Enchantment.DAMAGE_ALL, 3));
+		inv.setItem(0, Utilities.generateItem(Material.IRON_SWORD, Enchantment.DAMAGE_ALL, 2));
 		inv.setItem(1, Utilities.generateItem(Material.EMERALD, "§9§lUndertaker Gem"));
 
 		return inv;

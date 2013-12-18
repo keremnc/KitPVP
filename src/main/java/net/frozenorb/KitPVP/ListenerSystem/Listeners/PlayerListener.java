@@ -1,11 +1,8 @@
 package net.frozenorb.KitPVP.ListenerSystem.Listeners;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.KitPVP;
@@ -26,6 +23,7 @@ import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.Types.CombatLogRunnable;
 import net.frozenorb.Network.Events.SoundSendPacketEvent;
 import net.frozenorb.Utilities.Core;
+import net.frozenorb.mBasic.Basic;
 import net.frozenorb.mShared.API.Events.PlayerProfileLoadEvent;
 
 import org.bukkit.Bukkit;
@@ -179,7 +177,7 @@ public class PlayerListener extends ListenerBase {
 			KitAPI.getServerManager().removeLogout(e.getPlayer().getName());
 		}
 		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) != null) {
-			KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).save();
+			KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).delegateSave();
 		}
 		KitAPI.getStatManager().getStat(e.getPlayer().getName()).saveStat();
 	}
@@ -238,29 +236,15 @@ public class PlayerListener extends ListenerBase {
 				}
 			}, 5L);
 		} else {
-			final ArrayList<Item> items = new ArrayList<Item>();
-
-			for (ItemStack item : e.getDrops()) {
-				final Item ite = e.getEntity().getLocation().getWorld().dropItemNaturally(e.getEntity().getLocation(), item);
-				items.add(ite);
-			}
-			final Iterator<Item> drops = items.iterator();
-			final AtomicInteger times = new AtomicInteger(0);
-			while (drops.hasNext()) {
-				final Item ite = drops.next();
-				drops.remove();
-				times.set(times.get() + 1);
-				Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
-
-					@Override
-					public void run() {
-						if (ite.isValid() && !ite.isDead()) {
-							ite.remove();
-						}
-					}
-				}, 20 + times.get());
-
-			}
+			/*
+			 * final ArrayList<Item> items = new ArrayList<Item>();
+			 * 
+			 * for (ItemStack item : e.getDrops()) { final Item ite = e.getEntity().getLocation().getWorld().dropItemNaturally(e.getEntity().getLocation(), item); items.add(ite); } final Iterator<Item> drops = items.iterator(); final AtomicInteger times = new AtomicInteger(0); while (drops.hasNext()) { final Item ite = drops.next(); drops.remove(); times.set(times.get() + 1); Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
+			 * 
+			 * @Override public void run() { if (ite.isValid() && !ite.isDead()) { ite.remove(); } } }, 20 + times.get());
+			 * 
+			 * }
+			 */
 			e.getDrops().clear();
 		}
 		final Player p = e.getEntity();
@@ -271,7 +255,9 @@ public class PlayerListener extends ListenerBase {
 		if (ks > 9) {
 			Bukkit.broadcastMessage(p.getKiller().getDisplayName() + ChatColor.DARK_AQUA + " has ended " + ChatColor.GRAY + p.getDisplayName() + "'s" + ChatColor.DARK_AQUA + " killstreak of " + ChatColor.YELLOW + ks + ChatColor.DARK_AQUA + ".");
 		}
+
 		pStat.set(StatObjective.KILLSTREAK, 0);
+
 		int value = new Random().nextInt(33 - 21) + 21;
 		if (assist.containsKey(p.getName())) {
 			HashMap<String, Double> sub = assist.get(p.getName());
@@ -284,6 +270,7 @@ public class PlayerListener extends ListenerBase {
 						if (finalam * 100 > 13) {
 							double cent = Math.floor((finalam * 100) * 100) / 100;
 							int val = (int) Math.floor((finalam * value) * 100) / 100;
+							Basic.get().getEconomyManager().depositPlayer(as.getName(), val);
 							as.sendMessage(ChatColor.AQUA + "You received " + ChatColor.YELLOW + "" + (val) + " credits" + ChatColor.AQUA + " for doing " + ChatColor.YELLOW + cent + "%" + ChatColor.AQUA + " of the damage done to " + ChatColor.YELLOW + p.getName());
 						}
 
@@ -302,7 +289,13 @@ public class PlayerListener extends ListenerBase {
 				Stat killerStat = KitAPI.getStatManager().getStat(killer.getName());
 				killerStat.increment(StatObjective.KILLS, 1);
 				killerStat.increment(StatObjective.KILLSTREAK, 1);
-
+				int k = killerStat.get(StatObjective.KILLSTREAK);
+				if (killerStat.get(StatObjective.HIGHEST_KILLSTREAK) < k) {
+					killerStat.set(StatObjective.HIGHEST_KILLSTREAK, k);
+				}
+				if (k % 5 == 0) {
+					Bukkit.broadcastMessage(p.getKiller().getDisplayName() + ChatColor.DARK_AQUA + " has gotten a killstreak of " + ChatColor.YELLOW + k + ChatColor.DARK_AQUA + ".");
+				}
 			}
 			if (!KitAPI.getMatchManager().isInMatch(p.getName())) {
 				killer.sendMessage(ChatColor.AQUA + "You have receieved " + ChatColor.YELLOW + value + " credits " + ChatColor.AQUA + "for killing " + e.getEntity().getName() + "!");
@@ -425,8 +418,8 @@ public class PlayerListener extends ListenerBase {
 
 			}
 		}
-		if (e.getTo().distance(e.getFrom()) > 0.2) {
-			if (KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().containsField("warpTask")) {
+		if (KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().containsField("warpTask")) {
+			if (e.getTo().distance(e.getFrom()) > 0.2) {
 				Bukkit.getScheduler().cancelTask(KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().getInt("warpTask"));
 				KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().remove("warpTask");
 				e.getPlayer().sendMessage(ChatColor.RED + "Warp cancelled!");

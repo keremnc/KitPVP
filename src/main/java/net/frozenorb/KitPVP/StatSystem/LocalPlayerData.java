@@ -91,18 +91,18 @@ public class LocalPlayerData {
 
 	}
 
-	public void save() {
+	public void delegateSave() {
 		Bukkit.getScheduler().runTaskAsynchronously(KitAPI.getKitPVP(), new Runnable() {
 
 			@Override
 			public void run() {
-				saveToFile();
+				saveAsync();
 			}
 		});
 
 	}
 
-	public void saveToFile() {
+	public void saveAsync() {
 
 		try {
 			File saveTo = new File("data" + File.separator + "playerData" + File.separator + name.toLowerCase() + ".json");

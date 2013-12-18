@@ -451,7 +451,7 @@ public class Match {
 			public void run() {
 				victim.teleport(arena.getFirstLocation());
 			}
-		}, 4L);
+		}, 3L);
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 			@Override
@@ -504,6 +504,8 @@ public class Match {
 			@Override
 			public void run() {
 				if (current.get() > 2) {
+					victim.setHealth(((Damageable) victim).getMaxHealth());
+					challenger.setHealth(((Damageable) challenger).getMaxHealth());
 					victim.showPlayer(challenger);
 					challenger.showPlayer(victim);
 					KitAPI.getServerManager().unfreezePlayer(challenger);

@@ -103,8 +103,8 @@ public class KitPVP extends JavaPlugin {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getScoreboardManager(), 20L, 20L);
-		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getBossBarManager(), 20L, 120L);
+		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getScoreboardManager(), 20L, 60L);
+		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getBossBarManager(), 20L, 240L);
 
 		/*
 		 * We do the following to fix the server after a restart
@@ -137,7 +137,7 @@ public class KitPVP extends JavaPlugin {
 				e.remove();
 		}
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			KitAPI.getStatManager().getLocalData(p.getName()).saveToFile();
+			KitAPI.getStatManager().getLocalData(p.getName()).saveAsync();
 			KitAPI.getStatManager().getStat(p.getName()).saveStat();
 		}
 	}
