@@ -8,6 +8,7 @@ import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
+import net.frozenorb.KitPVP.Commands.Load;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
@@ -16,7 +17,7 @@ import net.frozenorb.KitPVP.MatchSystem.MatchFinishReason;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.PlayerSystem.PlayerManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
-import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
+import net.frozenorb.KitPVP.StatSystem.PlayerData;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
@@ -134,10 +135,14 @@ public class PlayerListener extends ListenerBase {
 		KitAPI.getPlayerManager().giveSpawnProtection(e.getPlayer());
 		e.getPlayer().teleport(KitAPI.getServerManager().getSpawn());
 		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
-		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) == null) {
-			KitAPI.getStatManager().setLocalData(e.getPlayer().getName().toLowerCase(), new LocalPlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
+		if (KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()) == null) {
+			KitAPI.getStatManager().setPlayerData(e.getPlayer().getName().toLowerCase(), new PlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
 		}
 		KitAPI.getStatManager().loadStats(e.getPlayer().getName());
+		if (Load.RATINGS.containsKey(e.getPlayer().getName().toLowerCase())) {
+			KitAPI.getEloManager().setElo(e.getPlayer().getName(), Load.RATINGS.get(e.getPlayer().getName().toLowerCase()));
+			Load.RATINGS.remove(e.getPlayer().getName().toLowerCase());
+		}
 		KitAPI.getScoreboardManager().loadScoreboard(e.getPlayer());
 		if (KitAPI.getPlayerManager().isInventoryEmpty(e.getPlayer())) {
 			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
@@ -176,8 +181,8 @@ public class PlayerListener extends ListenerBase {
 			Core.get().clearPlayer(e.getPlayer());
 			KitAPI.getServerManager().removeLogout(e.getPlayer().getName());
 		}
-		if (KitAPI.getStatManager().getLocalData(e.getPlayer().getName()) != null) {
-			KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).delegateSave();
+		if (KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()) != null) {
+			KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).delegateSave();
 		}
 		KitAPI.getStatManager().getStat(e.getPlayer().getName()).saveStat();
 	}
@@ -213,7 +218,7 @@ public class PlayerListener extends ListenerBase {
 			return;
 		}
 		if (KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit() != null)
-			KitAPI.getStatManager().getLocalData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
+			KitAPI.getStatManager().getPlayerData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {
 			e.getDrops().clear();
 			for (int i = 0; i < 9; i += 1)
@@ -282,7 +287,7 @@ public class PlayerListener extends ListenerBase {
 		if (p.getKiller() != null && p.getKiller() instanceof Player) {
 			Player killer = p.getKiller();
 			if (KitAPI.getPlayerManager().getProfile(killer.getName()).getLastUsedKit() != null)
-				KitAPI.getStatManager().getLocalData(killer.getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(killer.getName()).getLastUsedKit()).incrementKills(1);
+				KitAPI.getStatManager().getPlayerData(killer.getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(killer.getName()).getLastUsedKit()).incrementKills(1);
 
 			KitAPI.getStatManager().checkCombo(killer);
 			if (!killer.getName().equalsIgnoreCase(p.getName())) {
@@ -320,13 +325,7 @@ public class PlayerListener extends ListenerBase {
 		}
 		ItemStack item = e.getItemDrop().getItemStack();
 		if (item.getType() == Material.BOWL) {
-			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
-
-				@Override
-				public void run() {
-					e.getItemDrop().remove();
-				}
-			}, 40L);
+			e.getItemDrop().remove();
 			return;
 		}
 		if (KitAPI.getMatchManager().getMatchItems().contains(item.getType()) || item.getType() == PlayerManager.UNUSABLE_SLOT) {
@@ -401,30 +400,28 @@ public class PlayerListener extends ListenerBase {
 		Location from = e.getFrom();
 		double fromX = from.getX(), fromZ = from.getZ(), fromY = from.getY(), toX = to.getX(), toZ = to.getZ(), toY = to.getY();
 		if (fromX != toX || fromZ != toZ || fromY != toY) {
-			if (to.distance(from) > 0.1 && combatLogRunnables.containsKey(e.getPlayer().getName())) {
-				combatLogRunnables.get(e.getPlayer().getName()).setTime(COMBAT_LOG_TIME);
-			}
 			GamerProfile profile = KitAPI.getPlayerManager().getProfile(e.getPlayer().getName());
 			if (profile.isObject("cancelMove")) {
 				e.setTo(e.getFrom());
 				return;
 			}
-			if (!(KitAPI.getRegionChecker().isRegion(Region.SPAWN, to)) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, from)) {
-
-				if (KitAPI.getPlayerManager().hasSpawnProtection(e.getPlayer())) {
+			if (KitAPI.getPlayerManager().hasSpawnProtection(e.getPlayer())) {
+				if (!(KitAPI.getRegionChecker().isRegion(Region.SPAWN, to)) && KitAPI.getRegionChecker().isRegion(Region.SPAWN, from)) {
 					e.getPlayer().sendMessage(ChatColor.GRAY + "You no longer have spawn protection.");
+					KitAPI.getPlayerManager().removeSpawnProtection(e.getPlayer());
+
 				}
-				KitAPI.getPlayerManager().removeSpawnProtection(e.getPlayer());
 
 			}
-		}
-		if (KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().containsField("warpTask")) {
-			if (e.getTo().distance(e.getFrom()) > 0.2) {
-				Bukkit.getScheduler().cancelTask(KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().getInt("warpTask"));
-				KitAPI.getPlayerManager().getProfile(e.getPlayer().getName().toLowerCase()).getJSON().remove("warpTask");
-				e.getPlayer().sendMessage(ChatColor.RED + "Warp cancelled!");
+			if (profile.getJSON().containsField("warpTask")) {
+				if (e.getTo().distance(e.getFrom()) > 0.2) {
+					Bukkit.getScheduler().cancelTask(profile.getJSON().getInt("warpTask"));
+					profile.getJSON().remove("warpTask");
+					e.getPlayer().sendMessage(ChatColor.RED + "Warp cancelled!");
+				}
 			}
 		}
+
 	}
 
 	@EventHandler

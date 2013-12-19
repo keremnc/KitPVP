@@ -56,7 +56,7 @@ public class Inferno extends BaseKit {
 								e.getPlayer().sendMessage(ChatColor.RED + "You cannot use this for another " + getCooldown(e.getPlayer()) + " seconds.");
 								return;
 							}
-							KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).getPlayerKitData().get(Inferno.this).incrementAbility(1);
+							KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).getPlayerKitData().get(Inferno.this).incrementAbility(1);
 							KitAPI.getKitManager().useAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()), 15000);
 							int index = 1;
 							for (Location loc : Core.get().circle(e.getPlayer().getLocation(), 4, 2, false, true, 0)) {
@@ -79,7 +79,7 @@ public class Inferno extends BaseKit {
 								}
 
 							}
-							KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).getPlayerKitData().get(Inferno.this).incrementAbility(index - 1);
+							KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).getPlayerKitData().get(Inferno.this).incrementAbility(index - 1);
 							e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.BLAZE_BREATH, 1F, 20F);
 							e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.WITHER_SHOOT, 1F, 0.1F);
 						}

@@ -8,7 +8,7 @@ package net.frozenorb.KitPVP.StatSystem;
  */
 public enum StatObjective {
 	KILLS("kills", false, "Kills"), DEATHS("deaths", false, "Deaths"), DUEL_WINS("1v1wins", false, "1v1 Wins"), DUEL_LOSSES("1v1losses", false, "1v1 Losses"), HIGHEST_KILLSTREAK(
-			"highestKillstreak", false, "Highest Killstreak"), KD_RATIO("kd", false, "KD"), KILLSTREAK("LOCAL", true, "Killstreak"), ELO("elo", true, "Rating"), KIT_DATA(
+			"highestKillstreak", false, "Highest Killstreak"), KD_RATIO("kd", false, "KD"), KILLSTREAK("LOCAL", true, "Killstreak"), ELO("elo", false, "Rating"), KIT_DATA(
 			"kitData", true, "kitData", false), RANKED_MATCHES_PLAYED("rankedMatchesPlayed", true, "rankedMatchesPlayed", false);
 	private String name;
 	private boolean local;

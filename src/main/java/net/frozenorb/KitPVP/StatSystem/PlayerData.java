@@ -12,12 +12,12 @@ import org.bukkit.Bukkit;
 
 import com.mongodb.BasicDBObject;
 
-public class LocalPlayerData {
+public class PlayerData {
 
 	private String name;
 	private BasicDBObject data;
 
-	public LocalPlayerData(String name, BasicDBObject db) {
+	public PlayerData(String name, BasicDBObject db) {
 		this.name = name;
 		this.data = db;
 	}

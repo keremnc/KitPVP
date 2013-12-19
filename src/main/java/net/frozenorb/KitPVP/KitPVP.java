@@ -137,7 +137,7 @@ public class KitPVP extends JavaPlugin {
 				e.remove();
 		}
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			KitAPI.getStatManager().getLocalData(p.getName()).saveAsync();
+			KitAPI.getStatManager().getPlayerData(p.getName()).saveAsync();
 			KitAPI.getStatManager().getStat(p.getName()).saveStat();
 		}
 	}

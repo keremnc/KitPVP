@@ -1,9 +1,6 @@
 package net.frozenorb.KitPVP.StatSystem.Elo;
 
-import com.mongodb.BasicDBObject;
-
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloCalculator.Matchup;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloCalculator.Result;
@@ -41,7 +38,7 @@ public class EloManager {
 		if (loserGain < -MAX_CHANGE)
 			loserGain = -MAX_CHANGE;
 		if (winnerGain > MAX_CHANGE + 5)
-			winnerGain = winner + MAX_CHANGE + 5;
+			winnerGain = MAX_CHANGE + 5;
 		if (loserPlayed < PROVISIONAL)
 			loserGain /= 1.3;
 		if (winnerPlayed < PROVISIONAL)
@@ -53,20 +50,20 @@ public class EloManager {
 	}
 
 	/**
-	 * Gets the ELO of the player
+	 * Gets the rating of the player
 	 * 
 	 * @param name
 	 *            the name of the player
 	 * @return elo
 	 */
 	public int getElo(String name) {
-		if (KitAPI.getStatManager().getLocalData(name.toLowerCase()) != null)
-			return KitAPI.getStatManager().getLocalData(name.toLowerCase()).get(StatObjective.ELO);
+		if (KitAPI.getStatManager().getStat(name.toLowerCase()) != null)
+			return KitAPI.getStatManager().getStat(name.toLowerCase()).get(StatObjective.ELO);
 		return STARTING_ELO;
 	}
 
 	/**
-	 * Sets the elo of the name
+	 * Sets the rating of the name
 	 * 
 	 * @param name
 	 *            the name to set
@@ -74,10 +71,10 @@ public class EloManager {
 	 *            elo to set to
 	 */
 	public void setElo(String name, int elo) {
-		if (KitAPI.getStatManager().getLocalData(name.toLowerCase()) != null)
-			KitAPI.getStatManager().getLocalData(name.toLowerCase()).set(StatObjective.ELO, elo);
+		if (KitAPI.getStatManager().getStat(name.toLowerCase()) != null)
+			KitAPI.getStatManager().getStat(name.toLowerCase()).set(StatObjective.ELO, elo);
 		else
-			KitAPI.getStatManager().setLocalData(name.toLowerCase(), new LocalPlayerData(name.toLowerCase(), new BasicDBObject("elo", elo)));
+			KitAPI.getStatManager().loadStats(name);
 	}
 
 	/**

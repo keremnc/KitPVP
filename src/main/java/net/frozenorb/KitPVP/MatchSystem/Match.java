@@ -16,12 +16,14 @@ import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mShared.Shared;
+import net.minecraft.server.v1_7_R1.PacketPlayOutNamedEntitySpawn;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -197,13 +199,14 @@ public class Match {
 			matchFinishTime = System.currentTimeMillis();
 			setInProgress(false);
 			if (isRanked()) {
-				KitAPI.getStatManager().getLocalData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
-				KitAPI.getStatManager().getLocalData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
+				KitAPI.getStatManager().getPlayerData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
+				KitAPI.getStatManager().getPlayerData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
 			}
 		}
 		if (loser != null && loser.isOnline()) {
 			KitAPI.getServerManager().setVisible(loser, false);
 			loser.setNoDamageTicks(60);
+			winner.setNoDamageTicks(60);
 			loser.teleport(loser.getLocation().clone().add(0, 3, 0));
 			loser.setAllowFlight(true);
 			loser.setFlying(true);
@@ -231,7 +234,7 @@ public class Match {
 			if (getFirstTo() == 1) {
 				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
 				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getLocalData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getLocalData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
+				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getPlayerData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getPlayerData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
 				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
 				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
 				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
@@ -240,7 +243,7 @@ public class Match {
 			} else if (hasFinished() && getFirstTo() > 1 && !logout) {
 				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
 				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getLocalData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getLocalData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
+				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getPlayerData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getPlayerData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
 				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
 				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
 				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
@@ -462,7 +465,7 @@ public class Match {
 					KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
 				}
 			}
-		}, 5L);
+		}, 6L);
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 			@Override
@@ -477,11 +480,16 @@ public class Match {
 					victim.addPotionEffect(pot);
 					challenger.addPotionEffect(pot);
 				}
-				victim.showPlayer(challenger);
+				PacketPlayOutNamedEntitySpawn eV = new PacketPlayOutNamedEntitySpawn(((CraftPlayer) victim).getHandle());
+				PacketPlayOutNamedEntitySpawn eC = new PacketPlayOutNamedEntitySpawn(((CraftPlayer) challenger).getHandle());
+				((CraftPlayer) victim).getHandle().playerConnection.sendPacket(eC);
+				((CraftPlayer) challenger).getHandle().playerConnection.sendPacket(eV);
+
 				challenger.showPlayer(victim);
+				victim.showPlayer(challenger);
 
 			}
-		}, 6L);
+		}, 8L);
 		if (getFirstTo() > 1) {
 			victim.sendMessage(ChatColor.GOLD + "§7===§6Match §e§l" + matchesDone + "§r§6 is starting!§7===");
 			challenger.sendMessage(ChatColor.GOLD + "§7===§6Match §e§l" + matchesDone + "§r§6 is starting!§7===");

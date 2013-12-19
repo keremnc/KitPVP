@@ -25,7 +25,7 @@ public class Archer extends BaseKit {
 				if (e.getEntity() instanceof Player) {
 					Player p = (Player) e.getEntity();
 					if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(p.getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(p.getName()).getName().equals(getName()))
-						KitAPI.getStatManager().getLocalData(p.getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
+						KitAPI.getStatManager().getPlayerData(p.getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
 				}
 			}
 		};

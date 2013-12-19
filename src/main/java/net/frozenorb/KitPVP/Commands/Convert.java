@@ -8,7 +8,7 @@ import java.io.IOException;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.CommandSystem.Subcommand;
-import net.frozenorb.KitPVP.StatSystem.LocalPlayerData;
+import net.frozenorb.KitPVP.StatSystem.PlayerData;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
 
@@ -26,7 +26,7 @@ public class Convert extends BaseCommand {
 				sender.sendMessage(ChatColor.RED + "Loading all ratings...");
 
 				BasicDBObject elos = new BasicDBObject();
-				for (LocalPlayerData lpd : KitAPI.getStatManager().getAllLocalData()) {
+				for (PlayerData lpd : KitAPI.getStatManager().getAllPlayerData()) {
 					elos.put(lpd.getName(), lpd.get(StatObjective.ELO));
 				}
 				sender.sendMessage(ChatColor.RED + "Saving ratings...");

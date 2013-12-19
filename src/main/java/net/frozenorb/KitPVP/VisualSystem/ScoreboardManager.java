@@ -1,7 +1,8 @@
 package net.frozenorb.KitPVP.VisualSystem;
 
+import java.util.HashMap;
+
 import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.StatSystem.Stat;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.mBasic.Basic;
@@ -16,6 +17,7 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 public class ScoreboardManager implements Runnable {
+	private HashMap<String, OfflinePlayer> offlinePlayerCache = new HashMap<String, OfflinePlayer>();
 
 	@Override
 	public void run() {
@@ -32,7 +34,12 @@ public class ScoreboardManager implements Runnable {
 	 * @return the player
 	 */
 	public OfflinePlayer generateName(String str) {
-		return Bukkit.getOfflinePlayer(str);
+		if (offlinePlayerCache.containsKey(str)) {
+			return offlinePlayerCache.get(str);
+		}
+		OfflinePlayer player = Bukkit.getOfflinePlayer(str);
+		offlinePlayerCache.put(str, player);
+		return player;
 	}
 
 	/**
@@ -43,22 +50,6 @@ public class ScoreboardManager implements Runnable {
 	 */
 	public void updateScoreboard(Player p) {
 		Scoreboard sb = p.getScoreboard();
-		Objective nameTag = sb.getObjective("nergger");
-		if (nameTag == null) {
-			nameTag = sb.registerNewObjective("nergger", "nirger");
-			nameTag.setDisplaySlot(DisplaySlot.SIDEBAR);
-		}
-		if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation()) || (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress())) {
-			if (nameTag.getDisplaySlot() == null) {
-				nameTag.setDisplaySlot(DisplaySlot.BELOW_NAME);
-			}
-			for (Player lp : Bukkit.getOnlinePlayers()) {
-				Score elo = nameTag.getScore(lp);
-				elo.setScore(KitAPI.getEloManager().getElo(lp.getName().toLowerCase()));
-			}
-		} else {
-			nameTag.setDisplaySlot(null);
-		}
 		Objective o = sb.getObjective("nigger");
 		if (o == null) {
 			o = sb.registerNewObjective("nigger", "nogger");
@@ -86,14 +77,6 @@ public class ScoreboardManager implements Runnable {
 	 */
 	public void loadScoreboard(Player player) {
 		Scoreboard sb = Bukkit.getScoreboardManager().getNewScoreboard();
-		Objective nameTag = sb.registerNewObjective("nergger", "nirger");
-		nameTag.setDisplaySlot(DisplaySlot.BELOW_NAME);
-		nameTag.setDisplayName("Rating");
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			Score elo = nameTag.getScore(p);
-			elo.setScore(KitAPI.getEloManager().getElo(p.getName().toLowerCase()));
-
-		}
 		Objective o = sb.registerNewObjective("nigger", "nogger");
 		o.setDisplaySlot(DisplaySlot.SIDEBAR);
 		o.setDisplayName("§c" + player.getName());

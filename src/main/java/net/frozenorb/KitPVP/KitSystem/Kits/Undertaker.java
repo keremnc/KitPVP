@@ -73,7 +73,7 @@ public class Undertaker extends BaseKit {
 								e.getPlayer().sendMessage(ChatColor.RED + "You cannot use this for another " + getCooldown(e.getPlayer()) + " seconds.");
 								return;
 							}
-							KitAPI.getStatManager().getLocalData(e.getPlayer().getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
+							KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
 							KitAPI.getKitManager().useAbility(e.getPlayer(), KitAPI.getKitManager().getByName(getName()), 15000);
 							p.getInventory().setChestplate(null);
 							p.playSound(p.getLocation(), Sound.WITHER_DEATH, 20F, 0.1F);

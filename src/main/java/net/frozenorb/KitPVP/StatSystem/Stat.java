@@ -1,6 +1,6 @@
 package net.frozenorb.KitPVP.StatSystem;
 
-import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.mShared.Shared;
 
 import com.mongodb.BasicDBObject;
@@ -57,11 +57,12 @@ public class Stat {
 	 * @return value
 	 */
 	public int get(StatObjective sb) {
-		if (sb == StatObjective.ELO) {
-			return KitAPI.getEloManager().getElo(getPlayerName().toLowerCase());
+		if (sb == StatObjective.ELO && !statJson.containsField(sb.getName())) {
+			statJson.put(StatObjective.ELO.getName(), EloManager.STARTING_ELO);
 		}
-		if (statJson.containsField(sb.getName()))
+		if (statJson.containsField(sb.getName())) {
 			return statJson.getInt(sb.getName());
+		}
 		return 0;
 	}
 
@@ -73,8 +74,9 @@ public class Stat {
 	 * @return value
 	 */
 	public double getDouble(StatObjective sb) {
-		if (statJson.containsField(sb.getName()))
+		if (statJson.containsField(sb.getName())) {
 			return statJson.getDouble(sb.getName());
+		}
 		return 0;
 	}
 

@@ -30,7 +30,7 @@ import com.mongodb.util.JSON;
 
 public class StatManager {
 	private ConcurrentHashMap<String, Stat> stats = new ConcurrentHashMap<String, Stat>();
-	private HashMap<String, LocalPlayerData> playerData = new HashMap<String, LocalPlayerData>();
+	private HashMap<String, PlayerData> playerData = new HashMap<String, PlayerData>();
 
 	/**
 	 * Get the Stat object of the name
@@ -66,7 +66,7 @@ public class StatManager {
 	 *            the name of the player
 	 * @return local data
 	 */
-	public LocalPlayerData getLocalData(String name) {
+	public PlayerData getPlayerData(String name) {
 		if (playerData.containsKey(name.toLowerCase()))
 			return playerData.get(name.toLowerCase());
 		return null;
@@ -80,7 +80,7 @@ public class StatManager {
 	 * @param data
 	 *            the data to set to
 	 */
-	public void setLocalData(String name, LocalPlayerData data) {
+	public void setPlayerData(String name, PlayerData data) {
 		playerData.put(name.toLowerCase(), data);
 		data.delegateSave();
 	}
@@ -90,7 +90,7 @@ public class StatManager {
 	 * 
 	 * @return local data
 	 */
-	public Collection<LocalPlayerData> getAllLocalData() {
+	public Collection<PlayerData> getAllPlayerData() {
 		return playerData.values();
 	}
 
@@ -115,7 +115,7 @@ public class StatManager {
 			String str = Core.get().readFile(playerFile);
 			if (JSON.parse(str) != null) {
 				BasicDBObject db = (BasicDBObject) JSON.parse(str);
-				LocalPlayerData data = new LocalPlayerData(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), db);
+				PlayerData data = new PlayerData(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), db);
 				playerData.put(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), data);
 			} else
 				System.out.println("ERROR LOADING PLAYER DATA FILE: " + playerFile.getName());

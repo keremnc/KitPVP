@@ -90,11 +90,11 @@ public class KitInventory extends PageInventory {
 				{
 					addAll(wrap(kit.getDescription()));
 					add("");
-					add("§6Kills:§f " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getKills());
-					add("§6Deaths:§f " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getDeaths());
-					add("§6Uses:§f " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
+					add("§6Kills:§f " + KitAPI.getStatManager().getPlayerData(getPlayer().getName()).getPlayerKitData().get(kit).getKills());
+					add("§6Deaths:§f " + KitAPI.getStatManager().getPlayerData(getPlayer().getName()).getPlayerKitData().get(kit).getDeaths());
+					add("§6Uses:§f " + KitAPI.getStatManager().getPlayerData(getPlayer().getName()).getPlayerKitData().get(kit).getUses());
 					if (kit.hasAbilityMeta()) {
-						add("§6" + kit.getMetaName() + ":§f " + KitAPI.getStatManager().getLocalData(getPlayer().getName()).getPlayerKitData().get(kit).getAbility());
+						add("§6" + kit.getMetaName() + ":§f " + KitAPI.getStatManager().getPlayerData(getPlayer().getName()).getPlayerKitData().get(kit).getAbility());
 					}
 				}
 			};
