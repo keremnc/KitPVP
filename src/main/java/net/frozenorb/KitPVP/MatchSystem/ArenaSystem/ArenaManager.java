@@ -33,6 +33,12 @@ public class ArenaManager extends AbstractDataLoader {
 		return arenasInUse;
 	}
 
+	public void setArenaInUse(Arena arena) {
+		if ((!arenasInUse.contains(arena.getId()))) {
+			arenasInUse.add(arena.getId());
+		}
+	}
+
 	public Arena requestArena() {
 		for (Arena a : arenas) {
 			if ((!arenasInUse.contains(a.getId()))) {

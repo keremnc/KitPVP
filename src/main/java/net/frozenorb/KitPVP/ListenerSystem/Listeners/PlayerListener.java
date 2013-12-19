@@ -49,6 +49,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -156,8 +157,7 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler
-	public void onServerSendSound(SoundSendPacketEvent e) {
-	}
+	public void onServerSendSound(SoundSendPacketEvent e) {}
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
@@ -182,7 +182,7 @@ public class PlayerListener extends ListenerBase {
 			KitAPI.getServerManager().removeLogout(e.getPlayer().getName());
 		}
 		if (KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()) != null) {
-			KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).delegateSave();
+			KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).save();
 		}
 		KitAPI.getStatManager().getStat(e.getPlayer().getName()).saveStat();
 	}
@@ -199,6 +199,11 @@ public class PlayerListener extends ListenerBase {
 	public void onPlayerTrampleCrop(PlayerInteractEvent e) {
 		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL)
 			e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
+		KitAPI.getStatManager().loadPlayerData(e.getName().toLowerCase());
 	}
 
 	@EventHandler

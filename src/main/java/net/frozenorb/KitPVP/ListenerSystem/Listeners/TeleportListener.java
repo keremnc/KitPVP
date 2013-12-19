@@ -26,7 +26,7 @@ public class TeleportListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if (event.getTo().distance(event.getFrom()) > 10) {
+		if (event.getTo().distance(event.getFrom()) > 50D) {
 			final Player player = event.getPlayer();
 			if (KitAPI.getMatchManager().isInMatch(player.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(player.getName()).isInProgress()) {
 				final int visibleDistance = Bukkit.getViewDistance() * 16;

@@ -1,14 +1,10 @@
 package net.frozenorb.KitPVP.StatSystem;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import net.frozenorb.KitPVP.API.KitAPI;
-import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
-
 import org.bukkit.Bukkit;
+
+import net.frozenorb.KitPVP.KitPVP;
+import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
+import net.frozenorb.mShared.Shared;
 
 import com.mongodb.BasicDBObject;
 
@@ -91,32 +87,18 @@ public class PlayerData {
 
 	}
 
-	public void delegateSave() {
-		Bukkit.getScheduler().runTaskAsynchronously(KitAPI.getKitPVP(), new Runnable() {
+	public void save() {
+		Bukkit.getScheduler().runTaskAsynchronously(KitPVP.get(), new Runnable() {
 
 			@Override
 			public void run() {
-				saveAsync();
+				saveSync();
 			}
 		});
-
 	}
 
-	public void saveAsync() {
-
-		try {
-			File saveTo = new File("data" + File.separator + "playerData" + File.separator + name.toLowerCase() + ".json");
-			if (!saveTo.exists())
-				saveTo.createNewFile();
-			BufferedWriter writer = new BufferedWriter(new FileWriter(saveTo));
-			writer.write(data.toString());
-			writer.flush();
-			writer.close();
-		} catch (IOException ex) {
-			System.out.println("Error on data file that follows \n" + name + ": " + toString());
-			ex.printStackTrace();
-		}
-
+	public void saveSync() {
+		Shared.get().getConnectionManager().sendPut(Shared.get().getConnectionManager().getApiRoot() + "/servercmd/usermeta/" + name, getData().toString());
 	}
 
 	public String getName() {

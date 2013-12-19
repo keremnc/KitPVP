@@ -442,12 +442,15 @@ public class Match {
 			}
 			arena = a;
 		}
+		KitAPI.getArenaManager().setArenaInUse(arena);
 		arena.getFirstLocation().getChunk().load();
 		arena.getFirstLocation().getChunk().load(true);
 		arena.getSecondLocation().getChunk().load();
 		arena.getSecondLocation().getChunk().load(true);
 		KitAPI.getMatchManager().getMatches().remove(challenger.getName());
 		KitAPI.getMatchManager().getMatches().remove(victim.getName());
+		victim.closeInventory();
+		challenger.closeInventory();
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 
 			@Override
@@ -470,6 +473,8 @@ public class Match {
 
 			@Override
 			public void run() {
+				victim.closeInventory();
+				challenger.closeInventory();
 				victim.setHealth(((Damageable) victim).getMaxHealth());
 				challenger.setHealth(((Damageable) challenger).getMaxHealth());
 				getType().applyInventory(victim.getInventory());

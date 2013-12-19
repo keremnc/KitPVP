@@ -14,6 +14,8 @@ import net.frozenorb.KitPVP.Minigames.KitMinigameManager;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
 import net.frozenorb.Utilities.DataSystem.Regioning.RegionManager;
+import net.frozenorb.mBasic.Basic;
+import net.frozenorb.mBasic.EconomySystem.EconomyListener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -95,7 +97,6 @@ public class KitPVP extends JavaPlugin {
 		leaderboardUpdater.runTaskTimerAsynchronously(this, 0L, 30 * 20L);
 		reflectionManager = new ReflectionManager();
 		commandManager = new CommandManager();
-		KitAPI.getStatManager().loadLocalData();
 		KitAPI.init(this);
 		try {
 			KitAPI.getKitManager().loadKits();
@@ -103,18 +104,30 @@ public class KitPVP extends JavaPlugin {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getScoreboardManager(), 20L, 60L);
 		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getBossBarManager(), 20L, 240L);
 
-		/*
-		 * We do the following to fix the server after a restart
-		 */
 		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
 
 			@Override
 			public void run() {
+				Basic.get().getEconomyManager().registerListener(new EconomyListener() {
+
+					@Override
+					public void onWithdraw(String name, double withdrawn) {}
+
+					@Override
+					public void onDeposit(String name, double deposited) {}
+
+					@Override
+					public void onBalanceChanged(String name, double newBalance) {
+						if (Bukkit.getPlayerExact(name) != null) {
+							KitAPI.getScoreboardManager().updateScoreboard(Bukkit.getPlayerExact(name));
+						}
+					}
+				});
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					System.out.println("Reloading " + p.getName());
+					KitAPI.getStatManager().loadPlayerData(p.getName().toLowerCase());
 					PlayerListener.get().onPlayerJoin(new PlayerJoinEvent(p, null));
 				}
 			}
@@ -137,7 +150,7 @@ public class KitPVP extends JavaPlugin {
 				e.remove();
 		}
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			KitAPI.getStatManager().getPlayerData(p.getName()).saveAsync();
+			KitAPI.getStatManager().getPlayerData(p.getName().toLowerCase()).saveSync();
 			KitAPI.getStatManager().getStat(p.getName()).saveStat();
 		}
 	}

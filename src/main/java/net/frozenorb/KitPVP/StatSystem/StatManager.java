@@ -1,8 +1,6 @@
 package net.frozenorb.KitPVP.StatSystem;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -20,7 +18,6 @@ import org.bukkit.entity.Player;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Types.Kill;
-import net.frozenorb.Utilities.Core;
 import net.frozenorb.mShared.Shared;
 import net.frozenorb.mShared.API.Profile.PlayerProfile;
 
@@ -82,7 +79,7 @@ public class StatManager {
 	 */
 	public void setPlayerData(String name, PlayerData data) {
 		playerData.put(name.toLowerCase(), data);
-		data.delegateSave();
+		data.save();
 	}
 
 	/**
@@ -95,35 +92,21 @@ public class StatManager {
 	}
 
 	/**
-	 * Loads local playerData
+	 * Loads a player's stats from the API server
+	 * 
+	 * @param name
+	 *            the name of the player to load from
 	 */
-	public void loadLocalData() {
-		File dir = new File("data" + File.separator + "playerData");
-		if (!dir.exists()) {
-			dir.mkdirs();
+	public void loadPlayerData(final String name) {
+		final long now = System.currentTimeMillis();
+		BasicDBObject response = Shared.get().getConnectionManager().sendGet(Shared.get().getConnectionManager().getApiRoot() + "/servercmd/usermeta/" + name);
+		if (response != null) {
+			PlayerData data = new PlayerData(name.toLowerCase(), response);
+			playerData.put(name.toLowerCase(), data);
+		} else {
+			playerData.put(name.toLowerCase(), new PlayerData(name.toLowerCase(), new BasicDBObject()));
 		}
-		FilenameFilter statsFilter = new FilenameFilter() {
-			public boolean accept(File paramFile, String paramString) {
-				if (paramString.endsWith("json"))
-					return true;
-				return false;
-			}
-		};
-		System.out.println("Loading local stat files.");
-		long then = System.currentTimeMillis();
-		for (File playerFile : dir.listFiles(statsFilter)) {
-			String str = Core.get().readFile(playerFile);
-			if (JSON.parse(str) != null) {
-				BasicDBObject db = (BasicDBObject) JSON.parse(str);
-				PlayerData data = new PlayerData(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), db);
-				playerData.put(playerFile.getName().substring(0, playerFile.getName().indexOf('.')), data);
-			} else
-				System.out.println("ERROR LOADING PLAYER DATA FILE: " + playerFile.getName());
-
-		}
-		long time = System.currentTimeMillis() - then;
-		System.out.println("Successfully loaded data in " + time + " ms.");
-
+		System.out.println("Successfully player data for " + name + " via " + Shared.get().getConnectionManager().getApiRoot() + ". Login API call time: " + (System.currentTimeMillis() - now) + "ms");
 	}
 
 	/**

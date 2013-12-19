@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 public class Arena extends BaseCommand {
 
 	public Arena() {
-		setTabCompletions(new String[] { "create", "override", "here", "warp" });
+		setTabCompletions(new String[] { "create", "override", "here", "warp", "using" });
 	}
 
 	@Override
@@ -41,6 +41,10 @@ public class Arena extends BaseCommand {
 							sender.sendMessage(ChatColor.RED + "/arena warp <id>");
 						}
 					}
+				}
+				if (args[0].equalsIgnoreCase("using")) {
+					sender.sendMessage(ChatColor.GREEN + "Arena #'s in use: " + KitAPI.getArenaManager().getArenasInUse());
+					return;
 				}
 				if (args[0].equalsIgnoreCase("override")) {
 					if (args.length > 1) {

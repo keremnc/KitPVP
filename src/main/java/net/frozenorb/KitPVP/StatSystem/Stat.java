@@ -1,5 +1,8 @@
 package net.frozenorb.KitPVP.StatSystem;
 
+import org.bukkit.Bukkit;
+
+import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.mShared.Shared;
 
@@ -47,6 +50,9 @@ public class Stat {
 			increment += statJson.getInt(obj.getName());
 		}
 		statJson.put(obj.getName(), increment);
+		if (Bukkit.getPlayerExact(playerName) != null) {
+			KitAPI.getScoreboardManager().updateScoreboard(Bukkit.getPlayerExact(playerName));
+		}
 	}
 
 	/**
@@ -90,7 +96,9 @@ public class Stat {
 	 */
 	public void set(StatObjective obj, int value) {
 		statJson.put(obj.getName(), value);
-
+		if (Bukkit.getPlayerExact(playerName) != null) {
+			KitAPI.getScoreboardManager().updateScoreboard(Bukkit.getPlayerExact(playerName));
+		}
 	}
 
 	/**

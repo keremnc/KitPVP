@@ -465,18 +465,21 @@ public class MatchManager {
 			if (p.getItemInHand() != null) {
 				if (p.getItemInHand().getType() == Material.MUSHROOM_SOUP)
 					return;
-				if (p.getItemInHand().hasItemMeta()) {
-					String display = p.getItemInHand().getItemMeta().getDisplayName();
-					if (display != null && display.contains("Warp to the 1v1 Arena")) {
-						p.chat("/1v1");
-						return;
+				if (p.getItemInHand().getType() == Material.FEATHER) {
+					if (p.getItemInHand().hasItemMeta()) {
+						String display = p.getItemInHand().getItemMeta().getDisplayName();
+						if (display != null && display.contains("Warp to the 1v1 Arena")) {
+							p.chat("/1v1");
+							return;
+						}
 					}
 				}
 				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-					if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
-						int data = (int) p.getItemInHand().getDurability();
-						Material m = p.getItemInHand().getType();
-						if (getMatchItems().contains(m)) {
+					Material m = p.getItemInHand().getType();
+					if (getMatchItems().contains(m)) {
+						if (KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, p.getLocation())) {
+							int data = (int) p.getItemInHand().getDurability();
+
 							e.setCancelled(true);
 							handleInteract(p, m, data, p.getItemInHand());
 						}

@@ -16,15 +16,8 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
-public class ScoreboardManager implements Runnable {
+public class ScoreboardManager {
 	private HashMap<String, OfflinePlayer> offlinePlayerCache = new HashMap<String, OfflinePlayer>();
-
-	@Override
-	public void run() {
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			updateScoreboard(p);
-		}
-	}
 
 	/**
 	 * Gets an offline player with the given name
