@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
+import net.frozenorb.KitPVP.Commands.Debug;
 import net.frozenorb.KitPVP.InventorySystem.Inventories.RequestInventory;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.Arena;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
@@ -187,6 +188,7 @@ public class Match {
 	}
 
 	public void finish(final Player loser, final String loserName, final MatchFinishReason reason) {
+		long now = System.currentTimeMillis();
 		final Player winner = getOpponent(loserName);
 		loser.setHealth(20D);
 		final boolean logout = reason == MatchFinishReason.PLAYER_LOGOUT;
@@ -227,7 +229,10 @@ public class Match {
 			KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
 			BasicDBObject dbObject = constructObject(winner);
 			Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
-
+			Stat s = KitAPI.getStatManager().getStat(winner.getName().toLowerCase());
+			s.increment(StatObjective.DUEL_WINS);
+			Stat ls = KitAPI.getStatManager().getStat(loserName.toLowerCase());
+			ls.increment(StatObjective.DUEL_LOSSES);
 		}
 
 		if (isRanked()) {
@@ -307,6 +312,10 @@ public class Match {
 				else {
 					if (!logout) {
 						setInProgress(false);
+						Stat s = KitAPI.getStatManager().getStat(winner.getName().toLowerCase());
+						s.increment(StatObjective.DUEL_WINS);
+						Stat ls = KitAPI.getStatManager().getStat(loserName.toLowerCase());
+						ls.increment(StatObjective.DUEL_LOSSES);
 						KitAPI.getArenaManager().unregisterArena(arena);
 						KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
 						KitAPI.getBossBarManager().unregisterPlayer(winner);
@@ -327,6 +336,7 @@ public class Match {
 				}
 			}
 		}, 60L);
+		Debug.handleTiming(now, "finish match");
 
 	}
 
@@ -421,6 +431,7 @@ public class Match {
 	 * Starts the match
 	 */
 	public void startMatch() {
+		long now = System.currentTimeMillis();
 		KitAPI.getMatchManager().getCurrentMatches().put(victim.getName(), this);
 		KitAPI.getMatchManager().getCurrentMatches().put(challenger.getName(), this);
 		matchesDone++;
@@ -536,5 +547,6 @@ public class Match {
 		}.runTaskTimer(KitPVP.get(), 0L, 20L);
 		victim.showPlayer(challenger);
 		challenger.showPlayer(victim);
+		Debug.handleTiming(now, "Match#startMatch()");
 	}
 }

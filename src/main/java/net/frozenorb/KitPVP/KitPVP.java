@@ -11,6 +11,7 @@ import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
 import net.frozenorb.KitPVP.Minigames.KitMinigameManager;
+import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
 import net.frozenorb.Utilities.DataSystem.Regioning.RegionManager;
@@ -22,6 +23,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.mongodb.BasicDBObject;
 
 public class KitPVP extends JavaPlugin {
 	private ReflectionManager reflectionManager;
@@ -156,7 +159,16 @@ public class KitPVP extends JavaPlugin {
 	}
 
 	/*
-	 * ------------KIT REGISTRATION----------
+	 * --------------DEBUG------------
 	 */
+	public static void main(String[] args) {
+		for (int i = 0; i < 7000; i++) {
+			KitAPI.getPlayerManager().registerProfile(i + "player" + (i * 2), new GamerProfile(new BasicDBObject("test", true), i + "player" + (i * 2)));
+		}
+		long t = System.currentTimeMillis();
+		GamerProfile profile = KitAPI.getPlayerManager().getProfile("10player20");
+		profile.isObject("test");
+		System.out.println("profile loading took " + (System.currentTimeMillis() - t) + "ms");
+	}
 
 }

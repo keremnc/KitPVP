@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.Commands.Debug;
 import net.frozenorb.KitPVP.InventorySystem.Inventories.MatchTypeInventory;
 import net.frozenorb.KitPVP.InventorySystem.Inventories.RequestInventory;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
@@ -203,6 +204,7 @@ public class MatchManager {
 	}
 
 	public void addToQueue(MatchQueue queue) {
+		long now = System.currentTimeMillis();
 		String requester = queue.getPlayer().getName();
 		if (queue.getQueueType() == QueueType.QUICK) {
 			if (findQuickUnrankedMatch(requester) != null) {
@@ -241,9 +243,12 @@ public class MatchManager {
 			}
 
 		}
+		Debug.handleTiming(now, "addtoQueue");
+
 	}
 
 	public void matchFound(Player p1, Player p2, Loadout loadout, final MatchQueue type, boolean create) {
+		long now = System.currentTimeMillis();
 		int p1Elo = KitAPI.getEloManager().getElo(p1.getName());
 		int p2Elo = KitAPI.getEloManager().getElo(p2.getName());
 		String p1color = KitAPI.getEloManager().getColor(p1Elo, p2Elo);
@@ -267,6 +272,7 @@ public class MatchManager {
 				}
 			};
 
+		Debug.handleTiming(now, "matchfound");
 	}
 
 	public MatchQueue getFirstRanked(Loadout type, String requester) {
@@ -318,6 +324,8 @@ public class MatchManager {
 	}
 
 	public void handleInteract(final Player p, final Material m, final int data, final ItemStack item) {
+		long now = System.currentTimeMillis();
+
 		GamerProfile profile = KitAPI.getPlayerManager().getProfile(p.getName());
 		if (m == QUICK_MATCHUP_ITEM) {
 			if (item == null)
@@ -389,6 +397,7 @@ public class MatchManager {
 			new MatchTypeInventory(p, UNRANKED_MATCHUP_TITLE, QueueType.UNRANKED).loadTypes().openInventory();
 
 		}
+		Debug.handleTiming(now, "handle interact");
 
 	}
 
@@ -461,6 +470,7 @@ public class MatchManager {
 
 		@EventHandler
 		public void onPlayerInteract(PlayerInteractEvent e) {
+			long now = System.currentTimeMillis();
 			final Player p = e.getPlayer();
 			if (p.getItemInHand() != null) {
 				if (p.getItemInHand().getType() == Material.MUSHROOM_SOUP)
@@ -520,6 +530,8 @@ public class MatchManager {
 					}
 				}
 			}
+			Debug.handleTiming(now, "matchmanager interact");
+
 		}
 
 		@EventHandler
@@ -587,6 +599,8 @@ public class MatchManager {
 
 		@EventHandler(priority = EventPriority.HIGHEST)
 		public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
+			long now = System.currentTimeMillis();
+
 			if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
 				Location loc = e.getEntity().getLocation();
 				Player damager = (Player) e.getDamager();
@@ -624,21 +638,15 @@ public class MatchManager {
 				}
 
 			}
+			Debug.handleTiming(now, "matchmanager entity damage");
+
 		}
 
 		@EventHandler
 		public void onPlayerQuit(PlayerQuitEvent e) {
+			long now = System.currentTimeMillis();
+
 			Player p = e.getPlayer();
-			for (Entry<String, String> entry : matchRequestsInProgress.entrySet()) {
-				if (entry.getValue().equals(p.getName())) {
-					Player clicker = Bukkit.getPlayerExact(entry.getKey());
-					if (p != null) {
-						clicker.sendMessage(ChatColor.RED + "That player has logged off.");
-						clicker.closeInventory();
-						matchRequestsInProgress.remove(clicker.getName());
-					}
-				}
-			}
 			if (p.getInventory().first(Material.INK_SACK) != -1)
 				p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
 			if (isInMatch(p.getName())) {
@@ -649,24 +657,20 @@ public class MatchManager {
 			}
 			matches.remove(p.getName());
 			currentMatches.remove(p.getName());
-			for (Player pl : Bukkit.getOnlinePlayers())
-				if (RequestInventory.invs.containsKey(pl.getName()))
-					RequestInventory.invs.get(pl.getName()).update();
+			for (String name : RequestInventory.invs.keySet()) {
+				Player pl = Bukkit.getPlayerExact(name);
+				if (pl != null)
+					if (RequestInventory.invs.containsKey(pl.getName()))
+						RequestInventory.invs.get(pl.getName()).update();
+			}
+			Debug.handleTiming(now, "matchmanager quit");
+
 		}
 
 		@EventHandler
 		public void onPlayerQuit(PlayerKickEvent e) {
+			long now = System.currentTimeMillis();
 			Player p = e.getPlayer();
-			for (Entry<String, String> entry : matchRequestsInProgress.entrySet()) {
-				if (entry.getValue().equals(p.getName())) {
-					Player clicker = Bukkit.getPlayerExact(entry.getKey());
-					if (p != null) {
-						clicker.sendMessage(ChatColor.RED + "That player has logged off.");
-						clicker.closeInventory();
-						matchRequestsInProgress.remove(clicker.getName());
-					}
-				}
-			}
 			if (p.getInventory().first(Material.INK_SACK) != -1)
 				p.getInventory().getItem(p.getInventory().first(Material.INK_SACK)).setDurability((short) 8);
 			if (isInMatch(p.getName())) {
@@ -677,14 +681,19 @@ public class MatchManager {
 			}
 			matches.remove(p.getName());
 			currentMatches.remove(p.getName());
-			for (Player pl : Bukkit.getOnlinePlayers())
-				if (RequestInventory.invs.containsKey(pl.getName()))
-					RequestInventory.invs.get(pl.getName()).update();
+			for (String name : RequestInventory.invs.keySet()) {
+				Player pl = Bukkit.getPlayerExact(name);
+				if (pl != null)
+					if (RequestInventory.invs.containsKey(pl.getName()))
+						RequestInventory.invs.get(pl.getName()).update();
+			}
+			Debug.handleTiming(now, "matchmanager kick");
 
 		}
 
 		@EventHandler(priority = EventPriority.LOWEST)
 		public void onPlayerDeath(PlayerDeathEvent e) {
+			long now = System.currentTimeMillis();
 			final Player p = e.getEntity();
 			if (isInMatch(p.getName())) {
 				Match m = currentMatches.get(p.getName());
@@ -702,6 +711,8 @@ public class MatchManager {
 					}
 				}
 			}
+			Debug.handleTiming(now, "matchmanager death");
+
 		}
 
 	}

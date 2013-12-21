@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.frozenorb.KitPVP.API.KitAPI;
+import net.frozenorb.KitPVP.Commands.Debug;
 import net.minecraft.server.v1_7_R1.EntityPlayer;
 import net.minecraft.server.v1_7_R1.EntityTracker;
 import net.minecraft.server.v1_7_R1.EntityTrackerEntry;
@@ -26,7 +27,8 @@ public class TeleportListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if (event.getTo().distance(event.getFrom()) > 50D) {
+		long now = System.currentTimeMillis();
+		if (event.getTo().distance(event.getFrom()) > 75) {
 			final Player player = event.getPlayer();
 			if (KitAPI.getMatchManager().isInMatch(player.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(player.getName()).isInProgress()) {
 				final int visibleDistance = Bukkit.getViewDistance() * 16;
@@ -40,6 +42,8 @@ public class TeleportListener implements Listener {
 				}, TELEPORT_FIX_DELAY);
 			}
 		}
+		Debug.handleTiming(now, "teleport fix");
+
 	}
 
 	public void updateEntities(List<Player> observers) {

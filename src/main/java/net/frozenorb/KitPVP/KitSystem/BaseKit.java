@@ -2,6 +2,7 @@ package net.frozenorb.KitPVP.KitSystem;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
+import net.frozenorb.KitPVP.Commands.Debug;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.RegionSysten.RegionMeta;
 import net.frozenorb.Utilities.Core;
@@ -12,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 
 /**
@@ -79,8 +81,9 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	@Override
 	public void applyKit(Player p) {
 		Core.get().clearPlayer(p);
-		p.getInventory().setArmorContents(transformInventory(p.getInventory()).getArmorContents());
-		p.getInventory().setContents(transformInventory(p.getInventory()).getContents());
+		PlayerInventory inv = transformInventory(p.getInventory());
+		p.getInventory().setArmorContents(inv.getArmorContents());
+		p.getInventory().setContents(inv.getContents());
 		for (int i = 1; i < 36; i += 1)
 			p.getInventory().addItem(new ItemStack(Material.MUSHROOM_SOUP));
 		for (PotionEffect pot : getPotionEffects()) {
@@ -161,8 +164,9 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 
 	@Override
 	public final void syncExecute() {
+		long now = System.currentTimeMillis();
 		commandRun((Player) sender);
-
+		Debug.handleTiming(now, "kit equip: " + getName() + "(" + getId() + ")");
 	}
 
 	@Override

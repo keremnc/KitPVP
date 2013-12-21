@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.frozenorb.KitPVP.KitPVP;
+import net.frozenorb.KitPVP.Commands.Debug;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -27,6 +28,7 @@ public abstract class BaseCommand implements CommandExecutor, TabExecutor {
 
 	@Override
 	public boolean onCommand(final CommandSender arg0, final Command arg1, final String arg2, final String[] arg3) {
+		long now = System.currentTimeMillis();
 		this.sender = arg0;
 		this.cmd = arg1;
 		this.args = arg3;
@@ -48,6 +50,8 @@ public abstract class BaseCommand implements CommandExecutor, TabExecutor {
 
 			}
 		});
+		Debug.handleTiming(now, getCommandName());
+
 		return false;
 	}
 

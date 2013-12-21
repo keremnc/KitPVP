@@ -8,7 +8,7 @@ import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
-import net.frozenorb.KitPVP.Commands.Load;
+import net.frozenorb.KitPVP.Commands.Debug;
 import net.frozenorb.KitPVP.Events.PlayerKitSelectEvent;
 import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
@@ -17,8 +17,10 @@ import net.frozenorb.KitPVP.MatchSystem.MatchFinishReason;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.PlayerSystem.PlayerManager;
 import net.frozenorb.KitPVP.RegionSysten.Region;
+import net.frozenorb.KitPVP.Server.ServerManager;
 import net.frozenorb.KitPVP.StatSystem.PlayerData;
 import net.frozenorb.KitPVP.StatSystem.Stat;
+import net.frozenorb.KitPVP.StatSystem.StatManager;
 import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
 import net.frozenorb.KitPVP.Types.CombatLogRunnable;
@@ -53,7 +55,6 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -126,27 +127,22 @@ public class PlayerListener extends ListenerBase {
 	}
 
 	@EventHandler
-	public void onPlayerLoginEvent(PlayerLoginEvent e) {
-		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
-	}
-
-	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
+		PlayerManager pManager = KitAPI.getPlayerManager();
+		ServerManager sManager = KitAPI.getServerManager();
+		StatManager statManager = KitAPI.getStatManager();
 		e.setJoinMessage(null);
-		KitAPI.getPlayerManager().giveSpawnProtection(e.getPlayer());
-		e.getPlayer().teleport(KitAPI.getServerManager().getSpawn());
-		KitAPI.getPlayerManager().registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
-		if (KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()) == null) {
-			KitAPI.getStatManager().setPlayerData(e.getPlayer().getName().toLowerCase(), new PlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
+		pManager.registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
+		pManager.giveSpawnProtection(e.getPlayer());
+		e.getPlayer().teleport(sManager.getSpawn());
+		pManager.registerProfile(e.getPlayer().getName().toLowerCase(), new GamerProfile(new BasicDBObject(), e.getPlayer().getName()));
+		if (statManager.getPlayerData(e.getPlayer().getName()) == null) {
+			statManager.setPlayerData(e.getPlayer().getName().toLowerCase(), new PlayerData(e.getPlayer().getName().toLowerCase(), new BasicDBObject("elo", EloManager.STARTING_ELO).append("kitData", new PlayerKitData())));
 		}
 		KitAPI.getStatManager().loadStats(e.getPlayer().getName());
-		if (Load.RATINGS.containsKey(e.getPlayer().getName().toLowerCase())) {
-			KitAPI.getEloManager().setElo(e.getPlayer().getName(), Load.RATINGS.get(e.getPlayer().getName().toLowerCase()));
-			Load.RATINGS.remove(e.getPlayer().getName().toLowerCase());
-		}
 		KitAPI.getScoreboardManager().loadScoreboard(e.getPlayer());
-		if (KitAPI.getPlayerManager().isInventoryEmpty(e.getPlayer())) {
-			KitAPI.getServerManager().addSpawnItems(e.getPlayer());
+		if (pManager.isInventoryEmpty(e.getPlayer())) {
+			sManager.addSpawnItems(e.getPlayer());
 		}
 
 	}
@@ -161,15 +157,17 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
+		long now = System.currentTimeMillis();
 		Player p = e.getPlayer();
 		KitAPI.getBossBarManager().unregisterPlayer(p);
-		if (this.combatLogRunnables.containsKey(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
-			if (KitAPI.getMatchManager().isInMatch(p.getName())) {
-				Match m = KitAPI.getMatchManager().getCurrentMatches().get(p.getName());
-				if (m.isInProgress()) {
-					m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
-				}
+		if (KitAPI.getMatchManager().isInMatch(p.getName())) {
+			Match m = KitAPI.getMatchManager().getCurrentMatches().get(p.getName());
+			if (m.isInProgress()) {
+				m.finish(p, p.getName(), MatchFinishReason.PLAYER_LOGOUT);
 			}
+		}
+		if (this.combatLogRunnables.containsKey(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
+
 			p.setHealth(0.0D);
 
 		}
@@ -185,6 +183,7 @@ public class PlayerListener extends ListenerBase {
 			KitAPI.getStatManager().getPlayerData(e.getPlayer().getName()).save();
 		}
 		KitAPI.getStatManager().getStat(e.getPlayer().getName()).saveStat();
+		Debug.handleTiming(now, "playerlistener quit");
 	}
 
 	@EventHandler
@@ -197,8 +196,9 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler
 	public void onPlayerTrampleCrop(PlayerInteractEvent e) {
-		if (e.getAction() == Action.PHYSICAL && e.getClickedBlock().getType() == Material.SOIL)
-			e.setCancelled(true);
+		if (e.getAction() == Action.PHYSICAL)
+			if (e.getClickedBlock().getType() == Material.SOIL)
+				e.setCancelled(true);
 	}
 
 	@EventHandler
@@ -214,6 +214,7 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerDeath(final PlayerDeathEvent e) {
+		long now = System.currentTimeMillis();
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
 		if (ArcadeAPI.get().getMinigameManager().isGameInProgress() && ArcadeAPI.get().getMinigameManager().getCurrentMinigame().getPlayers().contains(e.getEntity().getName())) {
@@ -246,15 +247,6 @@ public class PlayerListener extends ListenerBase {
 				}
 			}, 5L);
 		} else {
-			/*
-			 * final ArrayList<Item> items = new ArrayList<Item>();
-			 * 
-			 * for (ItemStack item : e.getDrops()) { final Item ite = e.getEntity().getLocation().getWorld().dropItemNaturally(e.getEntity().getLocation(), item); items.add(ite); } final Iterator<Item> drops = items.iterator(); final AtomicInteger times = new AtomicInteger(0); while (drops.hasNext()) { final Item ite = drops.next(); drops.remove(); times.set(times.get() + 1); Bukkit.getScheduler().runTaskLater(KitAPI.getKitPVP(), new Runnable() {
-			 * 
-			 * @Override public void run() { if (ite.isValid() && !ite.isDead()) { ite.remove(); } } }, 20 + times.get());
-			 * 
-			 * }
-			 */
 			e.getDrops().clear();
 		}
 		final Player p = e.getEntity();
@@ -312,6 +304,8 @@ public class PlayerListener extends ListenerBase {
 				p.sendMessage(ChatColor.AQUA + "You were killed by " + ChatColor.YELLOW + killer.getName() + ChatColor.AQUA + " who had §e" + KitAPI.getServerManager().getSoupsInHotbar(killer) + " soups§b and §e" + KitAPI.getServerManager().getHearts(killer) + "§b hearts left.");
 			}
 		}
+		Debug.handleTiming(now, "player death");
+
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -458,6 +452,7 @@ public class PlayerListener extends ListenerBase {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent e) {
+		long now = System.currentTimeMillis();
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			double h = ((Damageable) e.getPlayer()).getHealth();
 			if (e.getPlayer().getItemInHand().getType() == Material.MUSHROOM_SOUP && h < 20D) {
@@ -501,6 +496,8 @@ public class PlayerListener extends ListenerBase {
 			}
 
 		}
+		Debug.handleTiming(now, "soup eaten");
+
 	}
 
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)

@@ -17,8 +17,11 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
@@ -104,7 +107,7 @@ public class KitManager {
 		if (hasKitOn(str)) {
 			return playerKits.get(str);
 		}
-		return null;
+		return KitFactory.createKit("null", "null", "null", new ItemStack[] {}, new ItemStack[] {}, new PotionEffect[] {}, Material.BEDROCK);
 	}
 
 	public boolean hasKitOn(String str) {

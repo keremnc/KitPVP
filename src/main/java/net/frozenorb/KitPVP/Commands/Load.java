@@ -1,7 +1,6 @@
 package net.frozenorb.KitPVP.Commands;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.bukkit.ChatColor;
@@ -10,17 +9,13 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONParseException;
 
-import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.CommandSystem.Subcommand;
-import net.frozenorb.KitPVP.StatSystem.PlayerData;
-import net.frozenorb.KitPVP.StatSystem.StatObjective;
 import net.frozenorb.Utilities.Core;
 import net.frozenorb.mBasic.Basic;
 import net.minecraft.util.com.google.common.io.Files;
 
 public class Load extends BaseCommand {
-	public static HashMap<String, Integer> RATINGS = new HashMap<String, Integer>();
 
 	public Load() {
 		registerSubcommand(new Subcommand("balances", new String[] { "money", "bal" }) {
@@ -42,20 +37,6 @@ public class Load extends BaseCommand {
 				} catch (JSONParseException ex) {
 					sender.sendMessage("§cError, file does not contain valid JSON!");
 				}
-			}
-		});
-		registerSubcommand(new Subcommand("elo") {
-
-			@Override
-			protected void syncExecute() {
-
-				sender.sendMessage(ChatColor.RED + "Loading all ratings...");
-
-				for (PlayerData lpd : KitAPI.getStatManager().getAllPlayerData()) {
-					RATINGS.put(lpd.getName(), lpd.get(StatObjective.ELO));
-				}
-				sender.sendMessage(ChatColor.RED + "Ratings loaded!");
-
 			}
 		});
 		registerSubcommandsToTabCompletions();
