@@ -57,8 +57,8 @@ public class EloManager {
 	 * @return elo
 	 */
 	public int getElo(String name) {
-		if (KitAPI.getStatManager().getStat(name.toLowerCase()) != null)
-			return KitAPI.getStatManager().getStat(name.toLowerCase()).get(StatObjective.ELO);
+		if (KitAPI.getStatManager().getStat(name) != null)
+			return KitAPI.getStatManager().getStat(name).get(StatObjective.ELO);
 		return STARTING_ELO;
 	}
 
@@ -71,8 +71,8 @@ public class EloManager {
 	 *            elo to set to
 	 */
 	public void setElo(String name, int elo) {
-		if (KitAPI.getStatManager().getStat(name.toLowerCase()) != null)
-			KitAPI.getStatManager().getStat(name.toLowerCase()).set(StatObjective.ELO, elo);
+		if (KitAPI.getStatManager().getStat(name) != null)
+			KitAPI.getStatManager().getStat(name).set(StatObjective.ELO, elo);
 		else
 			KitAPI.getStatManager().loadStats(name);
 	}

@@ -153,7 +153,7 @@ public class KitPVP extends JavaPlugin {
 				e.remove();
 		}
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			KitAPI.getStatManager().getPlayerData(p.getName().toLowerCase()).saveSync();
+			KitAPI.getStatManager().getPlayerData(p.getName()).saveSync();
 			KitAPI.getStatManager().getStat(p.getName()).saveStat();
 		}
 	}
