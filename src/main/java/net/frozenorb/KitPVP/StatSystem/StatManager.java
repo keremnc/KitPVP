@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -26,7 +25,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 
 public class StatManager {
-	private ConcurrentHashMap<String, Stat> stats = new ConcurrentHashMap<String, Stat>();
+	private HashMap<String, Stat> stats = new HashMap<String, Stat>();
 	private HashMap<String, PlayerData> playerData = new HashMap<String, PlayerData>();
 
 	/**
@@ -37,10 +36,7 @@ public class StatManager {
 	 * @return the Stat object
 	 */
 	public Stat getStat(String name) {
-		if (stats.containsKey(name.toLowerCase())) {
-			return stats.get(name.toLowerCase());
-		}
-		return null;
+		return stats.get(name.toLowerCase());
 	}
 
 	/**
@@ -64,9 +60,7 @@ public class StatManager {
 	 * @return local data
 	 */
 	public PlayerData getPlayerData(String name) {
-		if (playerData.containsKey(name.toLowerCase()))
-			return playerData.get(name.toLowerCase());
-		return null;
+		return playerData.get(name.toLowerCase());
 	}
 
 	/**
@@ -149,11 +143,14 @@ public class StatManager {
 
 	/**
 	 * Loads the stats of the name
+	 * <p>
+	 * Loads stats in a new thread
 	 * 
 	 * @param name
 	 *            the name of the player
 	 */
 	public void loadStats(final String name) {
+		final String n = name.toLowerCase();
 		PlayerProfile pp = Shared.get().getProfileManager().getProfile(name);
 		if (pp != null) {
 			BasicDBObject object = pp.getJson();
@@ -161,7 +158,7 @@ public class StatManager {
 			if (((BasicDBObject) (object.get("user"))).containsField("stats")) {
 				stat = new Stat(((BasicDBObject) (object.get("user"))).getString("name"), (BasicDBObject) ((BasicDBObject) (object.get("user"))).get("stats"));
 			}
-			stats.put(name.toLowerCase(), stat);
+			stats.put(n, stat);
 		} else {
 			Bukkit.getScheduler().runTaskAsynchronously(KitAPI.getKitPVP(), new Runnable() {
 
@@ -169,12 +166,32 @@ public class StatManager {
 				public void run() {
 					BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
 					if (db != null)
-						stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
+						stats.put(n, new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
 					else
-						stats.put(name.toLowerCase(), null);
+						stats.put(n, null);
 				}
 			});
 		}
+	}
+
+	public void loadStatsSync(final String name) {
+		String n = name.toLowerCase();
+		PlayerProfile pp = Shared.get().getProfileManager().getProfile(name);
+		if (pp != null) {
+			BasicDBObject object = pp.getJson();
+			Stat stat = new Stat(((BasicDBObject) (object.get("user"))).getString("name"), new BasicDBObject());
+			if (((BasicDBObject) (object.get("user"))).containsField("stats")) {
+				stat = new Stat(((BasicDBObject) (object.get("user"))).getString("name"), (BasicDBObject) ((BasicDBObject) (object.get("user"))).get("stats"));
+			}
+			stats.put(n, stat);
+		} else {
+			BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
+			if (db != null)
+				stats.put(n, new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
+			else
+				stats.put(n, null);
+		}
+
 	}
 
 	/**

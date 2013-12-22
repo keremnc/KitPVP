@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.frozenorb.KitPVP.KitPVP;
@@ -55,28 +54,6 @@ public class Stats extends BaseCommand {
 		return results;
 	}
 
-	public void getStatsAsync(final CommandSender sender, final String[] args, final String name) {
-		while (KitAPI.getStatManager().getStat(name) == null)
-			if (KitAPI.getStatManager().exists(name)) {
-				if (KitAPI.getStatManager().getStat(name) == null) {
-					sender.sendMessage(ChatColor.RED + "Player '" + name + "' not found.");
-					return;
-				}
-			}
-		Stat st = KitAPI.getStatManager().getStat(name);
-		String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);
-		String kills = String.format("§6Kills:§f %s", st.get(StatObjective.KILLS));
-		String deaths = String.format("§6Deaths:§f %s", st.get(StatObjective.DEATHS));
-		String kd = String.format("§6KD:§f %s", st.getDouble(StatObjective.KD_RATIO));
-		String cks = String.format("§6Current Killstreak:§f %s", st.get(StatObjective.KILLSTREAK));
-		String tks = String.format("§6Highest Killstreak:§f %s", st.get(StatObjective.HIGHEST_KILLSTREAK));
-		String wins = String.format("§61v1 Wins:§f %s", st.get(StatObjective.DUEL_WINS));
-		String losses = String.format("§61v1 Losses:§f %s", st.get(StatObjective.DUEL_LOSSES));
-		String elo = String.format("§6Rating:§f %s", KitAPI.getEloManager().getElo(name.toLowerCase()));
-		sender.sendMessage(new String[] { GRAY_HEADER, header, GRAY_HEADER, kills, deaths, kd, cks, tks, wins, losses, elo, GRAY_HEADER });
-
-	}
-
 	@Override
 	public void syncExecute() {
 		String player = sender.getName();
@@ -101,17 +78,29 @@ public class Stats extends BaseCommand {
 		}
 		Stat s = KitAPI.getStatManager().getStat(player);
 		if (s == null) {
-			KitAPI.getStatManager().loadStats(player);
-			s = KitAPI.getStatManager().getStat(player);
-		}
-		final String name = player;
-		if (s == null) {
+			final String name = player;
 			Bukkit.getScheduler().runTaskAsynchronously(KitPVP.get(), new Runnable() {
 				public void run() {
-					getStatsAsync(sender, args, name);
+					KitAPI.getStatManager().loadStatsSync(name);
+					Stat st = KitAPI.getStatManager().getStat(name);
+					if (st == null) {
+						sender.sendMessage(String.format("§6Cannot show stats for §f'%s'§6, player does not exist..", name));
+					} else {
+						String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);
+						String kills = String.format("§6Kills:§f %s", st.get(StatObjective.KILLS));
+						String deaths = String.format("§6Deaths:§f %s", st.get(StatObjective.DEATHS));
+						String kd = String.format("§6KD:§f %s", st.getDouble(StatObjective.KD_RATIO));
+						String cks = String.format("§6Current Killstreak:§f %s", st.get(StatObjective.KILLSTREAK));
+						String tks = String.format("§6Highest Killstreak:§f %s", st.get(StatObjective.HIGHEST_KILLSTREAK));
+						String wins = String.format("§61v1 Wins:§f %s", st.get(StatObjective.DUEL_WINS));
+						String losses = String.format("§61v1 Losses:§f %s", st.get(StatObjective.DUEL_LOSSES));
+						String elo = String.format("§6Rating:§f %s", KitAPI.getEloManager().getElo(name.toLowerCase()));
+						sender.sendMessage(new String[] { GRAY_HEADER, header, GRAY_HEADER, kills, deaths, kd, cks, tks, wins, losses, elo, GRAY_HEADER });
+					}
 				}
 			});
 			return;
+
 		} else {
 
 			s = KitAPI.getStatManager().getStat(player);
