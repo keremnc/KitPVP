@@ -8,7 +8,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -26,7 +28,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 
 public class StatManager {
-	private ConcurrentHashMap<String, Stat> stats = new ConcurrentHashMap<String, Stat>();
+	private Map<String, Stat> stats = new HashMap<String, Stat>();
+	private ReadWriteLock statsLock = new ReentrantReadWriteLock();
 	private HashMap<String, PlayerData> playerData = new HashMap<String, PlayerData>();
 
 	/**
@@ -37,10 +40,12 @@ public class StatManager {
 	 * @return the Stat object
 	 */
 	public Stat getStat(String name) {
-		if (stats.containsKey(name.toLowerCase())) {
+		statsLock.readLock().lock();
+		try {
 			return stats.get(name.toLowerCase());
+		} finally {
+			statsLock.readLock().unlock();
 		}
-		return null;
 	}
 
 	/**
@@ -53,7 +58,12 @@ public class StatManager {
 	 * @return if it exists as a key or not
 	 */
 	public boolean exists(String name) {
-		return stats.containsKey(name.toLowerCase());
+		statsLock.readLock().lock();
+		try {
+			return stats.containsKey(name.toLowerCase());
+		} finally {
+			statsLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -161,17 +171,26 @@ public class StatManager {
 			if (((BasicDBObject) (object.get("user"))).containsField("stats")) {
 				stat = new Stat(((BasicDBObject) (object.get("user"))).getString("name"), (BasicDBObject) ((BasicDBObject) (object.get("user"))).get("stats"));
 			}
-			stats.put(name.toLowerCase(), stat);
+			statsLock.writeLock().lock();
+			try {
+				stats.put(name.toLowerCase(), stat);
+			} finally {
+				statsLock.writeLock().unlock();
+			}
 		} else {
 			Bukkit.getScheduler().runTaskAsynchronously(KitAPI.getKitPVP(), new Runnable() {
 
 				@Override
 				public void run() {
 					BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
-					if (db != null)
-						stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
-					else
-						stats.put(name.toLowerCase(), null);
+					if (db != null) {
+						statsLock.writeLock().lock();
+						try {
+							stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
+						} finally {
+							statsLock.writeLock().unlock();
+						}
+					}
 				}
 			});
 		}
