@@ -196,6 +196,34 @@ public class StatManager {
 		}
 	}
 
+	public void loadStatsSync(final String name) {
+		PlayerProfile pp = Shared.get().getProfileManager().getProfile(name);
+		if (pp != null) {
+			BasicDBObject object = pp.getJson();
+			Stat stat = new Stat(((BasicDBObject) (object.get("user"))).getString("name"), new BasicDBObject());
+			if (((BasicDBObject) (object.get("user"))).containsField("stats")) {
+				stat = new Stat(((BasicDBObject) (object.get("user"))).getString("name"), (BasicDBObject) ((BasicDBObject) (object.get("user"))).get("stats"));
+			}
+			statsLock.writeLock().lock();
+			try {
+				stats.put(name.toLowerCase(), stat);
+			} finally {
+				statsLock.writeLock().unlock();
+			}
+		} else {
+			BasicDBObject db = Shared.get().getProfileManager().getOfflinePlayerProfile(name);
+			if (db != null) {
+				statsLock.writeLock().lock();
+				try {
+					stats.put(name.toLowerCase(), new Stat(db.getString("name"), (BasicDBObject) db.get("stats")));
+				} finally {
+					statsLock.writeLock().unlock();
+				}
+			}
+		}
+
+	}
+
 	/**
 	 * Checks if the player is in a kill combo
 	 * 
