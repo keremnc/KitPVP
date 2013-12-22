@@ -121,8 +121,7 @@ public class CommandManager {
 				List<String> list = Arrays.asList((String[]) field.get(exc));
 				command.setAliases(list);
 			}
-		} catch (Exception ex) {
-		}
+		} catch (Exception ex) {}
 		if (exc instanceof BaseCommand)
 			command.getAliases().addAll(Arrays.asList(((BaseCommand) exc).getAliases()));
 		if (command.getAliases() != null) {
@@ -133,8 +132,7 @@ public class CommandManager {
 			Field field = exc.getClass().getDeclaredField("description");
 			if (field != null && field.get(exc) instanceof String)
 				command.setDescription(ChatColor.translateAlternateColorCodes('&', (String) field.get(exc)));
-		} catch (Exception ex) {
-		}
+		} catch (Exception ex) {}
 		KitPVP.get().getReflectionManager().getCommandMap().register(name, command);
 	}
 
@@ -149,8 +147,6 @@ public class CommandManager {
 			Set<String> aliases = (Set<String>) alias.get(KitPVP.get().getReflectionManager().getCommandMap());
 			knownCommands.remove(name.toLowerCase());
 			aliases.remove(name.toLowerCase());
-		} catch (Exception ex) {
-
-		}
+		} catch (Exception ex) {}
 	}
 }

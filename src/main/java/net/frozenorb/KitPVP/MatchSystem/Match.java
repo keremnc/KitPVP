@@ -233,6 +233,8 @@ public class Match {
 			s.increment(StatObjective.DUEL_WINS);
 			Stat ls = KitAPI.getStatManager().getStat(loserName.toLowerCase());
 			ls.increment(StatObjective.DUEL_LOSSES);
+			victim = null;
+			challenger = null;
 		}
 
 		if (isRanked()) {
@@ -332,6 +334,8 @@ public class Match {
 						KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
 						BasicDBObject dbObject = constructObject(winner);
 						Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
+						victim = null;
+						challenger = null;
 					}
 				}
 			}

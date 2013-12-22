@@ -59,7 +59,7 @@ public class ScoreboardManager {
 		Score credits = o.getScore(generateName("§6Credits"));
 		credits.setScore((int) Basic.get().getEconomyManager().getBalance(p.getName()));
 		Score rating = o.getScore(generateName("§6Rating"));
-		rating.setScore(KitAPI.getEloManager().getElo(p.getName().toLowerCase()));
+		rating.setScore(s == null ? -1 : KitAPI.getEloManager().getElo(p.getName().toLowerCase()));
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class ScoreboardManager {
 		Score credits = o.getScore(generateName("§6Credits"));
 		credits.setScore((int) Basic.get().getEconomyManager().getBalance(player.getName()));
 		Score rating = o.getScore(generateName("§6Rating"));
-		rating.setScore(KitAPI.getEloManager().getElo(player.getName().toLowerCase()));
+		rating.setScore(s == null ? -1 : KitAPI.getEloManager().getElo(player.getName().toLowerCase()));
 		player.setScoreboard(sb);
 	}
 }

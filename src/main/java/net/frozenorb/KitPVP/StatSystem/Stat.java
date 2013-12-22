@@ -53,6 +53,7 @@ public class Stat {
 		if (Bukkit.getPlayerExact(playerName) != null) {
 			KitAPI.getScoreboardManager().updateScoreboard(Bukkit.getPlayerExact(playerName));
 		}
+		saveStat();
 	}
 
 	/**
@@ -99,6 +100,7 @@ public class Stat {
 		if (Bukkit.getPlayerExact(playerName) != null) {
 			KitAPI.getScoreboardManager().updateScoreboard(Bukkit.getPlayerExact(playerName));
 		}
+		saveStat();
 	}
 
 	/**
