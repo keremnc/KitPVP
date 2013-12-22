@@ -229,9 +229,9 @@ public class Match {
 			KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
 			BasicDBObject dbObject = constructObject(winner);
 			Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
-			Stat s = KitAPI.getStatManager().getStat(winner.getName().toLowerCase());
+			Stat s = KitAPI.getStatManager().getStat(winner.getName());
 			s.increment(StatObjective.DUEL_WINS);
-			Stat ls = KitAPI.getStatManager().getStat(loserName.toLowerCase());
+			Stat ls = KitAPI.getStatManager().getStat(loserName);
 			ls.increment(StatObjective.DUEL_LOSSES);
 			victim = null;
 			challenger = null;
@@ -314,9 +314,9 @@ public class Match {
 				else {
 					if (!logout) {
 						setInProgress(false);
-						Stat s = KitAPI.getStatManager().getStat(winner.getName().toLowerCase());
+						Stat s = KitAPI.getStatManager().getStat(winner.getName());
 						s.increment(StatObjective.DUEL_WINS);
-						Stat ls = KitAPI.getStatManager().getStat(loserName.toLowerCase());
+						Stat ls = KitAPI.getStatManager().getStat(loserName);
 						ls.increment(StatObjective.DUEL_LOSSES);
 						KitAPI.getArenaManager().unregisterArena(arena);
 						KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
