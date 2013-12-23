@@ -191,7 +191,7 @@ public class Match {
 		long now = System.currentTimeMillis();
 		final Player winner = getOpponent(loserName);
 		loser.setHealth(20D);
-		final boolean logout = reason == MatchFinishReason.PLAYER_LOGOUT;
+		final boolean logout = (reason == MatchFinishReason.PLAYER_LOGOUT);
 		wins.put(winner.getName(), wins.get(winner.getName()) + 1);
 		if (getFirstTo() > 1 && !logout) {
 			KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
@@ -218,7 +218,7 @@ public class Match {
 			loser.sendMessage(winner.getDisplayName() + " §6had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
 			winner.sendMessage(ChatColor.GOLD + "You have killed §e" + loser.getDisplayName() + "§6 in a match. You had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
 			winner.sendMessage(loser.getDisplayName() + "§6 had§c " + KitAPI.getServerManager().getSoupsInHotbar(loser) + "§6 " + getType().getHealType() + "s left.");
-		} else if (reason == MatchFinishReason.PLAYER_LOGOUT) {
+		} else if (logout) {
 			Core.get().clearPlayer(loser);
 			winner.sendMessage(ChatColor.GOLD + "§c" + loserName + "§6 has logged out, so you have won the match.");
 			KitAPI.getArenaManager().unregisterArena(arena);
@@ -233,8 +233,7 @@ public class Match {
 			s.increment(StatObjective.DUEL_WINS);
 			Stat ls = KitAPI.getStatManager().getStat(loserName);
 			ls.increment(StatObjective.DUEL_LOSSES);
-			victim = null;
-			challenger = null;
+
 		}
 
 		if (isRanked()) {
@@ -312,6 +311,7 @@ public class Match {
 				if (!hasFinished() && getFirstTo() > 1 && !logout)
 					startMatch();
 				else {
+
 					if (!logout) {
 						setInProgress(false);
 						Stat s = KitAPI.getStatManager().getStat(winner.getName());
@@ -334,9 +334,8 @@ public class Match {
 						KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
 						BasicDBObject dbObject = constructObject(winner);
 						Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
-						victim = null;
-						challenger = null;
 					}
+
 				}
 			}
 		}, 60L);

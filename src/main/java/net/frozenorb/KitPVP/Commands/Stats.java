@@ -84,6 +84,10 @@ public class Stats extends BaseCommand {
 				public void run() {
 					KitAPI.getStatManager().loadStatsSync(name);
 					Stat st = KitAPI.getStatManager().getStat(name);
+					if (st == null) {
+						sender.sendMessage(ChatColor.RED + "Player '" + name + "' could not be found!");
+						return;
+					}
 					String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);
 					String kills = String.format("§6Kills:§f %s", st.get(StatObjective.KILLS));
 					String deaths = String.format("§6Deaths:§f %s", st.get(StatObjective.DEATHS));
