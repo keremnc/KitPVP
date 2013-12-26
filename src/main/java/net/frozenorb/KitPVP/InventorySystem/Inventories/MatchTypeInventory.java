@@ -152,15 +152,18 @@ public class MatchTypeInventory extends PageInventory {
 
 	private ItemStack getRankedItemStack() {
 		String data = "§dThere are §eno§d players in this queue.";
+		String timeTo = "§dMatches will be selected in §e" + KitAPI.getMatchMaker().getSecondsUntilSelect() + "§d seconds.";
 		int amount = 1;
 		int fCheck = KitAPI.getMatchManager().getPlayersInQueue(QueueType.RANKED);
 		if (fCheck != 0) {
 			amount = fCheck;
 			data = "§dThere is §e" + fCheck + "§d player in this queue.";
 		}
-		ItemStack info = Core.get().generateItem(Material.MAP, 0, "§b§lQueue Data", new String[] { "", data });
+		ItemStack info = Core.get().generateItem(Material.EMPTY_MAP, 0, "§b§lQueue Data", new String[] { "", data, timeTo });
 		info.setAmount(amount);
-		return info;
+		Attributes a = new Attributes(info);
+		a.clear();
+		return a.getStack();
 	}
 
 	public static void updateAllOpenInventories() {

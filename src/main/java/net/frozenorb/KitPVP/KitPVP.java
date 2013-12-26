@@ -108,7 +108,7 @@ public class KitPVP extends JavaPlugin {
 			e.printStackTrace();
 		}
 		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getBossBarManager(), 20L, 240L);
-
+		Bukkit.getScheduler().runTaskTimer(this, KitAPI.getMatchMaker(), 20L, 20L);
 		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
 
 			@Override

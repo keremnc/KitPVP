@@ -50,7 +50,7 @@ public abstract class MatchAcceptScreen implements Listener {
 			lore.add(match.getType().getDescription());
 
 		}
-		ItemStack info = Core.get().generateItem(Material.MAP, 0, "§b§lLoadout Data", match.getMetadata(false, false));
+		ItemStack info = Core.get().generateItem(Material.EMPTY_MAP, 0, "§b§lLoadout Data", match.getMetadata(false, false));
 
 		int[] acc = new int[] { 10, 11, 19, 20 };
 		int[] dec = new int[] { 15, 16, 24, 25 };

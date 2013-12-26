@@ -6,6 +6,7 @@ import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.DataSystem.Managers.WarpDataManager;
 import net.frozenorb.KitPVP.ItemSystem.ToggleableItemManager;
 import net.frozenorb.KitPVP.KitSystem.KitManager;
+import net.frozenorb.KitPVP.MatchSystem.MatchMaker;
 import net.frozenorb.KitPVP.MatchSystem.MatchManager;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.ArenaManager;
 import net.frozenorb.KitPVP.PlayerSystem.PlayerManager;
@@ -43,6 +44,7 @@ public class KitAPI {
 	private static EloManager eloManager;
 	private static ToggleableItemManager itemManager;
 	private static BossBarManager bossBarManager;
+	private static MatchMaker matchMaker;
 
 	public static KitPVP getKitPVP() {
 		return kitpvp;
@@ -64,6 +66,12 @@ public class KitAPI {
 		if (playerManager == null)
 			playerManager = new PlayerManager();
 		return playerManager;
+	}
+
+	public static MatchMaker getMatchMaker() {
+		if (matchMaker == null)
+			matchMaker = new MatchMaker();
+		return matchMaker;
 	}
 
 	public static MatchManager getMatchManager() {
