@@ -42,4 +42,9 @@ public class Arena {
 			return ((Arena) arg0).getId() == id;
 		return super.equals(arg0);
 	}
+
+	@Override
+	public String toString() {
+		return "Arena #" + id;
+	}
 }

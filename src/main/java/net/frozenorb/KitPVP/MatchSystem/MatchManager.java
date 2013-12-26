@@ -226,12 +226,19 @@ public class MatchManager {
 				queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bRanked§e Matchup with the §b" + requested.getName() + "§e loadout.");
 			}
 		} else if (queue.getQueueType() == QueueType.UNRANKED) {
-			if (findQuickUnrankedMatch(requester) != null) {
-				MatchQueue un = findQuickUnrankedMatch(requester);
-				matches.remove(un);
-				matchFound(queue.getPlayer(), un.getPlayer(), queue.getLoadout(), queue, true);
-				return;
+			Iterator<MatchQueue> iter = matches.iterator();
+			while (iter.hasNext()) {
+				MatchQueue un = iter.next();
+				if (un.getQueueType() == QueueType.QUICK) {
+					if (!un.getPlayer().getName().equalsIgnoreCase(requester)) {
+						matchFound(queue.getPlayer(), un.getPlayer(), queue.getLoadout(), queue, true);
+						MatchTypeInventory.updateAllOpenInventories();
+						iter.remove();
+						return;
+					}
+				}
 			}
+
 			Loadout requested = queue.getLoadout();
 			if (getFirstUnranked(requested, requester) != null) {
 				MatchQueue un = getFirstUnranked(requested, requester);
@@ -243,6 +250,7 @@ public class MatchManager {
 			}
 
 		}
+		MatchTypeInventory.updateAllOpenInventories();
 		Debug.handleTiming(now, "addtoQueue");
 
 	}
@@ -262,47 +270,56 @@ public class MatchManager {
 		String[] msgp2 = { header, p2Found, lineTwo, footer };
 		p1.sendMessage(msgp1);
 		p2.sendMessage(msgp2);
-		if (create)
-			new Match(p1, p2, loadout) {
-				{
-					setRanked(type.getQueueType() == QueueType.RANKED);
-					if (isRanked())
-						setFirstTo(3);
-					startMatch();
-				}
-			};
+		if (create) {
+			Match m = new Match(p1, p2, loadout);
+			m.setRanked(type.getQueueType() == QueueType.RANKED);
+			if (m.isRanked())
+				m.setFirstTo(3);
+			m.startMatch();
 
+		}
 		Debug.handleTiming(now, "matchfound");
 	}
 
 	public MatchQueue getFirstRanked(Loadout type, String requester) {
 		for (int i = 0; i < matches.size(); i += 1) {
-			if (matches.get(i) != null)
-				if (matches.get(i).getQueueType() == QueueType.RANKED)
-					if (matches.get(i).getLoadout().getName().equals(type.getName()))
-						if (!matches.get(i).getPlayer().getName().equalsIgnoreCase(requester))
+			if (matches.get(i) != null) {
+				if (matches.get(i).getQueueType() == QueueType.RANKED) {
+					if (matches.get(i).getLoadout().getName().equals(type.getName())) {
+						if (!matches.get(i).getPlayer().getName().equalsIgnoreCase(requester)) {
 							return matches.get(i);
+						}
+					}
+				}
+			}
 		}
 		return null;
 	}
 
 	public MatchQueue findQuickUnrankedMatch(String requester) {
 		for (int i = 0; i < matches.size(); i += 1) {
-			if (matches.get(i) != null)
-				if (matches.get(i).getQueueType() != QueueType.RANKED)
-					if (!matches.get(i).getPlayer().getName().equalsIgnoreCase(requester))
+			if (matches.get(i) != null) {
+				if (matches.get(i).getQueueType() != QueueType.RANKED) {
+					if (!matches.get(i).getPlayer().getName().equalsIgnoreCase(requester)) {
 						return matches.get(i);
+					}
+				}
+			}
 		}
 		return null;
 	}
 
 	public MatchQueue getFirstUnranked(Loadout type, String requester) {
 		for (int i = 0; i < matches.size(); i += 1) {
-			if (matches.get(i) != null)
-				if (matches.get(i).getQueueType() != QueueType.RANKED)
-					if (matches.get(i).getLoadout().getName().equals(type.getName()))
-						if (!matches.get(i).getPlayer().getName().equalsIgnoreCase(requester))
+			if (matches.get(i) != null) {
+				if (matches.get(i).getQueueType() != QueueType.RANKED) {
+					if (matches.get(i).getLoadout().getName().equals(type.getName())) {
+						if (!matches.get(i).getPlayer().getName().equalsIgnoreCase(requester)) {
 							return matches.get(i);
+						}
+					}
+				}
+			}
 		}
 		return null;
 	}
@@ -316,11 +333,24 @@ public class MatchManager {
 		p.setMaxHealth(20D);
 		p.setHealth(((Damageable) p).getMaxHealth());
 		p.setFoodLevel(20);
-		p.getInventory().setItem(0, QUICK_ITEM);
+		p.getInventory().setItem(0, SELECT_ITEM);
 		p.getInventory().setItem(1, UNRANKED_ITEM);
 		p.getInventory().setItem(2, RANKED_ITEM);
-		p.getInventory().setItem(8, SELECT_ITEM);
+		p.getInventory().setItem(8, QUICK_ITEM);
 		p.updateInventory();
+	}
+
+	public int getPlayersInQueue(QueueType qType) {
+		int players = 0;
+		for (int i = 0; i < matches.size(); i += 1) {
+			if (matches.get(i) != null) {
+				if (matches.get(i).getQueueType() == qType) {
+					players++;
+				}
+			}
+		}
+		return players;
+
 	}
 
 	public void handleInteract(final Player p, final Material m, final int data, final ItemStack item) {

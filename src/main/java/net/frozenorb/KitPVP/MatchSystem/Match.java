@@ -420,6 +420,7 @@ public class Match {
 		invitedPlayer = p.getName();
 		challenger.sendMessage(ChatColor.GOLD + "You have challenged " + ChatColor.RED + "" + p.getName() + ChatColor.GOLD + " to a 1v1. Type: " + getType().getName());
 		p.sendMessage(ChatColor.GOLD + challenger.getName() + ChatColor.GOLD + " has challenged you to a 1v1! Right click them to accept. Type: " + getType().getName());
+		p.sendMessage(ChatColor.GOLD + "Left click to view all available matches.");
 		if (RequestInventory.invs.containsKey(p.getName()))
 			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
 

@@ -114,8 +114,7 @@ public abstract class Loadout {
 	 * @param loser
 	 *            the loser
 	 */
-	public void onDefeat(Player winner, Player loser) {
-	}
+	public void onDefeat(Player winner, Player loser) {}
 
 	/**
 	 * Gets the data associated with the 1v1
@@ -160,5 +159,10 @@ public abstract class Loadout {
 	 * @return weight
 	 */
 	public abstract int getWeight();
+
+	@Override
+	public String toString() {
+		return getName();
+	}
 
 }
