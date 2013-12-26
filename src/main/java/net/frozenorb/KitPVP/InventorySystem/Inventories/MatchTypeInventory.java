@@ -78,18 +78,14 @@ public class MatchTypeInventory extends PageInventory {
 
 	public MatchTypeInventory loadTypes() {
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		for (Loadout kit : maches) {
+		if (type == QueueType.RANKED) {
+			Loadout kit = Loadout.getByName("Buffed w/ Speed II");
 			ItemStack item = kit.getIcon();
 			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName((type == QueueType.RANKED ? "§a§lRanked " : "§a") + kit.getName());
+			meta.setDisplayName("§a§lRanked " + kit.getName());
 			ArrayList<String> lores = new ArrayList<String>();
 			lores.addAll(wrap(kit.getDescription()));
-			if (type == QueueType.RANKED) {
-				if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null) {
-					lores.add("");
-					lores.add("§dThere is §e1§d player in this queue.");
-				}
-			} else if (KitAPI.getMatchManager().getFirstUnranked(kit, getPlayer().getName()) != null) {
+			if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null) {
 				lores.add("");
 				lores.add("§dThere is §e1§d player in this queue.");
 			}
@@ -99,6 +95,29 @@ public class MatchTypeInventory extends PageInventory {
 			Attributes att = new Attributes(item);
 			att.clear();
 			items.add(att.getStack());
+		} else {
+			for (Loadout kit : maches) {
+				ItemStack item = kit.getIcon();
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName((type == QueueType.RANKED ? "§a§lRanked " : "§a") + kit.getName());
+				ArrayList<String> lores = new ArrayList<String>();
+				lores.addAll(wrap(kit.getDescription()));
+				if (type == QueueType.RANKED) {
+					if (KitAPI.getMatchManager().getFirstRanked(kit, getPlayer().getName()) != null) {
+						lores.add("");
+						lores.add("§dThere is §e1§d player in this queue.");
+					}
+				} else if (KitAPI.getMatchManager().getFirstUnranked(kit, getPlayer().getName()) != null) {
+					lores.add("");
+					lores.add("§dThere is §e1§d player in this queue.");
+				}
+				meta.setLore(lores);
+				item.setItemMeta(meta);
+				item.setAmount(1);
+				Attributes att = new Attributes(item);
+				att.clear();
+				items.add(att.getStack());
+			}
 		}
 		setPages(items);
 		return this;

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.KitSystem.BaseKit;
+import net.frozenorb.KitPVP.RegionSysten.Region;
 import net.frozenorb.KitPVP.Utilities.Utilities;
 import net.frozenorb.Utilities.Core;
 
@@ -34,7 +35,9 @@ public class Fisherman extends BaseKit {
 			public void onPlayerFishingEvent(PlayerFishEvent event) {
 
 				if (event.getState() == PlayerFishEvent.State.CAUGHT_ENTITY) {
-					if (!KitAPI.getPlayerManager().hasSpawnProtection((Player) event.getCaught())) {
+					if (KitAPI.getPlayerManager().hasSpawnProtection((Player) event.getCaught()) || KitAPI.getRegionChecker().isRegion(Region.SPAWN, event.getPlayer().getLocation())) {
+						event.getPlayer().sendMessage(ChatColor.RED + "You can't use this here.");
+					} else {
 						if (KitAPI.getKitManager().getKitOnPlayer(event.getPlayer().getName()).equals(Fisherman.this)) {
 							Player p = event.getPlayer();
 							if (((fishing.get(p.getName())).intValue() == 1)) {
@@ -48,9 +51,8 @@ public class Fisherman extends BaseKit {
 								fishing.put(p.getName(), Integer.valueOf(0));
 							}
 						}
-					} else {
-						event.getPlayer().sendMessage(ChatColor.RED + "You can't use this here.");
 					}
+
 				}
 			}
 
@@ -80,7 +82,7 @@ public class Fisherman extends BaseKit {
 		inv.setHelmet(Utilities.generateLeatherArmor(Material.LEATHER_HELMET, Color.BLACK));
 		inv.setChestplate(Utilities.generateItem(Material.IRON_CHESTPLATE, Enchantment.PROTECTION_ENVIRONMENTAL, 3));
 		inv.setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
-		inv.setLeggings(new ItemStack(Material.IRON_BOOTS));
+		inv.setBoots(new ItemStack(Material.IRON_BOOTS));
 		sword.setDurability((short) -1000);
 		flower.setDurability((short) -1000);
 		inv.addItem(sword);

@@ -189,88 +189,141 @@ public class Match {
 
 	public void finish(final Player loser, final String loserName, final MatchFinishReason reason) {
 		long now = System.currentTimeMillis();
-		final Player winner = getOpponent(loserName);
-		loser.setHealth(20D);
-		final boolean logout = (reason == MatchFinishReason.PLAYER_LOGOUT);
-		wins.put(winner.getName(), wins.get(winner.getName()) + 1);
-		if (getFirstTo() > 1 && !logout) {
-			KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
-			KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
-		}
-		if (((hasFinished() && getFirstTo() > 1) || getFirstTo() == 1)) {
-			matchFinishTime = System.currentTimeMillis();
-			setInProgress(false);
-			if (isRanked()) {
-				KitAPI.getStatManager().getPlayerData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
-				KitAPI.getStatManager().getPlayerData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
+		if (isInProgress()) {
+			final Player winner = getOpponent(loserName);
+			loser.setHealth(20D);
+			final boolean logout = (reason == MatchFinishReason.PLAYER_LOGOUT);
+			wins.put(winner.getName(), wins.get(winner.getName()) + 1);
+			if (getFirstTo() > 1 && !logout) {
+				KitAPI.getBossBarManager().registerStrings(victim, new String[] { victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()) + "§6 - " + challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
+				KitAPI.getBossBarManager().registerStrings(challenger, new String[] { challenger.getDisplayName() + "§6: §e" + wins.get(challenger.getName()) + "§6 - " + victim.getDisplayName() + "§6: §e" + wins.get(victim.getName()), "§6KitPVP.com - §cFirst to " + getFirstTo() });
 			}
-		}
-		if (loser != null && loser.isOnline()) {
-			KitAPI.getServerManager().setVisible(loser, false);
-			loser.setNoDamageTicks(60);
-			winner.setNoDamageTicks(60);
-			loser.teleport(loser.getLocation().clone().add(0, 3, 0));
-			loser.setAllowFlight(true);
-			loser.setFlying(true);
-		}
-		if (reason == MatchFinishReason.PLAYER_DEATH) {
-			loser.sendMessage(ChatColor.GOLD + "You have lost the §a" + getType().getName() + "§6 match to " + winner.getDisplayName() + "§6. ");
-			loser.sendMessage(winner.getDisplayName() + " §6had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
-			winner.sendMessage(ChatColor.GOLD + "You have killed §e" + loser.getDisplayName() + "§6 in a match. You had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
-			winner.sendMessage(loser.getDisplayName() + "§6 had§c " + KitAPI.getServerManager().getSoupsInHotbar(loser) + "§6 " + getType().getHealType() + "s left.");
-		} else if (logout) {
-			Core.get().clearPlayer(loser);
-			winner.sendMessage(ChatColor.GOLD + "§c" + loserName + "§6 has logged out, so you have won the match.");
-			KitAPI.getArenaManager().unregisterArena(arena);
-			setInProgress(false);
-			KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
-			KitAPI.getBossBarManager().unregisterPlayer(winner);
-			KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
-			KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-			BasicDBObject dbObject = constructObject(winner);
-			Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
-			Stat s = KitAPI.getStatManager().getStat(winner.getName());
-			s.increment(StatObjective.DUEL_WINS);
-			Stat ls = KitAPI.getStatManager().getStat(loserName);
-			ls.increment(StatObjective.DUEL_LOSSES);
-
-		}
-
-		if (isRanked()) {
-			if (getFirstTo() == 1) {
-				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
-				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getPlayerData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getPlayerData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
-				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
-				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
-				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
-				if (loser.isOnline())
-					loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
-			} else if (hasFinished() && getFirstTo() > 1 && !logout) {
-				int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
-				int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
-				int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getPlayerData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getPlayerData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
-				KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
-				KitAPI.getEloManager().setElo(loserName, finalElo[1]);
-				winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
-				if (loser.isOnline())
-					loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
+			if (((hasFinished() && getFirstTo() > 1) || getFirstTo() == 1)) {
+				matchFinishTime = System.currentTimeMillis();
+				setInProgress(false);
+				if (isRanked()) {
+					KitAPI.getStatManager().getPlayerData(loserName).increment(StatObjective.RANKED_MATCHES_PLAYED);
+					KitAPI.getStatManager().getPlayerData(winner.getName()).increment(StatObjective.RANKED_MATCHES_PLAYED);
+				}
 			}
+			if (loser != null && loser.isOnline()) {
+				KitAPI.getServerManager().setVisible(loser, false);
+				loser.setNoDamageTicks(60);
+				winner.setNoDamageTicks(60);
+				loser.teleport(loser.getLocation().clone().add(0, 3, 0));
+				loser.setAllowFlight(true);
+				loser.setFlying(true);
+			}
+			if (reason == MatchFinishReason.PLAYER_DEATH) {
+				loser.sendMessage(ChatColor.GOLD + "You have lost the §a" + getType().getName() + "§6 match to " + winner.getDisplayName() + "§6. ");
+				loser.sendMessage(winner.getDisplayName() + " §6had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
+				winner.sendMessage(ChatColor.GOLD + "You have killed §e" + loser.getDisplayName() + "§6 in a match. You had §c" + KitAPI.getServerManager().getSoupsInHotbar(winner) + " §6" + getType().getHealType() + "s and §c" + KitAPI.getServerManager().getHearts(winner) + "§6 hearts left.");
+				winner.sendMessage(loser.getDisplayName() + "§6 had§c " + KitAPI.getServerManager().getSoupsInHotbar(loser) + "§6 " + getType().getHealType() + "s left.");
+			} else if (logout) {
+				Core.get().clearPlayer(loser);
+				winner.sendMessage(ChatColor.GOLD + "§c" + loserName + "§6 has logged out, so you have won the match.");
+				KitAPI.getArenaManager().unregisterArena(arena);
+				KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
+				KitAPI.getBossBarManager().unregisterPlayer(winner);
+				KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
+				KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
+				BasicDBObject dbObject = constructObject(winner);
+				Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
+				Stat s = KitAPI.getStatManager().getStat(winner.getName());
+				s.increment(StatObjective.DUEL_WINS);
+				Stat ls = KitAPI.getStatManager().getStat(loserName);
+				ls.increment(StatObjective.DUEL_LOSSES);
+				if (isRanked()) {
+					int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
+					int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
+					int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getPlayerData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getPlayerData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
+					KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
+					KitAPI.getEloManager().setElo(loserName, finalElo[1]);
+					winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
+					if (loser.isOnline())
+						loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
+					setInProgress(false);
+
+				}
+			}
+
+			if (!logout) {
+				if (isRanked()) {
+					if (hasFinished() && getFirstTo() > 1) {
+						int kElo = KitAPI.getEloManager().getElo(winner.getName().toLowerCase());
+						int pElo = KitAPI.getEloManager().getElo(loserName.toLowerCase());
+						int[] finalElo = KitAPI.getEloManager().getNewElo(kElo, pElo, KitAPI.getStatManager().getPlayerData(winner.getName()).get(StatObjective.RANKED_MATCHES_PLAYED), KitAPI.getStatManager().getPlayerData(loserName).get(StatObjective.RANKED_MATCHES_PLAYED));
+						KitAPI.getEloManager().setElo(winner.getName(), finalElo[0]);
+						KitAPI.getEloManager().setElo(loserName, finalElo[1]);
+						winner.sendMessage(ChatColor.GOLD + "Your new rating is §a" + KitAPI.getEloManager().getElo(winner.getName()) + " (+" + (KitAPI.getEloManager().getElo(winner.getName()) - kElo) + ")§6.");
+						if (loser.isOnline())
+							loser.sendMessage(ChatColor.GOLD + "Your new rating is §c" + KitAPI.getEloManager().getElo(loser.getName()) + " (-" + Math.abs(KitAPI.getEloManager().getElo(loserName) - pElo) + ")§6.");
+					}
+				}
+				if (getFirstTo() > 1) {
+					String msg = "§6Match §e" + matchesDone + "§6 has ended.";
+					String first = wins.get(victim.getName()) > wins.get(challenger.getName()) ? victim.getDisplayName() : loser.getDisplayName();
+					String winsMsg = "§6Stats: §f" + first + "§e(" + wins.get(ChatColor.stripColor(first)) + ")§f - " + getOpponent(ChatColor.stripColor(first)).getDisplayName() + "§e(" + wins.get(getOpponent(ChatColor.stripColor(first)).getName()) + ")";
+					challenger.sendMessage(new String[] { msg, winsMsg });
+					victim.sendMessage(new String[] { msg, winsMsg });
+					if (hasFinished()) {
+						String firstPart = wins.get(victim.getName()) > wins.get(challenger.getName()) ? victim.getDisplayName() : challenger.getDisplayName();
+						String msgPart = firstPart + "§6 has won the§e first to " + getFirstTo() + "§6!";
+						challenger.sendMessage(new String[] { msgPart });
+						victim.sendMessage(new String[] { msgPart });
+					}
+				}
+			}
+			getType().onDefeat(winner, loser);
+			playFireworks(winner);
+			Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+				@Override
+				public void run() {
+					if (loser != null && loser.isOnline()) {
+						KitAPI.getServerManager().setVisible(loser, true);
+						loser.setAllowFlight(false);
+						loser.setFlying(false);
+					}
+					if (!logout)
+						Core.get().clearPlayer(winner);
+					if (!hasFinished() && getFirstTo() > 1 && !logout)
+						startMatch();
+					else {
+
+						if (!logout) {
+							setInProgress(false);
+							Stat s = KitAPI.getStatManager().getStat(winner.getName());
+							s.increment(StatObjective.DUEL_WINS);
+							Stat ls = KitAPI.getStatManager().getStat(loserName);
+							ls.increment(StatObjective.DUEL_LOSSES);
+							KitAPI.getArenaManager().unregisterArena(arena);
+							KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
+							KitAPI.getBossBarManager().unregisterPlayer(winner);
+							KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
+							Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
+
+								@Override
+								public void run() {
+									KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
+
+								}
+							}, 5L);
+							KitAPI.getBossBarManager().unregisterPlayer(loser);
+							KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
+							BasicDBObject dbObject = constructObject(winner);
+							Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
+						}
+
+					}
+				}
+			}, 60L);
 		}
-		if (getFirstTo() > 1 && !logout) {
-			String msg = "§6Match §e" + matchesDone + "§6 has ended.";
-			String first = wins.get(victim.getName()) > wins.get(challenger.getName()) ? victim.getDisplayName() : loser.getDisplayName();
-			String winsMsg = "§6Stats: §f" + first + "§e(" + wins.get(ChatColor.stripColor(first)) + ")§f - " + getOpponent(ChatColor.stripColor(first)).getDisplayName() + "§e(" + wins.get(getOpponent(ChatColor.stripColor(first)).getName()) + ")";
-			challenger.sendMessage(new String[] { msg, winsMsg });
-			victim.sendMessage(new String[] { msg, winsMsg });
-		}
-		if (getFirstTo() > 1 && hasFinished() && !logout) {
-			String first = wins.get(victim.getName()) > wins.get(challenger.getName()) ? victim.getDisplayName() : challenger.getDisplayName();
-			String msg = first + "§6 has won the§e first to " + getFirstTo() + "§6!";
-			challenger.sendMessage(new String[] { msg });
-			victim.sendMessage(new String[] { msg });
-		}
-		getType().onDefeat(winner, loser);
+		Debug.handleTiming(now, "finish match");
+
+	}
+
+	public void playFireworks(Player winner) {
 		for (int i = 0; i < 7; i += 1) {
 			Firework fw = (Firework) winner.getWorld().spawnEntity(winner.getLocation().clone().add(new Random().nextInt(2) - 1, 0, new Random().nextInt(2) - 1), EntityType.FIREWORK);
 			Random r = new Random();
@@ -297,50 +350,6 @@ public class Match {
 			fwm.setPower(rp);
 			fw.setFireworkMeta(fwm);
 		}
-		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
-
-			@Override
-			public void run() {
-				if (loser != null && loser.isOnline()) {
-					KitAPI.getServerManager().setVisible(loser, true);
-					loser.setAllowFlight(false);
-					loser.setFlying(false);
-				}
-				if (!logout)
-					Core.get().clearPlayer(winner);
-				if (!hasFinished() && getFirstTo() > 1 && !logout)
-					startMatch();
-				else {
-
-					if (!logout) {
-						setInProgress(false);
-						Stat s = KitAPI.getStatManager().getStat(winner.getName());
-						s.increment(StatObjective.DUEL_WINS);
-						Stat ls = KitAPI.getStatManager().getStat(loserName);
-						ls.increment(StatObjective.DUEL_LOSSES);
-						KitAPI.getArenaManager().unregisterArena(arena);
-						KitAPI.getPlayerManager().teleport(winner, CommandManager.DUEL_LOCATION);
-						KitAPI.getBossBarManager().unregisterPlayer(winner);
-						KitAPI.getMatchManager().getCurrentMatches().remove(winner.getName());
-						Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
-
-							@Override
-							public void run() {
-								KitAPI.getPlayerManager().teleport(loser, CommandManager.DUEL_LOCATION);
-
-							}
-						}, 5L);
-						KitAPI.getBossBarManager().unregisterPlayer(loser);
-						KitAPI.getMatchManager().getCurrentMatches().remove(loserName);
-						BasicDBObject dbObject = constructObject(winner);
-						Shared.get().getEventManager().registerNewEvent(new BasicDBObject("type", "1v1").append("when", Shared.get().getUtilities().getTime(System.currentTimeMillis())).append("data", dbObject));
-					}
-
-				}
-			}
-		}, 60L);
-		Debug.handleTiming(now, "finish match");
-
 	}
 
 	/**
@@ -444,9 +453,6 @@ public class Match {
 			wins.put(victim.getName(), 0);
 		}
 
-		if (victim == null) {
-			return;
-		}
 		if (arena == null) {
 			final Arena a = KitAPI.getArenaManager().requestArena();
 			if (a == null) {
@@ -457,12 +463,16 @@ public class Match {
 			arena = a;
 		}
 		KitAPI.getArenaManager().setArenaInUse(arena);
+		if (victim == null) {
+			return;
+		}
 		arena.getFirstLocation().getChunk().load();
 		arena.getFirstLocation().getChunk().load(true);
 		arena.getSecondLocation().getChunk().load();
 		arena.getSecondLocation().getChunk().load(true);
 		KitAPI.getMatchManager().getMatches().remove(challenger.getName());
 		KitAPI.getMatchManager().getMatches().remove(victim.getName());
+		setInProgress(true);
 		victim.closeInventory();
 		challenger.closeInventory();
 		Bukkit.getScheduler().runTaskLater(KitPVP.get(), new Runnable() {
@@ -487,6 +497,12 @@ public class Match {
 
 			@Override
 			public void run() {
+				if (matchesDone == 1) {
+					PacketPlayOutNamedEntitySpawn eV = new PacketPlayOutNamedEntitySpawn(((CraftPlayer) victim).getHandle());
+					PacketPlayOutNamedEntitySpawn eC = new PacketPlayOutNamedEntitySpawn(((CraftPlayer) challenger).getHandle());
+					((CraftPlayer) victim).getHandle().playerConnection.sendPacket(eC);
+					((CraftPlayer) challenger).getHandle().playerConnection.sendPacket(eV);
+				}
 				victim.closeInventory();
 				challenger.closeInventory();
 				victim.setHealth(((Damageable) victim).getMaxHealth());
@@ -499,11 +515,6 @@ public class Match {
 					victim.addPotionEffect(pot);
 					challenger.addPotionEffect(pot);
 				}
-				PacketPlayOutNamedEntitySpawn eV = new PacketPlayOutNamedEntitySpawn(((CraftPlayer) victim).getHandle());
-				PacketPlayOutNamedEntitySpawn eC = new PacketPlayOutNamedEntitySpawn(((CraftPlayer) challenger).getHandle());
-				((CraftPlayer) victim).getHandle().playerConnection.sendPacket(eC);
-				((CraftPlayer) challenger).getHandle().playerConnection.sendPacket(eV);
-
 				challenger.showPlayer(victim);
 				victim.showPlayer(challenger);
 
@@ -514,7 +525,6 @@ public class Match {
 			challenger.sendMessage(ChatColor.GOLD + "§7===§6Match §e§l" + matchesDone + "§r§6 is starting!§7===");
 		}
 		invitedPlayer = null;
-		setInProgress(true);
 		victim.setHealth(((Damageable) victim).getMaxHealth());
 		challenger.setHealth(((Damageable) challenger).getMaxHealth());
 		getType().applyInventory(victim.getInventory());

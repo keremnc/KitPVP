@@ -12,10 +12,10 @@ public class KitMinigameManager extends MinigameManager {
 
 	public KitMinigameManager() {
 		Minigame lms = new LMSMinigame();
-		Minigame spleef = new SpleefMinigame();
+		// Minigame spleef = new SpleefMinigame();
 		registerMinigame(lms);
-		registerMinigame(spleef);
-		loadData(spleef);
+		// registerMinigame(spleef);
+		// loadData(spleef);
 		loadData(lms);
 	}
 
