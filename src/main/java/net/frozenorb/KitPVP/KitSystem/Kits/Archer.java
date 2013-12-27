@@ -34,7 +34,7 @@ public class Archer extends BaseKit {
 
 	@Override
 	public PlayerInventory transformInventory(PlayerInventory inv) {
-		inv.setArmorContents(new ItemStack[] { Utilities.generateItem(Material.IRON_BOOTS, Enchantment.PROTECTION_ENVIRONMENTAL, 4, Enchantment.PROTECTION_FALL, 4), new ItemStack(Material.LEATHER_LEGGINGS), Utilities.generateItem(Material.CHAINMAIL_CHESTPLATE, Enchantment.PROTECTION_PROJECTILE, 5), new ItemStack(Material.LEATHER_HELMET) });
+		inv.setArmorContents(new ItemStack[] { Utilities.generateItem(Material.DIAMOND_BOOTS, Enchantment.PROTECTION_ENVIRONMENTAL, 4, Enchantment.PROTECTION_FALL, 2), new ItemStack(Material.LEATHER_LEGGINGS), Utilities.generateItem(Material.CHAINMAIL_CHESTPLATE, Enchantment.PROTECTION_PROJECTILE, 1), new ItemStack(Material.LEATHER_HELMET) });
 		inv.setItem(0, Utilities.generateItem(Material.WOOD_SWORD, Enchantment.DAMAGE_ALL, 4, Enchantment.DURABILITY, 3));
 		inv.setItem(1, Utilities.generateItem(Material.BOW, Enchantment.ARROW_DAMAGE, 4, Enchantment.ARROW_INFINITE, 1));
 		inv.setItem(9, new ItemStack(Material.ARROW));

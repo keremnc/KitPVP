@@ -208,8 +208,8 @@ public class Match {
 			}
 			if (loser != null && loser.isOnline()) {
 				KitAPI.getServerManager().setVisible(loser, false);
-				loser.setNoDamageTicks(60);
-				winner.setNoDamageTicks(60);
+				loser.setNoDamageTicks(80);
+				winner.setNoDamageTicks(80);
 				loser.teleport(loser.getLocation().clone().add(0, 3, 0));
 				loser.setAllowFlight(true);
 				loser.setFlying(true);
@@ -504,6 +504,8 @@ public class Match {
 					((CraftPlayer) victim).getHandle().playerConnection.sendPacket(eC);
 					((CraftPlayer) challenger).getHandle().playerConnection.sendPacket(eV);
 				}
+				challenger.teleport(arena.getSecondLocation());
+				victim.teleport(arena.getFirstLocation());
 				victim.closeInventory();
 				challenger.closeInventory();
 				victim.setHealth(((Damageable) victim).getMaxHealth());
@@ -518,6 +520,10 @@ public class Match {
 				}
 				challenger.showPlayer(victim);
 				victim.showPlayer(challenger);
+				ArrayList<Player> alp = new ArrayList<Player>();
+				alp.add(challenger);
+				alp.add(victim);
+				KitAPI.getTeleportFix().updateEntities(alp);
 
 			}
 		}, 8L);

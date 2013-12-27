@@ -203,9 +203,16 @@ public class MatchManager {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addToQueue(MatchQueue queue) {
 		long now = System.currentTimeMillis();
 		String requester = queue.getPlayer().getName();
+		if (isInMatch(queue.getPlayer().getName())) {
+			if (getCurrentMatches().get(queue.getPlayer().getName()).isInProgress()) {
+				queue.getPlayer().sendMessage(ChatColor.RED + "You are already in a match.");
+				return;
+			}
+		}
 		if (queue.getQueueType() == QueueType.QUICK) {
 			if (findQuickUnrankedMatch(requester) != null) {
 				MatchQueue un = findQuickUnrankedMatch(requester);
@@ -226,14 +233,14 @@ public class MatchManager {
 				queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bRanked§e Matchup with the §b" + requested.getName() + "§e loadout.");
 			}
 		} else if (queue.getQueueType() == QueueType.UNRANKED) {
-			Iterator<MatchQueue> iter = matches.iterator();
+			Iterator<MatchQueue> iter = ((ArrayList<MatchQueue>) matches.clone()).iterator();
 			while (iter.hasNext()) {
 				MatchQueue un = iter.next();
 				if (un.getQueueType() == QueueType.QUICK) {
 					if (!un.getPlayer().getName().equalsIgnoreCase(requester)) {
 						matchFound(queue.getPlayer(), un.getPlayer(), queue.getLoadout(), queue, true);
 						MatchTypeInventory.updateAllOpenInventories();
-						iter.remove();
+						matches.remove(un);
 						return;
 					}
 				}

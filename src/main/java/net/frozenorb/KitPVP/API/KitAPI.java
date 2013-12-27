@@ -6,6 +6,7 @@ import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.DataSystem.Managers.WarpDataManager;
 import net.frozenorb.KitPVP.ItemSystem.ToggleableItemManager;
 import net.frozenorb.KitPVP.KitSystem.KitManager;
+import net.frozenorb.KitPVP.ListenerSystem.Listeners.TeleportFix;
 import net.frozenorb.KitPVP.MatchSystem.MatchMaker;
 import net.frozenorb.KitPVP.MatchSystem.MatchManager;
 import net.frozenorb.KitPVP.MatchSystem.ArenaSystem.ArenaManager;
@@ -45,86 +46,107 @@ public class KitAPI {
 	private static ToggleableItemManager itemManager;
 	private static BossBarManager bossBarManager;
 	private static MatchMaker matchMaker;
+	private static TeleportFix teleportFix;
 
 	public static KitPVP getKitPVP() {
 		return kitpvp;
 	}
 
+	public static TeleportFix getTeleportFix() {
+		if (teleportFix == null) {
+			teleportFix = new TeleportFix();
+		}
+		return teleportFix;
+	}
+
 	public static KitManager getKitManager() {
-		if (kitManager == null)
+		if (kitManager == null) {
 			kitManager = new KitManager("net.frozenorb.KitPVP.KitSystem.Kits");
+		}
 		return kitManager;
 	}
 
 	public static EloManager getEloManager() {
-		if (eloManager == null)
+		if (eloManager == null) {
 			eloManager = new EloManager();
+		}
 		return eloManager;
 	}
 
 	public static PlayerManager getPlayerManager() {
-		if (playerManager == null)
+		if (playerManager == null) {
 			playerManager = new PlayerManager();
+		}
 		return playerManager;
 	}
 
 	public static MatchMaker getMatchMaker() {
-		if (matchMaker == null)
+		if (matchMaker == null) {
 			matchMaker = new MatchMaker();
+		}
 		return matchMaker;
 	}
 
 	public static MatchManager getMatchManager() {
-		if (matchManager == null)
+		if (matchManager == null) {
 			matchManager = new MatchManager();
+		}
 		return matchManager;
 	}
 
 	public static RegionChecker getRegionChecker() {
-		if (regionChecker == null)
+		if (regionChecker == null) {
 			regionChecker = new RegionChecker();
+		}
 		return regionChecker;
 	}
 
 	public static ScoreboardManager getScoreboardManager() {
-		if (scoreboardManager == null)
+		if (scoreboardManager == null) {
 			scoreboardManager = new ScoreboardManager();
+		}
 		return scoreboardManager;
 	}
 
 	public static BossBarManager getBossBarManager() {
-		if (bossBarManager == null)
+		if (bossBarManager == null) {
 			bossBarManager = new BossBarManager();
+		}
 		return bossBarManager;
 	}
 
 	public static StatManager getStatManager() {
-		if (statManager == null)
+		if (statManager == null) {
 			statManager = new StatManager();
+		}
 		return statManager;
 	}
 
 	public static WarpDataManager getWarpDataManager() {
-		if (warpDataManager == null)
+		if (warpDataManager == null) {
 			warpDataManager = new WarpDataManager(new File(AbstractDataLoader.DATA_FOLDER + File.separator + "warps.json"));
+		}
 		return warpDataManager;
 	}
 
 	public static ArenaManager getArenaManager() {
-		if (arenaManager == null)
+		if (arenaManager == null) {
 			arenaManager = new ArenaManager(new File(AbstractDataLoader.DATA_FOLDER + File.separator + "arenas.json"));
+		}
 		return arenaManager;
 	}
 
 	public static ServerManager getServerManager() {
-		if (serverManager == null)
+		if (serverManager == null) {
 			serverManager = new ServerManager(kitpvp);
+		}
 		return serverManager;
 	}
 
 	public static ToggleableItemManager getItemManager() {
-		if (itemManager == null)
+		if (itemManager == null) {
 			itemManager = new ToggleableItemManager();
+		}
 		return itemManager;
 	}
 
