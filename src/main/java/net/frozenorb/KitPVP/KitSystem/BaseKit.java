@@ -1,5 +1,6 @@
 package net.frozenorb.KitPVP.KitSystem;
 
+import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.BaseCommand;
 import net.frozenorb.KitPVP.Commands.Debug;
@@ -32,9 +33,7 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	/**
 	 * Called when the kit is equipped, used for custom kit designs
 	 */
-	public void onEquip() {
-
-	}
+	public void onEquip() {}
 
 	/**
 	 * Gets the Icon material of the kit
@@ -106,6 +105,10 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 	public final void equip(Player p) {
 		if (KitAPI.getKitManager().hasKitOn(p.getName()) && !KitAPI.getPlayerManager().hasSpawnProtection(p)) {
 			p.sendMessage(ChatColor.RED + "You may only use one kit per life!");
+			return;
+		}
+		if (ArcadeAPI.get().getMinigameManager().isGameInProgress() && ArcadeAPI.get().getMinigameManager().getCurrentMinigame().getPlayers().contains(p.getName())) {
+			p.sendMessage(ChatColor.RED + "You are not able to use kits in a minigame.");
 			return;
 		}
 		if (KitAPI.getRegionChecker().getRegion(p.getLocation()) != null) {

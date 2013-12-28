@@ -16,6 +16,7 @@ import net.frozenorb.mBasic.Utilities.Attributes;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -83,7 +84,18 @@ public class MatchTypeInventory extends PageInventory {
 					MatchQueue queue = new MatchQueue((Player) event.getWhoClicked(), type, this.type);
 					KitAPI.getMatchManager().addToQueue(queue);
 					event.getWhoClicked().closeInventory();
+					((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.NOTE_PIANO, 20F, 20F);
 					return;
+				}
+				if (item.equals(decline)) {
+					if (KitAPI.getMatchManager().isQueued(event.getWhoClicked().getName())) {
+						((Player) event.getWhoClicked()).sendMessage(ChatColor.RED + "You have been removed from the Ranked Match Queue.");
+					}
+					KitAPI.getMatchManager().getMatches().remove(event.getWhoClicked().getName());
+					event.getWhoClicked().closeInventory();
+					((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.ARROW_HIT, 20F, 20F);
+					return;
+
 				}
 				if (item.equals(getBackPage())) {
 					setPage(currentPage - 1);

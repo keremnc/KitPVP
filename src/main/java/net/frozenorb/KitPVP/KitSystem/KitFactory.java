@@ -25,8 +25,7 @@ import org.bukkit.potion.PotionEffect;
  * 
  */
 public final class KitFactory {
-	KitFactory() {
-	}
+	KitFactory() {}
 
 	/**
 	 * Creates a new Kit
