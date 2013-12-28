@@ -27,24 +27,48 @@ public enum StatObjective {
 		this(name, local, friendlyName, true);
 	}
 
+	/**
+	 * Should the stat be displayed?
+	 * 
+	 * @return display
+	 */
 	public boolean isDisplay() {
 		return display;
 	}
 
+	/**
+	 * Gets the friendly name of the objective
+	 * <p>
+	 * Used in /stats and /stats top
+	 * 
+	 * @see StatObjective#getName()
+	 * @return friendly name
+	 */
 	public String getFriendlyName() {
 		return friendlyName;
 	}
 
+	/**
+	 * Whether the objective's data is local or not
+	 * <p>
+	 * Should we grab it from their stat object?
+	 * 
+	 * @return local
+	 */
 	public boolean isLocal() {
 		return local;
 	}
 
+	/**
+	 * Gets the name of the stat objective
+	 * <p>
+	 * Returns the name used in the JSON object
+	 * 
+	 * @see StatObjective#getFriendlyName()
+	 * 
+	 * @return the name of the objective
+	 */
 	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String toString() {
 		return name;
 	}
 
@@ -63,5 +87,10 @@ public enum StatObjective {
 				return so;
 		}
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }

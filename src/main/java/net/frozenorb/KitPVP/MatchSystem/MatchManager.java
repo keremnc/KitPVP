@@ -223,15 +223,16 @@ public class MatchManager {
 				queue.getPlayer().sendMessage(ChatColor.GREEN + "You have been added to the Quick Unranked Matchup queue!");
 			}
 		} else if (queue.getQueueType() == QueueType.RANKED) {
-			Loadout requested = queue.getLoadout();
-			if (getFirstRanked(requested, requester) != null) {
-				MatchQueue un = getFirstRanked(requested, requester);
-				matches.remove(un);
-				matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue, true);
-			} else {
-				matches.add(queue);
-				queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bRanked§e Matchup with the §b" + requested.getName() + "§e loadout.");
-			}
+			// Loadout requested = queue.getLoadout();
+			// if (getFirstRanked(requested, requester) != null) {
+			// MatchQueue un = getFirstRanked(requested, requester);
+			// matches.remove(un);
+			// matchFound(queue.getPlayer(), un.getPlayer(), un.getLoadout(), queue, true);
+			// } else {
+			matches.add(queue);
+			queue.getPlayer().sendMessage(ChatColor.YELLOW + "You have joined the §bRanked Match Queue§e.");
+			queue.getPlayer().sendMessage(ChatColor.YELLOW + "Matches will be selected in §b" + KitAPI.getMatchMaker().getSecondsUntilSelect() + "§e seconds.");
+			// }
 		} else if (queue.getQueueType() == QueueType.UNRANKED) {
 			Iterator<MatchQueue> iter = ((ArrayList<MatchQueue>) matches.clone()).iterator();
 			while (iter.hasNext()) {
@@ -573,7 +574,7 @@ public class MatchManager {
 
 		@EventHandler
 		public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
-			if (!e.getPlayer().isOp() && isInMatch(e.getPlayer().getName()) && currentMatches.get(e.getPlayer().getName()).isInProgress()) {
+			if (!e.getPlayer().hasPermission("kit.mod") && isInMatch(e.getPlayer().getName()) && currentMatches.get(e.getPlayer().getName()).isInProgress()) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to use commands in a match!");
 			}

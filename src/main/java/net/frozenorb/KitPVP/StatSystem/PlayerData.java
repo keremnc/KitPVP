@@ -4,11 +4,12 @@ import org.bukkit.Bukkit;
 
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.KitSystem.Data.PlayerKitData;
+import net.frozenorb.Utilities.Interfaces.DataHolder;
 import net.frozenorb.mShared.Shared;
 
 import com.mongodb.BasicDBObject;
 
-public class PlayerData {
+public class PlayerData implements DataHolder<StatObjective, Integer> {
 
 	private String name;
 	private BasicDBObject data;
@@ -55,7 +56,8 @@ public class PlayerData {
 	 *            the objective to get it from
 	 * @return value
 	 */
-	public int get(StatObjective sb) {
+	@Override
+	public Integer get(StatObjective sb) {
 		if (data.containsField(sb.getName()))
 			return data.getInt(sb.getName());
 		data.append(sb.getName(), 0);
@@ -82,7 +84,8 @@ public class PlayerData {
 	 * @param value
 	 *            the value to set to
 	 */
-	public void set(StatObjective obj, int value) {
+	@Override
+	public void set(StatObjective obj, Integer value) {
 		data.put(obj.getName(), value);
 
 	}

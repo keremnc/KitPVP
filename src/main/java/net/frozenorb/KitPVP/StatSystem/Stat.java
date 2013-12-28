@@ -4,11 +4,12 @@ import org.bukkit.Bukkit;
 
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.StatSystem.Elo.EloManager;
+import net.frozenorb.Utilities.Interfaces.DataHolder;
 import net.frozenorb.mShared.Shared;
 
 import com.mongodb.BasicDBObject;
 
-public class Stat {
+public class Stat implements DataHolder<StatObjective, Integer> {
 	private BasicDBObject statJson = new BasicDBObject();
 	private String playerName;
 
@@ -63,7 +64,8 @@ public class Stat {
 	 *            the objective to get it from
 	 * @return value
 	 */
-	public int get(StatObjective sb) {
+	@Override
+	public Integer get(StatObjective sb) {
 		if (sb == StatObjective.ELO && !statJson.containsField(sb.getName())) {
 			statJson.put(StatObjective.ELO.getName(), EloManager.STARTING_ELO);
 		}
@@ -95,7 +97,8 @@ public class Stat {
 	 * @param value
 	 *            the value to set to
 	 */
-	public void set(StatObjective obj, int value) {
+	@Override
+	public void set(StatObjective obj, Integer value) {
 		statJson.put(obj.getName(), value);
 		if (Bukkit.getPlayerExact(playerName) != null) {
 			KitAPI.getScoreboardManager().updateScoreboard(Bukkit.getPlayerExact(playerName));
