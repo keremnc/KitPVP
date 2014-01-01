@@ -102,9 +102,7 @@ public class MatchTypeInventory extends PageInventory {
 				} else if (item.equals(getForwardsPage())) {
 					setPage(currentPage + 1);
 				} else {
-					String name = item.getItemMeta().getDisplayName();
-					name = ChatColor.stripColor(name);
-					Loadout type = Loadout.getByName(name.replace("Ranked ", ""));
+					Loadout type = Loadout.getByName(ChatColor.stripColor(item.getItemMeta().getDisplayName()).replace("Ranked ", ""));
 					if (type == null) {
 						event.getWhoClicked().closeInventory();
 						KitAPI.getMatchManager().handleInteract((Player) event.getWhoClicked(), item.getType(), (int) item.getDurability());
@@ -169,7 +167,11 @@ public class MatchTypeInventory extends PageInventory {
 		int fCheck = KitAPI.getMatchManager().getPlayersInQueue(QueueType.RANKED);
 		if (fCheck != 0) {
 			amount = fCheck;
-			data = "§dThere is §e" + fCheck + "§d player in this queue.";
+			if (fCheck == 1) {
+				data = "§dThere is §e" + fCheck + "§d player in this queue.";
+			} else {
+				data = "§dThere are §e" + fCheck + "§d players in this queue.";
+			}
 		}
 		ItemStack info = Core.get().generateItem(Material.EMPTY_MAP, 0, "§b§lQueue Data", new String[] { "", data, timeTo });
 		info.setAmount(amount);

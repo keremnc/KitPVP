@@ -59,7 +59,7 @@ public class Undertaker extends BaseKit {
 
 			@EventHandler
 			public void onEntityInteract(PlayerInteractEntityEvent e) {
-				if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(e.getPlayer().getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(e.getPlayer().getName()).getName().equals(getName()))
+				if (hasKit(e.getPlayer()))
 					if (!KitAPI.getRegionChecker().isRegion(Region.DUEL_SPAWN, e.getPlayer().getLocation()) && e.getRightClicked() instanceof Player && e.getPlayer().getItemInHand() != null && e.getPlayer().getItemInHand().getType() == Material.EMERALD) {
 						final Player p = (Player) e.getRightClicked();
 						if (KitAPI.getPlayerManager().hasSpawnProtection(p)) {

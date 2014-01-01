@@ -47,12 +47,14 @@ public class KitManager {
 
 	public Kit getByName(String str) {
 		for (Kit k : KitPVP.getKits()) {
-			if (k.getName().equalsIgnoreCase(str))
+			if (k.getName().equalsIgnoreCase(str)) {
 				return k;
+			}
 		}
 		for (Kit k : KitPVP.getKits()) {
-			if (k.getName().toLowerCase().startsWith(str.toLowerCase()))
+			if (k.getName().toLowerCase().startsWith(str.toLowerCase())) {
 				return k;
+			}
 		}
 		return null;
 	}

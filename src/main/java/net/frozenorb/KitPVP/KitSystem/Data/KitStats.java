@@ -7,38 +7,42 @@ public class KitStats extends BasicDBObject {
 	private static final long serialVersionUID = -68795705218379355L;
 
 	public KitStats(BasicDBObject dbobj) {
-		for (java.util.Map.Entry<String, Object> entry : dbobj.entrySet())
+		for (java.util.Map.Entry<String, Object> entry : dbobj.entrySet()) {
 			append(entry.getKey(), entry.getValue());
+		}
 
 	}
 
-	public KitStats() {
-	}
+	public KitStats() {}
 
 	public int getKills() {
-		if (containsField("kills"))
+		if (containsField("kills")) {
 			return getInt("kills");
+		}
 		put("kills", 0);
 		return 0;
 	}
 
 	public int getDeaths() {
-		if (containsField("deaths"))
+		if (containsField("deaths")) {
 			return getInt("deaths");
+		}
 		put("deaths", 0);
 		return 0;
 	}
 
 	public int getUses() {
-		if (containsField("uses"))
+		if (containsField("uses")) {
 			return getInt("uses");
+		}
 		put("uses", 0);
 		return 0;
 	}
 
 	public int getAbility() {
-		if (containsField("ability"))
+		if (containsField("ability")) {
 			return getInt("ability");
+		}
 		put("ability", 0);
 		return 0;
 	}

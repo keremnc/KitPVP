@@ -82,9 +82,7 @@ public abstract class Subcommand {
 	 * @param args
 	 *            arguments run
 	 */
-	protected void asyncExecute(CommandSender sender, Command cmd, String label, String[] args) {
-
-	}
+	protected void asyncExecute(CommandSender sender, Command cmd, String label, String[] args) {}
 
 	/**
 	 * Sends the error message to set player

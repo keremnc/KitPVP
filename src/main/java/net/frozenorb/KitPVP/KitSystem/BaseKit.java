@@ -165,6 +165,17 @@ public abstract class BaseKit extends BaseCommand implements Kit {
 		return "§l" + Math.round(10.0 * value) / 10.0 + "§c";
 	}
 
+	/**
+	 * Gets whether the given player has the kit on
+	 * 
+	 * @param p
+	 *            the player to check
+	 * @return if the player has the kit on
+	 */
+	public final boolean hasKitOn(Player p) {
+		return KitAPI.getKitManager().getKitOnPlayer(p.getName()).equals(this);
+	}
+
 	@Override
 	public final void syncExecute() {
 		long now = System.currentTimeMillis();

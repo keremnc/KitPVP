@@ -38,7 +38,7 @@ public class Fisherman extends BaseKit {
 					if (KitAPI.getPlayerManager().hasSpawnProtection((Player) event.getCaught()) || KitAPI.getRegionChecker().isRegion(Region.SPAWN, event.getPlayer().getLocation())) {
 						event.getPlayer().sendMessage(ChatColor.RED + "You can't use this here.");
 					} else {
-						if (KitAPI.getKitManager().getKitOnPlayer(event.getPlayer().getName()).equals(Fisherman.this)) {
+						if (hasKitOn(event.getPlayer())) {
 							Player p = event.getPlayer();
 							if (((fishing.get(p.getName())).intValue() == 1)) {
 								((Player) event.getCaught()).setNoDamageTicks(0);

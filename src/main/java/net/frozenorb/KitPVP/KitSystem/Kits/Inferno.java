@@ -47,7 +47,7 @@ public class Inferno extends BaseKit {
 				if (e.getPlayer() instanceof Player) {
 					Player p = (Player) e.getPlayer();
 					if (p.getItemInHand() != null && p.getItemInHand().getType() == Material.BLAZE_POWDER) {
-						if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(p.getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(p.getName()).getName().equals(getName())) {
+						if (hasKit(p)) {
 							if (KitAPI.getRegionChecker().isRegion(Region.SPAWN, p.getLocation())) {
 								p.sendMessage(ChatColor.RED + "You may not use this in spawn!");
 								return;

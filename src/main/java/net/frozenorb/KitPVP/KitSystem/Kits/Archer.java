@@ -24,7 +24,7 @@ public class Archer extends BaseKit {
 			public void onArrowFire(EntityShootBowEvent e) {
 				if (e.getEntity() instanceof Player) {
 					Player p = (Player) e.getEntity();
-					if (KitAPI.getKitManager().getKitsOnPlayers().containsKey(p.getName()) && KitAPI.getKitManager().getKitsOnPlayers().get(p.getName()).getName().equals(getName()))
+					if (hasKitOn(p))
 						KitAPI.getStatManager().getPlayerData(p.getName()).getPlayerKitData().get(KitAPI.getKitManager().getByName(getName())).incrementAbility(1);
 				}
 			}

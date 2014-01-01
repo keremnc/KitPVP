@@ -95,7 +95,7 @@ public class Stats extends BaseCommand {
 					String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", st.getPlayerName(), 0);
 					String kills = String.format("§6Kills:§f %s", k);
 					String deaths = String.format("§6Deaths:§f %s", d);
-					String kd = String.format("§6KD:§f %s", d == 0 ? "-1" : kdFormat.format(k / d));
+					String kd = String.format("§6KD:§f %s", d == 0 ? "Infinity" : kdFormat.format((double) k / (double) d));
 					String cks = String.format("§6Current Killstreak:§f %s", st.get(StatObjective.KILLSTREAK));
 					String tks = String.format("§6Highest Killstreak:§f %s", st.get(StatObjective.HIGHEST_KILLSTREAK));
 					String wins = String.format("§61v1 Wins:§f %s", st.get(StatObjective.DUEL_WINS));
@@ -114,7 +114,7 @@ public class Stats extends BaseCommand {
 			String header = String.format("§6Showing stats for §f%s§6 | Rank: §f%s", s.getPlayerName(), 0);
 			String kills = String.format("§6Kills:§f %s", k);
 			String deaths = String.format("§6Deaths:§f %s", d);
-			String kd = String.format("§6KD:§f %s", d == 0 ? "-1" : kdFormat.format(k / d));
+			String kd = String.format("§6KD:§f %s", d == 0 ? "Infinity" : kdFormat.format((double) k / (double) d));
 			String cks = String.format("§6Current Killstreak:§f %s", s.get(StatObjective.KILLSTREAK));
 			String tks = String.format("§6Highest Killstreak:§f %s", s.get(StatObjective.HIGHEST_KILLSTREAK));
 			String wins = String.format("§61v1 Wins:§f %s", s.get(StatObjective.DUEL_WINS));
