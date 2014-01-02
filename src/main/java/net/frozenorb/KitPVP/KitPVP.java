@@ -2,15 +2,12 @@ package net.frozenorb.KitPVP;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-
-import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
 import net.frozenorb.KitPVP.KitSystem.Kit;
 import net.frozenorb.KitPVP.ListenerSystem.ListenerBase;
 import net.frozenorb.KitPVP.ListenerSystem.Listeners.PlayerListener;
 import net.frozenorb.KitPVP.MatchSystem.Loadouts.Loadout;
-import net.frozenorb.KitPVP.Minigames.KitMinigameManager;
 import net.frozenorb.KitPVP.PlayerSystem.GamerProfile;
 import net.frozenorb.KitPVP.Reflection.ReflectionManager;
 import net.frozenorb.KitPVP.StatSystem.LeaderboardUpdater;
@@ -135,8 +132,6 @@ public class KitPVP extends JavaPlugin {
 				}
 			}
 		}, 20L);
-		if (Bukkit.getPluginManager().getPlugin("mArcade") != null)
-			ArcadeAPI.get().setMinigameManager(new KitMinigameManager());
 		KitAPI.getKitManager().loadFromFile();
 		Loadout.init();
 		RegionManager.register(this);

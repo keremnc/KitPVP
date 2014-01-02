@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import net.frozenorb.Arcade.ArcadeAPI;
 import net.frozenorb.KitPVP.KitPVP;
 import net.frozenorb.KitPVP.API.KitAPI;
 import net.frozenorb.KitPVP.CommandSystem.CommandManager;
@@ -217,12 +216,12 @@ public class PlayerListener extends ListenerBase {
 		long now = System.currentTimeMillis();
 		e.setDeathMessage(null);
 		e.setDroppedExp(0);
-		if (ArcadeAPI.get().getMinigameManager().isGameInProgress() && ArcadeAPI.get().getMinigameManager().getCurrentMinigame().getPlayers().contains(e.getEntity().getName())) {
-			e.getDrops().clear();
-			e.getEntity().setHealth(20D);
-			ArcadeAPI.get().getMinigameManager().getCurrentMinigame().handleDeath(e.getEntity());
-			return;
-		}
+		// if (ArcadeAPI.get().getMinigameManager().isGameInProgress() && ArcadeAPI.get().getMinigameManager().getCurrentMinigame().getPlayers().contains(e.getEntity().getName())) {
+		// e.getDrops().clear();
+		// e.getEntity().setHealth(20D);
+		// ArcadeAPI.get().getMinigameManager().getCurrentMinigame().handleDeath(e.getEntity());
+		// return;
+		// }
 		if (KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit() != null)
 			KitAPI.getStatManager().getPlayerData(e.getEntity().getName()).getPlayerKitData().get(KitAPI.getPlayerManager().getProfile(e.getEntity().getName()).getLastUsedKit()).incrementDeaths(1);
 		if (KitAPI.getRegionChecker().isRegion(Region.EARLY_HG, e.getEntity().getLocation())) {
