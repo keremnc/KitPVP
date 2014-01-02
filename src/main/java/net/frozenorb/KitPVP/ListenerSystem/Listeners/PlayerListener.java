@@ -330,8 +330,13 @@ public class PlayerListener extends ListenerBase {
 			e.setCancelled(true);
 			return;
 		}
+		if (KitAPI.getMatchManager().isInMatch(p.getName()) && KitAPI.getMatchManager().getCurrentMatches().get(p.getName()).isInProgress()) {
+			e.setCancelled(true);
+			p.sendMessage(ChatColor.RED + "You can't drop this in a match.");
+			return;
+		}
 		if (item.getType() == Material.ENCHANTED_BOOK || item.getType() == Material.EMERALD || item.getType() == Material.FEATHER || item.getType() == Material.BLAZE_POWDER || item.getType() == Material.WATCH || item.getType().toString().toLowerCase().contains("sword") || item.getType().equals((Material.BOW)) || item.getType().equals((Material.FISHING_ROD)) || item.getType().equals((Material.NETHER_STAR)) || item.getType().equals((Material.TRIPWIRE_HOOK)) || item.getType().equals((Material.BLAZE_ROD))) {
-			p.sendMessage(ChatColor.RED + "You can only drop this by using /drop.");
+			p.sendMessage(ChatColor.RED + "You can only drop this by using '/drop'.");
 			e.setCancelled(true);
 		} else {
 			e.setCancelled(false);
